@@ -20,5 +20,8 @@
 
 set -eu
 
+msg "performing host system checks"
+# check for pacman
+type -p pacman >/dev/null || die "missing pacman binary in \$PATH"
 # check for toolchain
-type -p $_toolchain-gcc || die "missing $_toolchain prefixed toolchain in \$PATH"
+type -p $_toolchain-gcc >/dev/null || die "missing $_toolchain prefixed toolchain in \$PATH"

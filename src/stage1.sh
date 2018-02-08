@@ -20,25 +20,34 @@
 
 set -eu
 
-die() { echo "$*" 1>&2 ; exit 1; }
-msg() { echo " :: $*"; }
-export -f die msg
+_group="base base-devel"
 
-[ $(id -u) -ne 0 ] && die "must be root"
-[ -z "${SUDO_USER:-}" ] && die "SUDO_USER not set"
+msg "creating transitive dependency tree for $_group"
+declare -A _tree
+_frontier=($(pacman -Sg $_group | cut -d' ' -f2))
+while [ ${#_frontier[@]} -gt 0 ]; do
+  # pop pkg from frontier
+  _pkg=$(echo ${_frontier[0]})
+  _frontier=("${_frontier[@]:1}")
+  # if seen before, skip, otherwise create entry in dependency tree
+  [[ -v _tree[$_pkg] ]] && continue
+  _tree[$_pkg]=""
+  # iterate dependencies for pkg
+  _deps="$(echo $(pacman -Si $_pkg | grep '^Depends' | cut -d':' -f2 | sed 's/None//'))"
+  for dep in $_deps; do
+    # translate dependency string to actual package
+    realdep=$(yes n | pacman --confirm -Sd "$dep" 2>&1 | grep '^Packages' \
+              | cut -d' ' -f3 | rev | cut -d'-' -f3- | rev)
+    # add dependency to tree and frontier
+    _tree[$_pkg]="${_tree[$_pkg]} $realdep"
+    _frontier+=($realdep)
+  done
+done
 
-export _builddir=build
-mkdir -vp $_builddir
-chown -v $SUDO_USER "$_builddir"
+# print package dependency tree
+echo "" > $_builddir/.deptree
+for i in "${!_tree[@]}"; do
+  echo "  ${i} : [${_tree[$i]} ]" >> $_builddir/.deptree
+done
+echo "total pkges: ${#_tree[@]}" >> $_builddir/.deptree
 
-export _toolchain=riscv64-linux-gnu
-
-# stage 0: prepare host
-./src/stage0.sh
-
-# stage 1: cross-makepkg a base system
-./src/stage1.sh
-
-# cleanup
-# rm -rf "$_builddir"
-echo "all done :)"
