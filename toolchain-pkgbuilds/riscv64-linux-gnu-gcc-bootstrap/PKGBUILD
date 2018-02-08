@@ -78,8 +78,8 @@ build() {
 		  --disable-libgomp \
 		  --disable-nls \
 		  --disable-bootstrap \
-      --enable-chehcking=release \
-      --disable-multilib \
+      --enable-checking=release \
+      --disable-multilib
 
 	make inhibit-libc=true all-gcc
 	make inhibit-libc=true all-target-libgcc

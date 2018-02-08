@@ -1,3 +1,7 @@
 
 # build dirs
 build/
+
+# built packages
+*.pkg.tar.xz
+*.src.tar.gz

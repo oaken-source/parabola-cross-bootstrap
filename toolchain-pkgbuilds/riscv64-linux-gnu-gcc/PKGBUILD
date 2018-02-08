@@ -15,7 +15,7 @@ url='https://github.com/riscv/riscv-gnu-toolchain'
 license=(GPL LGPL FDL)
 depends=($_target-binutils $_target-glibc libmpc zlib)
 makedepends=(git)
-options=(!emptydirs !strip)
+options=(!emptydirs !strip staticlibs)
 conflicts=($pkgname-bootstrap)
 replaces=($pkgname-bootstrap)
 source=("$_target::git+https://github.com/riscv/riscv-gnu-toolchain#tag=v$_snapshot")
@@ -70,7 +70,7 @@ build() {
 		  --disable-libquadmath \
 		  --disable-nls \
 		  --disable-bootstrap \
-      --enable-chehcking=release \
+      --enable-checking=release \
       --disable-multilib
 
   make
@@ -79,7 +79,7 @@ build() {
 package() {
   cd gcc-build
 
-  make DESTDIR="$pkgdir" install-gcc install-target-libgcc install-target-libstdc++-v3
+  make DESTDIR="$pkgdir" install
 
   # strip target binaries
   find "$pkgdir"/usr/lib/gcc/$_target/ "$pkgdir"/usr/$_target/lib -type f -and \( -name \*.a -or -name \*.o \) -exec $_target-objcopy -R .comment -R .note -R .debug_info -R .debug_aranges -R .debug_pubnames -R .debug_pubtypes -R .debug_abbrev -R .debug_line -R .debug_str -R .debug_ranges -R .debug_loc '{}' \;
@@ -88,6 +88,7 @@ package() {
   find "$pkgdir"/usr/bin/ "$pkgdir"/usr/lib/gcc/$_target/ -type f -and \( -executable \) -exec strip '{}' \;
 
   # Remove files that conflict with host gcc package
+  rm -r "$pkgdir"/usr/lib/libcc1.so{,.0,.0.0.0}
   rm -r "$pkgdir"/usr/share/man/man7
   rm -r "$pkgdir"/usr/share/info
   rm -r "$pkgdir"/usr/share/gcc-$pkgver
