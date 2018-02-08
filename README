@@ -1,0 +1,19 @@
+
+parabola-riscv64-bootstrap
+==========================
+
+an attempt at creating a self-contained parabola GNU/Linux-libre system on the
+riscv64 architecture.
+
+prerequesites
+-------------
+
+to create parabola-riscv64, you need a riscv64-linux-gnu toolchain. On parabola
+GNU/Linux-libre, this toolchain has been pre-packaged and can be installed by
+invoking:
+
+  $> pacman -S riscv64-linux-gnu-{gcc,gdb}
+
+the PKGBUILDS used for building these packages, as well as documentation
+towards the process of bootstrapping the toolchain is included in the
+subdirectory `toolchain-pkgbuilds'.

@@ -1,0 +1,42 @@
+# Maintainer: David P. <megver83@parabola.nu>
+# Maintainer (Arch): Anatol Pomozov <anatol.pomozov@gmail.com>
+# Contributor: Andreas Grapentin <andreas@grapentin.org>
+
+# parabola changes and rationale:
+#  - adapted from aarch64-linux-libre-gnu-binutils
+
+_target_arch=riscv
+_target=riscv64-linux-gnu
+pkgname=$_target-linux-libre-api-headers
+_pkgver=4.15-gnu
+
+_archpkgver=${_pkgver%-*}
+pkgver=${_pkgver//-/_}
+pkgrel=1
+pkgdesc="Kernel headers sanitized for use in userspace ($_target)"
+arch=(any)
+url='https://linux-libre.fsfla.org'
+license=(GPL2)
+provides=("$_target-linux-api-headers=${_archpkgver}")
+conflicts=("$_target-linux-api-headers")
+replaces=("$_target-linux-api-headers")
+source=("https://linux-libre.fsfla.org/pub/linux-libre/releases/${_pkgver}/linux-libre-${_pkgver}.tar.xz"{,.sign})
+sha512sums=('a55cc663c6fb1e1cfa7905282b368b5d5888bc2398f0acf37e5bb9a232ded04fd566b1980e654da26aaec005332e458581495184d6bd4cec669181085d4d78a5'
+            'SKIP')
+validpgpkeys=('474402C8C582DAFBE389C427BCB7CF877E7D47A7') # Alexandre Oliva
+
+build() {
+  cd linux-$_archpkgver
+
+  make ARCH=$_target_arch mrproper
+  make ARCH=$_target_arch headers_check
+}
+
+package() {
+  cd linux-$_archpkgver
+
+  make INSTALL_HDR_PATH="$pkgdir/usr/$_target/" ARCH=$_target_arch V=0 headers_install
+
+  # clean-up unnecessary files generated during install
+  find "$pkgdir" \( -name .install -or -name ..install.cmd \) -delete
+}

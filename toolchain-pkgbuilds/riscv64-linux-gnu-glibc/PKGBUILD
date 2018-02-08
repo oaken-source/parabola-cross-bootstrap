@@ -1,0 +1,72 @@
+# Maintainer (Arch): Anatol Pomozov
+# Contributor: Andreas Grapentin <andreas@grapentin.org>
+
+# parabola changes and rationale:
+#  - adapted from aarch64-linux-gnu-glibc
+
+_target=riscv64-linux-gnu
+pkgname=$_target-glibc
+_snapshot=20171231
+pkgver=2.26.v$_snapshot
+pkgrel=1
+pkgdesc="GNU C Library riscv64 target"
+arch=(any)
+url='https://github.com/riscv/riscv-gnu-toolchain'
+license=('GPL' 'LGPL')
+depends=($_target-gcc $_target-linux-api-headers)
+makedepends=(git)
+options=(!buildflags !strip staticlibs)
+source=("$_target::git+https://github.com/riscv/riscv-gnu-toolchain#tag=v$_snapshot")
+sha256sums=('SKIP')
+
+prepare() {
+  mkdir -p glibc-build
+
+  cd "$srcdir/$_target"
+
+  # fix submodule repo paths
+  sed -i 's#\.\.#git://github.com/riscv#' .gitmodules
+  # update submodule
+  git submodule update --init riscv-glibc
+}
+
+build() {
+  cd glibc-build
+
+  echo "slibdir=/lib" >> configparms
+  echo "rtlddir=/lib" >> configparms
+  echo "sbindir=/bin" >> configparms
+  echo "rootsbindir=/bin" >> configparms
+
+  unset LD_LIBRARY_PATH
+
+  export BUILD_CC=gcc
+  export CC=${_target}-gcc
+  export CXX=${_target}-g++
+  export AR=${_target}-ar
+  export RANLIB=${_target}-ranlib
+
+  ../$_target/riscv-glibc/configure \
+      --prefix=/usr \
+      --target=$_target \
+      --host=$_target \
+      --libdir=/usr/lib \
+      --libexecdir=/usr/lib \
+      --disable-werror \
+      --enable-shared \
+      --enable-obsolete-rpc \
+      --with-headers=/usr/$_target/include \
+      --disable-multilib \
+      --enable-kernel=3.0.0
+
+  echo "build-programs=no" >> configparms
+  make
+}
+
+package() {
+  cd glibc-build
+
+  make install_root=$pkgdir/usr/$_target install
+
+  rm -rf $pkgdir/usr/$_target/{bin,sbin,etc,share,var}
+}

@@ -1,0 +1,69 @@
+# $Id$
+# Maintainer (Arch): Anatol Pomozov <anatol.pomozov@gmail.com>
+# Contributor: Andreas Grapentin <andreas@grapentin.org>
+
+# parabola changes and rationale:
+#  - adapted from aarch64-linux-gnu-binutils
+
+_target=riscv64-linux-gnu
+pkgname=$_target-binutils
+_snapshot=20171231
+pkgver=2.29.v$_snapshot
+pkgrel=1
+pkgdesc='A set of programs to assemble and manipulate binary and object files for the riscv64 target'
+arch=(x86_64)
+url='https://github.com/riscv/riscv-gnu-toolchain'
+license=(GPL)
+depends=(zlib)
+makedepends=(git)
+source=("$_target::git+https://github.com/riscv/riscv-gnu-toolchain#tag=v$_snapshot")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "$srcdir/$_target"
+
+  # fix submodule repo paths
+  sed -i 's#\.\.#git://github.com/riscv#' .gitmodules
+  # update submodule
+  git submodule update --init riscv-binutils-gdb
+
+  cd "$srcdir/$_target/riscv-binutils-gdb"
+  sed -i "/ac_cpp=/s/\$CPPFLAGS/\$CPPFLAGS -O2/" libiberty/configure
+}
+
+build() {
+  cd "$srcdir/$_target/riscv-binutils-gdb"
+
+  ./configure --target=$_target \
+              --with-sysroot=/usr/$_target \
+              --prefix=/usr \
+              --disable-multilib \
+              --with-gnu-as \
+              --with-gnu-ld \
+              --disable-nls \
+              --enable-ld=default \
+              --enable-gold \
+              --enable-plugins \
+              --enable-deterministic-archives \
+              --disable-gdb
+
+  make
+}
+
+check() {
+  cd "$srcdir/$_target/riscv-binutils-gdb"
+
+  # unset LDFLAGS as testsuite makes assumptions about which ones are active
+  # do not abort on errors - manually check log files
+  make -k LDFLAGS="" check || true
+}
+
+package() {
+  cd "$srcdir/$_target/riscv-binutils-gdb"
+
+  make DESTDIR="$pkgdir" install
+
+  # Remove file conflicting with host binutils and manpages for MS Windows tools
+  rm -r "$pkgdir"/usr/share/info
+  rm "$pkgdir"/usr/share/man/man1/$_target-{dlltool,nlmconv,windres,windmc}*
+}

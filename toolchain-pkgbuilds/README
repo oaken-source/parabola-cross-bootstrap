@@ -1,0 +1,13 @@
+
+toolchain-pkgbuilds
+-------------------
+
+this directory contains the pkgbuilds required to bootstrap parabola-riscv64
+
+build order:
+  - riscv64-linux-gnu-binutis
+  - riscv64-linux-gnu-linux-libre-api-headers
+  - riscv64-linux-gnu-gcc-bootstrap (modified to compile without glibc)
+  - riscv64-linux-gnu-glibc
+  - riscv64-linux-gnu-gcc (supersedes gcc-bootstrap)
+  - riscv64-linux-gnu-gdb
