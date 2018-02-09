@@ -59,7 +59,6 @@ build() {
       --disable-multilib \
       --enable-kernel=3.0.0
 
-  echo "build-programs=no" >> configparms
   make
 }
 
@@ -67,6 +66,4 @@ package() {
   cd glibc-build
 
   make install_root=$pkgdir/usr/$_target install
-
-  rm -rf $pkgdir/usr/$_target/{bin,sbin,etc,share,var}
 }
