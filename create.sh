@@ -28,8 +28,10 @@ set -eu
 export _startdir="$(pwd)"
 export _builddir="$_startdir"/build
 export _target=riscv64-linux-gnu
+export _arch=${_target%%-*}
+export _groups="base base_devel"
 
-msg "prepare builddir"
+msg "preparing builddir"
 rm -rf "$_builddir"
 mkdir -vp "$_builddir"
 chown -v $SUDO_USER "$_builddir"

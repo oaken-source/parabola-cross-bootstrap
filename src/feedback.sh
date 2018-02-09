@@ -22,10 +22,10 @@ set -eu
 
 export BO=$(tput bold)
 export NO=$(tput sgr0)
-export RE=$(tput setf 1)
+export RE=$(tput setf 4)
 export GR=$(tput setf 2)
 export WH=$(tput setf 7)
 
-die() { echo "$BO$RE==> ERROR:$WH$*$NO" 1>&2 ; exit 1; }
+die() { echo "$BO$RE==> ERROR:$WH $*$NO" 1>&2 ; exit 1; }
 msg() { echo "$BO$GR==>$WH $*$NO"; }
 export -f die msg

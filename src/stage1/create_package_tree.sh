@@ -20,15 +20,35 @@
 
 set -eu
 
-check_bin() {
-  echo -n "checking for $1 in \$PATH ... "
-  type -p $1 >/dev/null && echo yes || (echo no && die "missing ${2:-$1} in \$PATH")
-}
+msg "creating transitive dependency tree for $_groups"
 
-msg "performing host system sanity checks"
+declare -A _tree
 
-check_bin pacman
-check_bin $_target-gcc "$_target prefixed toolchain"
-check_bin repo-add
-check_bin tput
-check_bin bsdtar
+_frontier=($(pacman -Sg $_groups | cut -d' ' -f2))
+while [ ${#_frontier[@]} -gt 0 ]; do
+  # pop pkg from frontier
+  _pkg=$(echo ${_frontier[0]})
+  _frontier=("${_frontier[@]:1}")
+  # if seen before, skip, otherwise create entry in dependency tree
+  [[ -v _tree[$_pkg] ]] && continue
+  _tree[$_pkg]=""
+  # iterate dependencies for pkg
+  _deps="$(echo $(pacman -Si $_pkg | grep '^Depends' | cut -d':' -f2 | sed 's/None//'))"
+  for dep in $_deps; do
+    # translate dependency string to actual package
+    realdep=$(yes n | pacman --confirm -Sd "$dep" 2>&1 | grep '^Packages' \
+              | cut -d' ' -f3 | rev | cut -d'-' -f3- | rev)
+    # add dependency to tree and frontier
+    _tree[$_pkg]="${_tree[$_pkg]} $realdep"
+    _frontier+=($realdep)
+  done
+done
+
+# log package dependency tree
+_deptree="$_builddir"/DEPTREE
+echo "" > "$_deptree"
+for i in "${!_tree[@]}"; do
+  echo "  ${i} : [${_tree[$i]} ]" >> "$_deptree"
+done
+echo "total pkges: ${#_tree[@]}"
+

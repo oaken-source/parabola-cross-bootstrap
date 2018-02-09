@@ -2,6 +2,8 @@
 # build dirs
 build/
 
-# built packages
+# built packages and signatures
 *.pkg.tar.xz
+*.pkg.tar.xz.sig
 *.src.tar.gz
+*.src.tar.gz.sig

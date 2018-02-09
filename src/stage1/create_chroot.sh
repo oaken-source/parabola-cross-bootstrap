@@ -20,15 +20,34 @@
 
 set -eu
 
-check_bin() {
-  echo -n "checking for $1 in \$PATH ... "
-  type -p $1 >/dev/null && echo yes || (echo no && die "missing ${2:-$1} in \$PATH")
-}
+msg "preparing a skeleton $_arch chroot"
 
-msg "performing host system sanity checks"
+# create required directories
+mkdir -pv "$_chrootdir"/etc/pacman.d/{gnupg,hooks} \
+          "$_chrootdir"/var/{lib/pacman,cache/pacman/pkg,log} \
+          "$_chrootdir"/packages/$_arch
 
-check_bin pacman
-check_bin $_target-gcc "$_target prefixed toolchain"
-check_bin repo-add
-check_bin tput
-check_bin bsdtar
+# create pacman.conf
+cat > "$_chrootdir"/etc/pacman.conf << EOF
+[options]
+RootDir = $_chrootdir
+DBPath = $_chrootdir/var/cache/pacman/
+CacheDir = $_chrootdir/var/cache/pacman/pkg/
+LogFile = $_chrootdir/var/log/pacman.log
+GPGDir = $_chrootdir/etc/pacman.d/gnupg
+HookDir = $_chrootdir/etc/pacman.d/hooks
+Architecture = $_arch
+
+[repo]
+SigLevel = Never
+Server = file://$_chrootdir/packages/\$arch
+EOF
+
+# create an empty local package directory
+tar -czf "$_chrootdir"/packages/$_arch/repo.db.tar.gz -T /dev/null
+tar -czf "$_chrootdir"/packages/$_arch/repo.files.tar.gz -T /dev/null
+ln -s repo.db.tar.gz "$_chrootdir"/packages/$_arch/repo.db
+ln -s repo.files.tar.gz "$_chrootdir"/packages/$_arch/repo.files
+
+# test and initialize ALPM library
+pacman --config "$_chrootdir"/etc/pacman.conf -r "$_chrootdir" -Syyu
