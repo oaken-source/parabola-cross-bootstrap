@@ -17,3 +17,8 @@ invoking:
 the PKGBUILDS used for building these packages, as well as documentation
 towards the process of bootstrapping the toolchain is included in the
 subdirectory `toolchain-pkgbuilds'.
+
+bootstrapping
+-------------
+
+to bootstrap parabola-riscv64, run the create.sh script, and hope for the best.

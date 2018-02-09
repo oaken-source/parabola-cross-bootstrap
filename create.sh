@@ -32,7 +32,6 @@ export _arch=${_target%%-*}
 export _groups="base base_devel"
 
 msg "preparing builddir"
-rm -rf "$_builddir"
 mkdir -vp "$_builddir"
 chown -v $SUDO_USER "$_builddir"
 

@@ -20,29 +20,31 @@
 
 set -eu
 
-_pkgname=gcc-libs-shim
-_pkgver=$(pacman -Qi $_target-gcc | grep '^Version' | cut -d':' -f2 | tr -d [:space:])
+_pkgname=ca-certificates-utils-shim
+_pkgver=$(pacman -Qi ${_pkgname%-*} | grep '^Version' | cut -d':' -f2 | tr -d [:space:])
 _pkgdir="$_makepkgdir"/$_pkgname/pkg/$_pkgname
 
 msg "makepkg: $_pkgname-$_pkgver-$_arch.pkg.tar.xz"
 
-mkdir -pv "$_makepkgdir"/$_pkgname
-pushd "$_makepkgdir"/$_pkgname >/dev/null
+if [ ! -f "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz ]; then
+  rm -rf "$_makepkgdir"/$_pkgname
+  mkdir -pv "$_makepkgdir"/$_pkgname
+  pushd "$_makepkgdir"/$_pkgname >/dev/null
 
-# to produce gcc-libs shim from gcc, we need the package
-pacman -Sw --noconfirm --cachedir . $_target-gcc
-mkdir tmp && bsdtar -C tmp -xf $_target-gcc-$_pkgver-*.pkg.tar.xz
+  # get original package
+  pacman -Sw --noconfirm --cachedir . ${_pkgname%-*}
+  mkdir tmp && bsdtar -C tmp -xf ${_pkgname%-*}-$_pkgver-*.pkg.tar.xz
 
-# install libraries
-mkdir -p "$_pkgdir"/usr
-cp -a tmp/usr/$_target/lib "$_pkgdir"/usr/lib
+  # install certificates
+  mkdir -p "$_pkgdir"/etc/ssl/certs/
+  cp -a tmp/etc/ssl/certs/ca-certificates.crt "$_pkgdir"/etc/ssl/certs/.
 
-# produce .PKGINFO file
-cat > "$_pkgdir"/.PKGINFO << EOF
+  # produce .PKGINFO file
+  cat > "$_pkgdir"/.PKGINFO << EOF
 pkgname = $_pkgname
 pkgver = $_pkgver
-pkgdesc = Runtime libraries shipped by GCC (extracted from $_target-gcc)
-url = https://github.com/riscv/riscv-gnu-toolchain
+pkgdesc = Common CA certificates (utilities) - extracted from host machine
+url = http://pkgs.fedoraproject.org/cgit/rpms/ca-certificates.git
 builddate = $(date '+%s')
 size = $(( $(du -sk --apparent-size "$_pkgdir" | cut -d'	' -f1) * 1024 ))
 arch = $_arch
@@ -50,20 +52,24 @@ provides = ${_pkgname%-*}
 conflicts = ${_pkgname%-*}
 EOF
 
-# package
-cd "$_pkgdir"
-env LANG=C bsdtar -czf .MTREE \
-  --format=mtree \
-  --options='!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link' \
-  .PKGINFO *
-env LANG=C bsdtar -cf - .MTREE .PKGINFO * | xz -c -z - > \
-  "$_chrootdir"/packages/$_arch/$_pkgname-$_pkgver-$_arch.pkg.tar.xz
+  # package
+  cd "$_pkgdir"
+  env LANG=C bsdtar -czf .MTREE \
+    --format=mtree \
+    --options='!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link' \
+    .PKGINFO *
+  env LANG=C bsdtar -cf - .MTREE .PKGINFO * | xz -c -z - > \
+    "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz
 
-popd >/dev/null
+  popd >/dev/null
 
-# rm -rf "$_makepkgdir"/$_pkgname
+  # rm -rf "$_makepkgdir"/$_pkgname
+fi
+
+cp -av "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz "$_chrootdir"/packages/$_arch
 
 rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
 rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*
 repo-add -R "$_chrootdir"/packages/$_arch/{repo.db.tar.gz,*.pkg.tar.xz}
 pacman --noconfirm --config "$_chrootdir"/etc/pacman.conf -r "$_chrootdir" -Syy $_pkgname
+

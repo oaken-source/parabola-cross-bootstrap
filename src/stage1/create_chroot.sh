@@ -23,6 +23,7 @@ set -eu
 msg "preparing a skeleton $_arch chroot"
 
 # create required directories
+rm -rf "$_chrootdir"
 mkdir -pv "$_chrootdir"/etc/pacman.d/{gnupg,hooks} \
           "$_chrootdir"/var/{lib/pacman,cache/pacman/pkg,log} \
           "$_chrootdir"/packages/$_arch

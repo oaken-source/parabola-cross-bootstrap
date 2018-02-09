@@ -26,13 +26,14 @@ set -eu
 _chrootdir="$_builddir"/$_arch-root
 _makepkgdir="$_builddir"/$_arch-makepkg
 
-# prepare skeleton chroot
-. src/stage1/create_chroot.sh
-
 # prepare makepkg environment
 . src/stage1/create_makepkg.sh
 
+# prepare skeleton chroot
+. src/stage1/create_chroot.sh
+
 # create temporary shim packages
-. src/stage1/shim-gcc-libs.sh
-. src/stage1/shim-glibc.sh
-. src/stage1/shim-ca-certificates-utils.sh
+_shims="gcc-libs glibc ca-certificates-utils"
+for s in $_shims; do
+  . src/stage1/$s-shim.sh
+done
