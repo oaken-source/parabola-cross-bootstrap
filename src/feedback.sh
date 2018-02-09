@@ -20,14 +20,12 @@
 
 set -eu
 
-check() {
-  type -p $1 >/dev/null || die "missing ${2:-$1} in \$PATH"
-}
+export BO=$(tput bold)
+export NO=$(tput sgr0)
+export RE=$(tput setf 1)
+export GR=$(tput setf 2)
+export WH=$(tput setf 7)
 
-msg "performing host system sanity checks"
-
-check pacman
-check $_target-gcc "$_target prefixed toolchain"
-check repo-add
-check tput
-check bsdtar
+die() { echo "$BO$RE==> ERROR:$WH$*$NO" 1>&2 ; exit 1; }
+msg() { echo "$BO$GR==>$WH $*$NO"; }
+export -f die msg

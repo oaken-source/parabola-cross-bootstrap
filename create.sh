@@ -20,18 +20,19 @@
 
 set -eu
 
-die() { echo "$*" 1>&2 ; exit 1; }
-msg() { echo " :: $*"; }
-export -f die msg
+. src/feedback.sh
 
 [ $(id -u) -ne 0 ] && die "must be root"
 [ -z "${SUDO_USER:-}" ] && die "SUDO_USER not set"
 
-export _builddir=build
-mkdir -vp $_builddir
-chown -v $SUDO_USER "$_builddir"
+export _startdir="$(pwd)"
+export _builddir="$_startdir"/build
+export _target=riscv64-linux-gnu
 
-export _toolchain=riscv64-linux-gnu
+msg "prepare builddir"
+rm -rf "$_builddir"
+mkdir -vp "$_builddir"
+chown -v $SUDO_USER "$_builddir"
 
 # stage 0: prepare host
 ./src/stage0.sh
