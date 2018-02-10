@@ -22,8 +22,6 @@ set -eu
 
 msg "creating transitive dependency tree for $_groups"
 
-_deptree="$_builddir"/DEPTREE
-
 if [ ! -f "$_deptree" ]; then
   declare -A _tree
 
@@ -48,11 +46,12 @@ if [ ! -f "$_deptree" ]; then
   done
 
   # log package dependency tree
-  echo "" > "$_deptree"
+  truncate -s0 "$_deptree".FULL
   for i in "${!_tree[@]}"; do
-    echo "  ${i} : [${_tree[$i]} ]" >> "$_deptree"
+    echo "${i} : [${_tree[$i]} ]" >> "$_deptree".FULL
   done
 fi
 
-echo "total pkges: $(cat "$_deptree" | wc -l)"
+cp "$_deptree"{.FULL,}
 
+echo "total pkges: $(cat "$_deptree" | wc -l)"

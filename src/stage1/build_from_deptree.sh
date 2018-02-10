@@ -20,41 +20,38 @@
 
 set -eu
 
-_packages=$(cat "$_builddir"/DEPTREE | cut -d' ' -f1)
-
-# we can simply repackage anything with arch=('any'), no compilation needed.
-for _pkgname in $_packages; do
-  _pkgarch=$(pacman -Si $_pkgname | grep '^Architecture' | awk '{print $3}')
-  [ "x$_pkgarch" == "xany" ] || continue
+# keep building packages until the deptree is empty
+while [ -s "$_deptree" ]; do
+  # grab one without unfulfilled dependencies
+  _pkgname=$(grep '\[ \]' "$_deptree" | head -n1 | awk '{print $1}')
+  [ -n "$_pkgname" ] || die "could not resolve cyclic dependencies. exiting."
 
   _pkgver=$(pacman -Qi $_pkgname | grep '^Version' | awk '{print $3}')
   _pkgdir="$_makepkgdir"/$_pkgname/pkg/$_pkgname
 
-  msg "makepkg: $_pkgname-$_pkgver-any.pkg.tar.xz"
+  msg "makepkg: $_pkgname-$_pkgver-$_arch.pkg.tar.xz"
   msg "  remaining pkges: $(cat "$_deptree" | wc -l)"
 
-  if [ ! -f "$_makepkgdir"/$_pkgname-$_pkgver-any.pkg.tar.xz ]; then
+  if [ ! -f "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz ]; then
     rm -rf "$_makepkgdir"/$_pkgname
     mkdir -pv "$_makepkgdir"/$_pkgname
     pushd "$_makepkgdir"/$_pkgname >/dev/null
 
-    # download the package
-    pacman -Sw --noconfirm --cachedir . $_pkgname
-    cp $_pkgname-$_pkgver-any.pkg.tar.xz "$_makepkgdir"/
 
     popd >/dev/null
 
     # rm -rf "$_makepkgdir"/$_pkgname
   fi
 
-  cp -av "$_makepkgdir"/$_pkgname-$_pkgver-any.pkg.tar.xz "$_chrootdir"/packages/$_arch
-
-  rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
-  rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*
-  repo-add -q -R "$_chrootdir"/packages/$_arch/{repo.db.tar.gz,*.pkg.tar.xz}
-  pacman --noscriptlet --noconfirm --force -dd --config "$_chrootdir"/etc/pacman.conf \
-    -r "$_chrootdir" -Syy $_pkgname
+#  cp -av "$_makepkgdir"/$_pkgname-$_pkgver-any.pkg.tar.xz "$_chrootdir"/packages/$_arch
+#
+#  rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
+#  rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*
+#  repo-add -q -R "$_chrootdir"/packages/$_arch/{repo.db.tar.gz,*.pkg.tar.xz}
+#  pacman --noscriptlet --noconfirm --force -dd --config "$_chrootdir"/etc/pacman.conf \
+#    -r "$_chrootdir" -Syy $_pkgname
 
   # remove pkg from deptree
-  sed -i "/^$_pkgname :/d; s/ $_pkgname / /" "$_deptree"
+  sed -i "/^$_pkgname :/d; s/ $_pkgname\b//g" "$_deptree"
 done
+

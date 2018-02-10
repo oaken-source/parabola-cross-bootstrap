@@ -36,7 +36,11 @@ for s in $_shims; do
 done
 
 # create base package tree
+export _deptree="$_builddir"/DEPTREE
 . src/stage1/create_package_tree.sh
 
 # simply repackage anything with arch=('any')
 . src/stage1/repackage_arch_any.sh
+
+# work through dependency tree and rebuild everything else in order
+. src/stage1/build_from_deptree.sh

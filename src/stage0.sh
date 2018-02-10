@@ -32,3 +32,4 @@ check_bin $_target-gcc "$_target prefixed toolchain"
 check_bin repo-add
 check_bin tput
 check_bin bsdtar
+check_bin awk

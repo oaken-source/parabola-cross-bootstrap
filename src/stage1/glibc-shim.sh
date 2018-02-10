@@ -21,7 +21,7 @@
 set -eu
 
 _pkgname=glibc-shim
-_pkgver=$(pacman -Qi $_target-glibc | grep '^Version' | cut -d':' -f2 | tr -d [:space:])
+_pkgver=$(pacman -Qi $_target-glibc | grep '^Version' | awk '{print $3}')
 _pkgdir="$_makepkgdir"/$_pkgname/pkg/$_pkgname
 
 msg "makepkg: $_pkgname-$_pkgver-$_arch.pkg.tar.xz"
@@ -31,7 +31,7 @@ if [ ! -f "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz ]; then
   mkdir -pv "$_makepkgdir"/$_pkgname
   pushd "$_makepkgdir"/$_pkgname >/dev/null
 
-  # to produce glibc shim from gcc, we need the package
+  # to produce glibc shim from glibc, we need the package
   pacman -Sw --noconfirm --cachedir . $_target-glibc
   mkdir tmp && bsdtar -C tmp -xf $_target-glibc-$_pkgver-*.pkg.tar.xz
 
@@ -79,5 +79,6 @@ cp -av "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz "$_chrootdir"/package
 
 rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
 rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*
-repo-add -R "$_chrootdir"/packages/$_arch/{repo.db.tar.gz,*.pkg.tar.xz}
-pacman --noconfirm --config "$_chrootdir"/etc/pacman.conf -r "$_chrootdir" -Syy $_pkgname
+repo-add -q -R "$_chrootdir"/packages/$_arch/{repo.db.tar.gz,*.pkg.tar.xz}
+pacman --noscriptlet --noconfirm --force -dd --config "$_chrootdir"/etc/pacman.conf \
+  -r "$_chrootdir" -Syy $_pkgname
