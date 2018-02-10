@@ -20,23 +20,4 @@
 
 set -eu
 
-_chrootdir="$_builddir"/$_arch-root
-_makepkgdir="$_builddir"/$_arch-makepkg
 
-# prepare makepkg environment
-. src/stage1/create_makepkg.sh
-
-# prepare skeleton chroot
-. src/stage1/create_chroot.sh
-
-# create temporary shim packages
-_shims="gcc-libs glibc ca-certificates-utils"
-for s in $_shims; do
-  . src/stage1/$s-shim.sh
-done
-
-# create base package tree
-. src/stage1/create_package_tree.sh
-
-# simply repackage anything with arch=('any')
-. src/stage1/repackage_arch_any.sh

@@ -22,33 +22,37 @@ set -eu
 
 msg "creating transitive dependency tree for $_groups"
 
-declare -A _tree
-
-_frontier=($(pacman -Sg $_groups | cut -d' ' -f2))
-while [ ${#_frontier[@]} -gt 0 ]; do
-  # pop pkg from frontier
-  _pkg=$(echo ${_frontier[0]})
-  _frontier=("${_frontier[@]:1}")
-  # if seen before, skip, otherwise create entry in dependency tree
-  [[ -v _tree[$_pkg] ]] && continue
-  _tree[$_pkg]=""
-  # iterate dependencies for pkg
-  _deps="$(echo $(pacman -Si $_pkg | grep '^Depends' | cut -d':' -f2 | sed 's/None//'))"
-  for dep in $_deps; do
-    # translate dependency string to actual package
-    realdep=$(yes n | pacman --confirm -Sd "$dep" 2>&1 | grep '^Packages' \
-              | cut -d' ' -f3 | rev | cut -d'-' -f3- | rev)
-    # add dependency to tree and frontier
-    _tree[$_pkg]="${_tree[$_pkg]} $realdep"
-    _frontier+=($realdep)
-  done
-done
-
-# log package dependency tree
 _deptree="$_builddir"/DEPTREE
-echo "" > "$_deptree"
-for i in "${!_tree[@]}"; do
-  echo "  ${i} : [${_tree[$i]} ]" >> "$_deptree"
-done
-echo "total pkges: ${#_tree[@]}"
+
+if [ ! -f "$_deptree" ]; then
+  declare -A _tree
+
+  _frontier=($(pacman -Sg $_groups | cut -d' ' -f2))
+  while [ ${#_frontier[@]} -gt 0 ]; do
+    # pop pkg from frontier
+    _pkg=$(echo ${_frontier[0]})
+    _frontier=("${_frontier[@]:1}")
+    # if seen before, skip, otherwise create entry in dependency tree
+    [[ -v _tree[$_pkg] ]] && continue
+    _tree[$_pkg]=""
+    # iterate dependencies for pkg
+    _deps="$(echo $(pacman -Si $_pkg | grep '^Depends' | cut -d':' -f2 | sed 's/None//'))"
+    for dep in $_deps; do
+      # translate dependency string to actual package
+      realdep=$(yes n | pacman --confirm -Sd "$dep" 2>&1 | grep '^Packages' \
+                | cut -d' ' -f3 | rev | cut -d'-' -f3- | rev)
+      # add dependency to tree and frontier
+      _tree[$_pkg]="${_tree[$_pkg]} $realdep"
+      _frontier+=($realdep)
+    done
+  done
+
+  # log package dependency tree
+  echo "" > "$_deptree"
+  for i in "${!_tree[@]}"; do
+    echo "  ${i} : [${_tree[$i]} ]" >> "$_deptree"
+  done
+fi
+
+echo "total pkges: $(cat "$_deptree" | wc -l)"
 

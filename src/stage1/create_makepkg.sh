@@ -22,15 +22,27 @@ set -eu
 
 msg "preparing a $_arch cross makepkg environment"
 
-# create required directories
-mkdir -pv "$_makepkgdir"
+if [ ! -f "$_makepkgdir"/makepkg-$_arch.sh ]; then
+  # create required directories
+  mkdir -pv "$_makepkgdir"/makepkg-$_arch
+  pushd "$_makepkgdir"/makepkg-$_arch >/dev/null
 
-# create a modified makepkg
-cp -v /usr/bin/makepkg "$_makepkgdir"/makepkg-$_arch
+  _pkgver=$(pacman -Qi pacman | grep '^Version' | cut -d':' -f2 | tr -d [:space:])
 
-# patch run_pacman in makepkg, we cannot pass the pacman root to it as parameter ATM
-sed -i "/\"\$PACMAN_PATH\"/a --config $_chrootdir/etc/pacman.conf -r $_chrootdir" \
-  "$_makepkgdir"/makepkg-$_arch
+  # fetch pacman package to excract makepkg
+  pacman -Sw --noconfirm --cachedir . pacman
+  mkdir tmp && bsdtar -C tmp -xf pacman-$_pkgver-*.pkg.tar.xz
+
+  # install makepkg
+  cp -av tmp/usr/bin/makepkg "$_makepkgdir"/makepkg-$_arch.sh
+
+  # patch run_pacman in makepkg, we cannot pass the pacman root to it as parameter ATM
+  sed -i "/\"\$PACMAN_PATH\"/a --config $_chrootdir/etc/pacman.conf -r $_chrootdir" \
+    "$_makepkgdir"/makepkg-$_arch.sh
+
+  popd >/dev/null
+  # rm -rf "$_makepkgdir"/makepkg-$_arch
+fi
 
 # create temporary makepkg.conf
 cat > "$_makepkgdir"/makepkg-$_arch.conf << EOF
