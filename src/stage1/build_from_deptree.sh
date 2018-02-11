@@ -18,7 +18,10 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -eu
+set -euo pipefail
+
+# set path to include $_target toolchain
+export PATH="/usr/$_target/bin:/usr/$_target/usr/bin:$PATH"
 
 # keep building packages until the deptree is empty
 while [ -s "$_deptree" ]; do
@@ -26,30 +29,67 @@ while [ -s "$_deptree" ]; do
   _pkgname=$(grep '\[ \]' "$_deptree" | head -n1 | awk '{print $1}')
   [ -n "$_pkgname" ] || die "could not resolve cyclic dependencies. exiting."
 
-  _pkgver=$(pacman -Qi $_pkgname | grep '^Version' | awk '{print $3}')
+  _pkgarch=$(pacman -Si $_pkgname | grep '^Architecture' | awk '{print $3}')
+  _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
   _pkgdir="$_makepkgdir"/$_pkgname/pkg/$_pkgname
 
-  msg "makepkg: $_pkgname-$_pkgver-$_arch.pkg.tar.xz"
+  [ "x$_pkgarch" == "xany" ] || _pkgarch=$_arch
+
+  msg "makepkg: $_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz"
   msg "  remaining pkges: $(cat "$_deptree" | wc -l)"
 
-  if [ ! -f "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz ]; then
+  if [ ! -f "$_makepkgdir"/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz ]; then
     rm -rf "$_makepkgdir"/$_pkgname
     mkdir -pv "$_makepkgdir"/$_pkgname
     pushd "$_makepkgdir"/$_pkgname >/dev/null
 
+    if [ "x$_pkgarch" == "xany" ]; then
+      # simply reuse arch=(any) packages
+      pacman -Sw --noconfirm --cachedir . $_pkgname
+    else
+      # acquire the pkgbuild and auxiliary files
+      _libre=https://www.parabola.nu/packages/libre/x86_64/$_pkgname/
+      _core=https://www.archlinux.org/packages/core/x86_64/$_pkgname/
+      _extra=https://www.archlinux.org/packages/extra/x86_64/$_pkgname/
+      _community=https://www.archlinux.org/packages/community/x86_64/$_pkgname/
+      for url in $_libre $_core $_extra $_community; do
+        if ! curl -s $url | grep -iq 'not found'; then
+          src=$(curl -s $url | grep -i 'source files' | cut -d'"' -f2 | sed 's#/tree/#/plain/#')
+          for link in $(curl -sL $src | grep '^  <li><a href' | cut -d"'" -f2 \
+              | sed "s#^#$(echo $src | awk -F/ '{print $3}')#"); do
+            wget -q $link -O $(basename ${link%\?*});
+          done
+          break
+        fi
+      done
+
+      [ -f "$_srcdir"/stage1/patches/$_pkgname.patch ] || die "missing package patch"
+      patch -Np1 -i "$_srcdir"/stage1/patches/$_pkgname.patch
+
+      # enable the target arch explicitly
+      sed -i "s/arch=([^)]*/& $_arch/" PKGBUILD
+
+      # build the package
+      chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
+      sudo -u $SUDO_USER \
+        "$_makepkgdir"/makepkg-$_arch.sh -C --config "$_makepkgdir"/makepkg-$_arch.conf \
+        --skipchecksums --skippgpcheck --nocheck 2>&1 | tee $_pkgname.log
+    fi
+
+    cp -l $_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz "$_makepkgdir"/
 
     popd >/dev/null
 
     # rm -rf "$_makepkgdir"/$_pkgname
   fi
 
-#  cp -av "$_makepkgdir"/$_pkgname-$_pkgver-any.pkg.tar.xz "$_chrootdir"/packages/$_arch
-#
-#  rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
-#  rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*
-#  repo-add -q -R "$_chrootdir"/packages/$_arch/{repo.db.tar.gz,*.pkg.tar.xz}
-#  pacman --noscriptlet --noconfirm --force -dd --config "$_chrootdir"/etc/pacman.conf \
-#    -r "$_chrootdir" -Syy $_pkgname
+  cp -av "$_makepkgdir"/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz "$_chrootdir"/packages/$_arch
+
+  rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
+  rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*
+  repo-add -q -R "$_chrootdir"/packages/$_arch/{repo.db.tar.gz,*.pkg.tar.xz}
+  pacman --noscriptlet --noconfirm --force -dd --config "$_chrootdir"/etc/pacman.conf \
+    -r "$_chrootdir" -Syy $_pkgname
 
   # remove pkg from deptree
   sed -i "/^$_pkgname :/d; s/ $_pkgname\b//g" "$_deptree"

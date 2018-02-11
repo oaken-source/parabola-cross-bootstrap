@@ -18,7 +18,7 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -eu
+set -euo pipefail
 
 . src/feedback.sh
 
@@ -27,9 +27,11 @@ set -eu
 
 export _startdir="$(pwd)"
 export _builddir="$_startdir"/build
+export _srcdir="$_startdir"/src
 export _target=riscv64-linux-gnu
 export _arch=${_target%%-*}
-export _groups="base base_devel"
+export _groups="base base-devel"
+#export _groups="base"
 
 msg "preparing builddir"
 mkdir -vp "$_builddir"

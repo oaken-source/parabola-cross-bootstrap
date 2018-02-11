@@ -18,7 +18,7 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -eu
+set -euo pipefail
 
 export BO=$(tput bold)
 export NO=$(tput sgr0)

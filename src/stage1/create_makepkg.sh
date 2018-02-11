@@ -18,7 +18,7 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -eu
+set -euo pipefail
 
 msg "preparing a $_arch cross makepkg environment"
 
@@ -37,10 +37,11 @@ if [ ! -f "$_makepkgdir"/makepkg-$_arch.sh ]; then
   cp -av tmp/usr/bin/makepkg "$_makepkgdir"/makepkg-$_arch.sh
 
   # patch run_pacman in makepkg, we cannot pass the pacman root to it as parameter ATM
-  sed -i "/\"\$PACMAN_PATH\"/a --config $_chrootdir/etc/pacman.conf -r $_chrootdir" \
+  sed -i "s#\"\$PACMAN_PATH\"#& --config $_chrootdir/etc/pacman.conf -r $_chrootdir#" \
     "$_makepkgdir"/makepkg-$_arch.sh
 
   popd >/dev/null
+
   # rm -rf "$_makepkgdir"/makepkg-$_arch
 fi
 

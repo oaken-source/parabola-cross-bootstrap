@@ -18,7 +18,7 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -eu
+set -euo pipefail
 
 check_bin() {
   echo -n "checking for $1 in \$PATH ... "
@@ -28,8 +28,10 @@ check_bin() {
 msg "performing host system sanity checks"
 
 check_bin pacman
+check_bin makepkg
 check_bin $_target-gcc "$_target prefixed toolchain"
 check_bin repo-add
 check_bin tput
 check_bin bsdtar
 check_bin awk
+check_bin sudo

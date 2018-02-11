@@ -18,32 +18,38 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -eu
+set -euo pipefail
 
 msg "creating transitive dependency tree for $_groups"
 
 if [ ! -f "$_deptree" ]; then
   declare -A _tree
 
-  _frontier=($(pacman -Sg $_groups | cut -d' ' -f2))
+  _frontier=($(pacman -Sg $_groups | awk '{print $2}' ))
   while [ ${#_frontier[@]} -gt 0 ]; do
     # pop pkg from frontier
-    _pkg=$(echo ${_frontier[0]})
+    _pkgname=$(echo ${_frontier[0]})
     _frontier=("${_frontier[@]:1}")
+
     # if seen before, skip, otherwise create entry in dependency tree
-    [[ -v _tree[$_pkg] ]] && continue
-    _tree[$_pkg]=""
+    [[ -v _tree[$_pkgname] ]] && continue
+    _tree[$_pkgname]=""
+
+    _pkgdeps=$(pacman -Si $_pkgname | grep '^Depends' | cut -d':' -f2 | sed 's/None//')
+
     # iterate dependencies for pkg
-    _deps="$(echo $(pacman -Si $_pkg | grep '^Depends' | cut -d':' -f2 | sed 's/None//'))"
-    for dep in $_deps; do
+    for dep in $_pkgdeps; do
       # translate dependency string to actual package
-      realdep=$(yes n | pacman --confirm -Sd "$dep" 2>&1 | grep '^Packages' \
-                | cut -d' ' -f3 | rev | cut -d'-' -f3- | rev)
+      realdep=$(pacman --noconfirm -Sw "$dep" | grep '^Packages' | awk '{print $3}')
+      realdep=${realdep%-*-*}
       # add dependency to tree and frontier
-      _tree[$_pkg]="${_tree[$_pkg]} $realdep"
+      _tree[$_pkgname]="${_tree[$_pkgname]} $realdep"
       _frontier+=($realdep)
     done
   done
+
+  # add some additional build-order dependencies by hand
+  _tree[libutil-linux]="${_tree[libutil-linux]}pam libcap-ng ncurses "
 
   # log package dependency tree
   truncate -s0 "$_deptree".FULL

@@ -18,7 +18,7 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -eu
+set -euo pipefail
 
 _pkgname=glibc-shim
 _pkgver=$(pacman -Qi $_target-glibc | grep '^Version' | awk '{print $3}')
@@ -75,7 +75,7 @@ EOF
   # rm -rf "$_makepkgdir"/$_pkgname
 fi
 
-cp -av "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz "$_chrootdir"/packages/$_arch
+cp -alv "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz "$_chrootdir"/packages/$_arch
 
 rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
 rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*
