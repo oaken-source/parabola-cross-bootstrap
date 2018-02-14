@@ -60,13 +60,16 @@ while [ -s "$_deptree" ]; do
         fi
       done
 
+      # [ "x$_pkgname" == "xglibc" ] && die "stopping."
+
       [ -f "$_srcdir"/stage1/patches/$_pkgname.patch ] || die "missing package patch"
       patch -Np1 -i "$_srcdir"/stage1/patches/$_pkgname.patch
 
       # substitute common variables
-      sed -i "s/@TARGET@/$_target/" PKGBUILD
-      sed -i "s/@ARCH@/$_arch/" PKGBUILD
-      sed -i "s/@LINUX_ARCH@/$_linux_arch/" PKGBUILD
+      sed -i "s#@TARGET@#$_target#" PKGBUILD
+      sed -i "s#@ARCH@#$_arch#" PKGBUILD
+      sed -i "s#@LINUX_ARCH@#$_linux_arch#" PKGBUILD
+      sed -i "s#@CHROOTDIR@#$_chrootdir#" PKGBUILD
 
       # enable the target arch explicitly
       sed -i "s/arch=([^)]*/& $_arch/" PKGBUILD
@@ -90,7 +93,7 @@ while [ -s "$_deptree" ]; do
   rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
   rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*
   repo-add -q -R "$_chrootdir"/packages/$_arch/{repo.db.tar.gz,*.pkg.tar.xz}
-  pacman --noscriptlet --noconfirm --force -dd --config "$_chrootdir"/etc/pacman.conf \
+  (yes || true) | pacman --noscriptlet --config "$_chrootdir"/etc/pacman.conf \
     -r "$_chrootdir" -Syy $_pkgname
 
   # remove pkg from deptree

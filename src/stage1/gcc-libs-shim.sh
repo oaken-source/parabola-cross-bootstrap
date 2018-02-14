@@ -48,8 +48,8 @@ url = https://github.com/riscv/riscv-gnu-toolchain
 builddate = $(date '+%s')
 size = $(( $(du -sk --apparent-size "$_pkgdir" | cut -d'	' -f1) * 1024 ))
 arch = $_arch
-provides = ${_pkgname%-*}
-conflicts = ${_pkgname%-*}
+provide = ${_pkgname%-*}
+conflict = ${_pkgname%-*}
 EOF
 
   # package
@@ -71,5 +71,5 @@ cp -alv "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz "$_chrootdir"/packag
 rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
 rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*
 repo-add -q -R "$_chrootdir"/packages/$_arch/{repo.db.tar.gz,*.pkg.tar.xz}
-pacman --noscriptlet --noconfirm --force -dd --config "$_chrootdir"/etc/pacman.conf \
+pacman --noscriptlet --noconfirm --config "$_chrootdir"/etc/pacman.conf \
   -r "$_chrootdir" -Syy $_pkgname

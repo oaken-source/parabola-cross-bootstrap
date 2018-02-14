@@ -26,7 +26,8 @@ msg "preparing a skeleton $_arch chroot"
 rm -rf "$_chrootdir"
 mkdir -pv "$_chrootdir"/etc/pacman.d/{gnupg,hooks} \
           "$_chrootdir"/var/{lib/pacman,cache/pacman/pkg,log} \
-          "$_chrootdir"/packages/$_arch
+          "$_chrootdir"/packages/$_arch \
+  | sed "s#$_chrootdir#\$_chrootdir#"
 
 # create pacman.conf
 cat > "$_chrootdir"/etc/pacman.conf << EOF
