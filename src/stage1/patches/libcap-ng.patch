@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-14 21:40:20.315697551 +0100
++++ b/PKGBUILD	2018-02-14 21:41:14.872805361 +0100
+@@ -16,7 +16,7 @@ md5sums=('0dece96644bd798020e170fbf76638
+ build() {
+   cd $pkgname-$pkgver
+ 
+-  ./configure --prefix=/usr --enable-static=no --with-python=no
++  ./configure --host=@TARGET@ --prefix=/usr --enable-static=no --with-python=no
+   make
+ }
+ 
