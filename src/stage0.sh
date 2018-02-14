@@ -21,7 +21,7 @@
 set -euo pipefail
 
 check_bin() {
-  echo -n "checking for $1 in \$PATH ... "
+  echo -n "checking for $1 ... "
   type -p $1 >/dev/null && echo yes || (echo no && die "missing ${2:-$1} in \$PATH")
 }
 
@@ -35,3 +35,5 @@ check_bin tput
 check_bin bsdtar
 check_bin awk
 check_bin sudo
+
+[ "x$_arch" == "x$(uname -m)" ] || check_bin qemu-$_arch-static

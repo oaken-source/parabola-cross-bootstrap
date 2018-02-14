@@ -20,9 +20,6 @@
 
 set -euo pipefail
 
-# set path to include $_target toolchain
-export PATH="/usr/$_target/bin:/usr/$_target/usr/bin:$PATH"
-
 # keep building packages until the deptree is empty
 while [ -s "$_deptree" ]; do
   # grab one without unfulfilled dependencies
@@ -66,6 +63,11 @@ while [ -s "$_deptree" ]; do
       [ -f "$_srcdir"/stage1/patches/$_pkgname.patch ] || die "missing package patch"
       patch -Np1 -i "$_srcdir"/stage1/patches/$_pkgname.patch
 
+      # substitute common variables
+      sed -i "s/@TARGET@/$_target/" PKGBUILD
+      sed -i "s/@ARCH@/$_arch/" PKGBUILD
+      sed -i "s/@LINUX_ARCH@/$_linux_arch/" PKGBUILD
+
       # enable the target arch explicitly
       sed -i "s/arch=([^)]*/& $_arch/" PKGBUILD
 
@@ -73,7 +75,7 @@ while [ -s "$_deptree" ]; do
       chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
       sudo -u $SUDO_USER \
         "$_makepkgdir"/makepkg-$_arch.sh -C --config "$_makepkgdir"/makepkg-$_arch.conf \
-        --skipchecksums --skippgpcheck --nocheck 2>&1 | tee $_pkgname.log
+        --skipchecksums --skippgpcheck --nocheck --nodeps 2>&1 | tee makepkg.log
     fi
 
     cp -l $_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz "$_makepkgdir"/

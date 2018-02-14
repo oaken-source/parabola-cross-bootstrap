@@ -1,0 +1,17 @@
+--- a/PKGBUILD	2018-02-12 07:03:31.357350872 +0100
++++ b/PKGBUILD	2018-02-12 07:09:41.641241382 +0100
+@@ -39,12 +39,12 @@ build() {
+   cd linux-${_basever}
+ 
+   make mrproper
+-  make headers_check
++  make ARCH=@LINUX_ARCH@ CROSS_COMPILE=@TARGET@- headers_check
+ }
+ 
+ package() {
+   cd linux-${_basever}
+-  make INSTALL_HDR_PATH="$pkgdir/usr" headers_install
++  make INSTALL_HDR_PATH="$pkgdir"/usr ARCH=@LINUX_ARCH@ CROSS_COMPILE=@TARGET@- headers_install
+ 
+   # use headers from libdrm
+   rm -r "$pkgdir/usr/include/drm"

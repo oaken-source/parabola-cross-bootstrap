@@ -30,6 +30,7 @@ export _builddir="$_startdir"/build
 export _srcdir="$_startdir"/src
 export _target=riscv64-linux-gnu
 export _arch=${_target%%-*}
+export _linux_arch=riscv
 export _groups="base base-devel"
 #export _groups="base"
 

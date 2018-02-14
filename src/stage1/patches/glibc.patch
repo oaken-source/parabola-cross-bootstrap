@@ -1,0 +1,97 @@
+--- a/PKGBUILD	2018-02-14 10:59:52.990457019 +0100
++++ b/PKGBUILD	2018-02-14 11:13:29.113515472 +0100
+@@ -6,16 +6,16 @@
+ # NOTE: valgrind requires rebuilt with each major glibc version
+ 
+ pkgbase=glibc
+-pkgname=(glibc lib32-glibc)
++pkgname=(glibc)
+ pkgver=2.26
+ pkgrel=11
+ arch=(x86_64)
+ url='http://www.gnu.org/software/libc'
+ license=(GPL LGPL)
+-makedepends=(git gd lib32-gcc-libs)
++makedepends=(git)
+ options=(!strip staticlibs)
+-_commit=de51f431ed6226ec68ca76e578f2cbd55b6262cb
+-source=(git+https://sourceware.org/git/glibc.git#commit=${_commit}
++_snapshot=20171231
++source=(git+https://github.com/riscv/riscv-gnu-toolchain#tag=v${_snapshot}
+         locale.gen.txt
+         locale-gen
+         lib32-glibc.conf
+@@ -29,7 +29,14 @@ md5sums=('SKIP'
+ prepare() {
+   mkdir -p glibc-build lib32-glibc-build
+ 
+-  cd glibc
++  cd riscv-gnu-toolchain
++
++  # fix submodule repo paths
++  sed -i 's#\.\.#git://github.com/riscv#' .gitmodules
++  # update submodule
++  git submodule update --init riscv-glibc
++
++  cd riscv-glibc
+ 
+   local i; for i in ${source[@]}; do
+     case ${i%::*} in
+@@ -49,7 +56,7 @@ build() {
+       --enable-add-ons
+       --enable-bind-now
+       --enable-lock-elision
+-      --enable-multi-arch
++      --disable-multi-arch
+       --enable-obsolete-nsl
+       --enable-obsolete-rpc
+       --enable-stack-protector=strong
+@@ -68,7 +75,8 @@ build() {
+   # remove fortify for building libraries
+   CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
+ 
+-  "$srcdir/glibc/configure" \
++  "$srcdir/riscv-gnu-toolchain/riscv-glibc/configure" \
++      --host=@TARGET@ \
+       --libdir=/usr/lib \
+       --libexecdir=/usr/lib \
+       ${_configure_flags[@]}
+@@ -83,38 +91,6 @@ build() {
+   echo "CC += -D_FORTIFY_SOURCE=2" >> configparms
+   echo "CXX += -D_FORTIFY_SOURCE=2" >> configparms
+   make
+-
+-  cd "$srcdir/lib32-glibc-build"
+-  export CC="gcc -m32 -mstackrealign"
+-  export CXX="g++ -m32 -mstackrealign"
+-
+-  echo "slibdir=/usr/lib32" >> configparms
+-  echo "rtlddir=/usr/lib32" >> configparms
+-  echo "sbindir=/usr/bin" >> configparms
+-  echo "rootsbindir=/usr/bin" >> configparms
+-
+-  # remove fortify for building libraries
+-  CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
+-  CFLAGS=${CFLAGS/-fno-plt/}
+-  CXXFLAGS=${CXXFLAGS/-fno-plt/}
+-
+-  "$srcdir/glibc/configure" \
+-      --host=i686-pc-linux-gnu \
+-      --libdir=/usr/lib32 \
+-      --libexecdir=/usr/lib32 \
+-      ${_configure_flags[@]}
+-
+-  # build libraries with fortify disabled
+-  echo "build-programs=no" >> configparms
+-  make
+-
+-  # re-enable fortify for programs
+-  sed -i "/build-programs=/s#no#yes#" configparms
+-
+-  echo "CC += -D_FORTIFY_SOURCE=2" >> configparms
+-  echo "CXX += -D_FORTIFY_SOURCE=2" >> configparms
+-  make
+-
+ }
+ 
+ check() {

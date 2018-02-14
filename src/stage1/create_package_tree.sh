@@ -25,7 +25,10 @@ msg "creating transitive dependency tree for $_groups"
 if [ ! -f "$_deptree" ]; then
   declare -A _tree
 
-  _frontier=($(pacman -Sg $_groups | awk '{print $2}' ))
+  # remove a couple things from base we don't need
+  _frontier=($(pacman -Sg $_groups | awk '{print $2}' \
+    | grep -v lvm2))
+
   while [ ${#_frontier[@]} -gt 0 ]; do
     # pop pkg from frontier
     _pkgname=$(echo ${_frontier[0]})

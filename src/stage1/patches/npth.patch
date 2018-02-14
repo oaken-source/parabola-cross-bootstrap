@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-11 21:35:12.390612022 +0100
++++ b/PKGBUILD	2018-02-11 21:35:03.423845914 +0100
+@@ -19,7 +19,7 @@ sha256sums=('294a690c1f537b92ed829d867be
+ 
+ build() {
+ 	cd "${srcdir}/${pkgname}-${pkgver}"
+-	./configure --prefix=/usr --enable-maintainer-mode
++	./configure --host=@TARGET@ --prefix=/usr --enable-maintainer-mode
+ 	make
+ }
+ 
