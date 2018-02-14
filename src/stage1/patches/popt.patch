@@ -1,0 +1,13 @@
+--- a/PKGBUILD	2018-02-14 21:25:27.205059740 +0100
++++ b/PKGBUILD	2018-02-14 21:32:44.032635822 +0100
+@@ -15,7 +15,9 @@ sha1sums=('cfe94a15a2404db85858a81ff8de2
+ 
+ build() {
+   cd "${srcdir}/${pkgname}-${pkgver}"
+-  ./configure --prefix=/usr
++  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
++    > config.sub
++  ./configure --host=@TARGET@ --prefix=/usr
+   make
+ }
+ 
