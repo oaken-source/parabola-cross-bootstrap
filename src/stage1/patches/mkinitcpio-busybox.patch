@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-02-15 11:17:35.704990728 +0100
++++ b/PKGBUILD	2018-02-15 11:21:39.897325696 +0100
+@@ -20,7 +20,7 @@ sha256sums=('9d4be516b61e6480f156b11eb42
+ prepare() {
+   cd "busybox-$pkgver"
+ 
+-  local safeflags="-march=${CARCH/_/-} -mtune=generic -Os -pipe -fno-strict-aliasing"
++  local safeflags="-Os -pipe -fno-strict-aliasing"
+ 
+   sed 's|^\(CONFIG_EXTRA_CFLAGS\)=.*|\1="'"$safeflags"'"|' "$srcdir/config" >.config
+ 
+@@ -28,6 +28,8 @@ prepare() {
+   if [[ $CARCH == 'i686' ]]; then
+     echo 'CONFIG_STATIC=y' >> .config
+   fi
++
++  echo 'CONFIG_CROSS_COMPILER_PREFIX=@TARGET@-' >> .config
+ }
+ 
+ build() {
