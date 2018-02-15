@@ -21,15 +21,16 @@
 set -euo pipefail
 
 _pkgname=glibc-shim
-_pkgver=$(pacman -Qi $_target-glibc | grep '^Version' | awk '{print $3}')
 _pkgdir="$_makepkgdir"/$_pkgname/pkg/$_pkgname
 
-msg "makepkg: $_pkgname-$_pkgver-$_arch.pkg.tar.xz"
+msg "makepkg: $_pkgname"
 
-if [ ! -f "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz ]; then
+if [ ! -h "$_makepkgdir"/$_pkgname.pkg.tar.xz ]; then
   rm -rf "$_makepkgdir"/$_pkgname
   mkdir -pv "$_makepkgdir"/$_pkgname
   pushd "$_makepkgdir"/$_pkgname >/dev/null
+
+  _pkgver=$(pacman -Qi $_target-glibc | grep '^Version' | awk '{print $3}')
 
   # to produce glibc shim from glibc, we need the package
   pacman -Sw --noconfirm --cachedir . $_target-glibc
@@ -68,14 +69,15 @@ EOF
     --options='!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link' \
     .PKGINFO *
   env LANG=C bsdtar -cf - .MTREE .PKGINFO * | xz -c -z - > \
-    "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz
+    "$_makepkgdir"/$_pkgname/$_pkgname-$_pkgver-$_arch.pkg.tar.xz
+
+  ln -s "$_makepkgdir"/$_pkgname/$_pkgname-$_pkgver-$_arch.pkg.tar.xz \
+    "$_makepkgdir"/$_pkgname.pkg.tar.xz
 
   popd >/dev/null
-
-  # rm -rf "$_makepkgdir"/$_pkgname
 fi
 
-cp -alv "$_makepkgdir"/$_pkgname-$_pkgver-$_arch.pkg.tar.xz "$_chrootdir"/packages/$_arch
+cp -lv "$(readlink -f "$_makepkgdir"/$_pkgname.pkg.tar.xz)" "$_chrootdir"/packages/$_arch/
 
 rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
 rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*

@@ -27,21 +27,21 @@ while [ -s "$_deptree" ]; do
   [ -n "$_pkgname" ] || die "could not resolve cyclic dependencies. exiting."
 
   _pkgarch=$(pacman -Si $_pkgname | grep '^Architecture' | awk '{print $3}')
-  _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
   _pkgdir="$_makepkgdir"/$_pkgname/pkg/$_pkgname
 
   [ "x$_pkgarch" == "xany" ] || _pkgarch=$_arch
 
-  msg "makepkg: $_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz"
+  msg "makepkg: $_pkgname"
   msg "  remaining pkges: $(cat "$_deptree" | wc -l)"
 
-  if [ ! -f "$_makepkgdir"/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz ]; then
+  if [ ! -h "$_makepkgdir"/$_pkgname.pkg.tar.xz ]; then
     rm -rf "$_makepkgdir"/$_pkgname
     mkdir -pv "$_makepkgdir"/$_pkgname
     pushd "$_makepkgdir"/$_pkgname >/dev/null
 
     if [ "x$_pkgarch" == "xany" ]; then
       # simply reuse arch=(any) packages
+      _pkgver=$(pacman -Qi $_pkgname | grep '^Version' | awk '{print $3}')
       pacman -Sw --noconfirm --cachedir . $_pkgname
     else
       # acquire the pkgbuild and auxiliary files
@@ -60,7 +60,7 @@ while [ -s "$_deptree" ]; do
         fi
       done
 
-      # [ "x$_pkgname" == "xglibc" ] && die "stopping."
+      # [ "x$_pkgname" == "xlibffi" ] && die "stopping."
 
       [ -f "$_srcdir"/stage1/patches/$_pkgname.patch ] || die "missing package patch"
       patch -Np1 -i "$_srcdir"/stage1/patches/$_pkgname.patch
@@ -79,16 +79,22 @@ while [ -s "$_deptree" ]; do
       sudo -u $SUDO_USER \
         "$_makepkgdir"/makepkg-$_arch.sh -C --config "$_makepkgdir"/makepkg-$_arch.conf \
         --skipchecksums --skippgpcheck --nocheck --nodeps 2>&1 | tee makepkg.log
+
+      # construct pkgver from pkgbuild
+      _srcinfo=$(sudo -u $SUDO_USER makepkg --printsrcinfo)
+      _pkgver=$(echo "$_srcinfo" | grep 'pkgver =' | head -n1 | awk '{print $3}')
+      _pkgrel=$(echo "$_srcinfo" | grep 'pkgrel =' | head -n1 | awk '{print $3}')
+      _epoch=$(echo "$_srcinfo" | grep 'epoch =' | head -n1 | awk '{print $3}'): || _epoch=""
+      _pkgver="$_epoch$_pkgver-$_pkgrel"
     fi
 
-    cp -l $_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz "$_makepkgdir"/
+    ln -s "$_makepkgdir"/$_pkgname/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz \
+      "$_makepkgdir"/$_pkgname.pkg.tar.xz
 
     popd >/dev/null
-
-    # rm -rf "$_makepkgdir"/$_pkgname
   fi
 
-  cp -av "$_makepkgdir"/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz "$_chrootdir"/packages/$_arch
+  cp -lv "$(readlink -f "$_makepkgdir"/$_pkgname.pkg.tar.xz)" "$_chrootdir"/packages/$_arch/
 
   rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
   rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*
