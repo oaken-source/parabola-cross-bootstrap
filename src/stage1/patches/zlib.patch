@@ -1,0 +1,48 @@
+--- a/PKGBUILD	2018-02-15 11:00:49.520175121 +0100
++++ b/PKGBUILD	2018-02-15 11:07:05.186130556 +0100
+@@ -2,7 +2,7 @@
+ # Maintainer: Pierre Schmitz <pierre@archlinux.de>
+ 
+ pkgbase=zlib
+-pkgname=(zlib minizip)
++pkgname=(zlib)
+ epoch=1
+ pkgver=1.2.11
+ pkgrel=2
+@@ -24,22 +24,12 @@ prepare() {
+ build() {
+ 	cd ${srcdir}/zlib-$pkgver
+ 	./configure --prefix=/usr
+-	make
+-
+-	cd contrib/minizip
+-	cp Makefile Makefile.orig
+-	cp ../README.contrib readme.txt
+-	autoreconf --install
+-	./configure --prefix=/usr --enable-static=no
+-	make
++	make TARGETMACH=@TARGET@ CROSS=@TARGET@ CC=@TARGET@-gcc LD=@TARGET@-ld AS=@TARGET@-as
+ }
+ 
+ check() {
+ 	cd ${srcdir}/zlib-$pkgver
+ 	make test
+-
+-	cd contrib/minizip
+-	make -f Makefile.orig test
+ }
+ 
+ package_zlib() {
+@@ -49,12 +39,3 @@ package_zlib() {
+ 	make install DESTDIR=${pkgdir}
+ 	install -D -m644 LICENSE ${pkgdir}/usr/share/licenses/zlib/LICENSE
+ }
+-
+-package_minizip() {
+-	pkgdesc='Mini zip and unzip based on zlib'
+-	depends=('zlib')
+-
+-	cd ${srcdir}/zlib-$pkgver/contrib/minizip
+-	make install DESTDIR=${pkgdir}
+-	install -D -m644 ${srcdir}/zlib-$pkgver/LICENSE ${pkgdir}/usr/share/licenses/minizip/LICENSE
+-}

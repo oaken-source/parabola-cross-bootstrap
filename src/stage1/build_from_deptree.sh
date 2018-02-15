@@ -66,10 +66,10 @@ while [ -s "$_deptree" ]; do
       patch -Np1 -i "$_srcdir"/stage1/patches/$_pkgname.patch
 
       # substitute common variables
-      sed -i "s#@TARGET@#$_target#" PKGBUILD
-      sed -i "s#@ARCH@#$_arch#" PKGBUILD
-      sed -i "s#@LINUX_ARCH@#$_linux_arch#" PKGBUILD
-      sed -i "s#@CHROOTDIR@#$_chrootdir#" PKGBUILD
+      sed -i "s#@TARGET@#$_target#g" PKGBUILD
+      sed -i "s#@ARCH@#$_arch#g" PKGBUILD
+      sed -i "s#@LINUX_ARCH@#$_linux_arch#g" PKGBUILD
+      sed -i "s#@CHROOTDIR@#$_chrootdir#g" PKGBUILD
 
       # enable the target arch explicitly
       sed -i "s/arch=([^)]*/& $_arch/" PKGBUILD
