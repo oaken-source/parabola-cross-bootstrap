@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-16 14:03:40.438622198 +0100
++++ b/PKGBUILD	2018-02-16 14:05:03.509546626 +0100
+@@ -34,7 +34,7 @@ prepare() {
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  ./configure --prefix=/usr
++  ./configure --host=@TARGET@ --prefix=/usr
+   make
+ }
+ 

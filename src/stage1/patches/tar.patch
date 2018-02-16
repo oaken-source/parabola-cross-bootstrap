@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-16 13:59:07.215590435 +0100
++++ b/PKGBUILD	2018-02-16 14:01:48.097373800 +0100
+@@ -33,7 +33,7 @@ prepare() {
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  ./configure --prefix=/usr --libexecdir=/usr/lib/tar
++  ./configure --host=@TARGET@ --prefix=/usr --libexecdir=/usr/lib/tar
+   make
+ }
+ 

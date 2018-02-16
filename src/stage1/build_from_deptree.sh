@@ -41,7 +41,7 @@ while [ -s "$_deptree" ]; do
 
     if [ "x$_pkgarch" == "xany" ]; then
       # simply reuse arch=(any) packages
-      _pkgver=$(pacman -Qi $_pkgname | grep '^Version' | awk '{print $3}')
+      _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
       pacman -Sw --noconfirm --cachedir . $_pkgname
     else
       # acquire the pkgbuild and auxiliary files
@@ -67,6 +67,7 @@ while [ -s "$_deptree" ]; do
 
       # substitute common variables
       sed -i "s#@TARGET@#$_target#g" PKGBUILD
+      sed -i "s#@SYSROOT@#$_chrootdir#g" PKGBUILD
       sed -i "s#@LINUX_ARCH@#$_linux_arch#g" PKGBUILD
 
       # enable the target arch explicitly

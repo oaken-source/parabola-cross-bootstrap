@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-02-16 13:37:23.361325553 +0100
++++ b/PKGBUILD	2018-02-16 13:39:23.382675703 +0100
+@@ -19,6 +19,7 @@ validpgpkeys=('49EA7C670E0850E7419514F62
+ build() {
+   cd $pkgname-$pkgver
+   ./configure \
++    --host=@TARGET@ \
+     --prefix=/usr \
+     --sysconfdir=/etc \
+     --sbindir=/usr/bin \

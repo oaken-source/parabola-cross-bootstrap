@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-16 14:06:38.830608498 +0100
++++ b/PKGBUILD	2018-02-16 14:13:14.468358210 +0100
+@@ -32,7 +32,7 @@ prepare() {
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  ./configure --prefix=/usr --datadir=/usr/share/file --enable-fsect-man5
++  ./configure --host=@TARGET@ --build=$(uname -m)-unknown-linux-gnu --prefix=/usr --datadir=/usr/share/file --enable-fsect-man5
+   make
+ }
+ 

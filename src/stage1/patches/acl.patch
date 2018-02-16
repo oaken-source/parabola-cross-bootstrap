@@ -1,0 +1,13 @@
+--- a/PKGBUILD	2018-02-16 13:54:08.475632636 +0100
++++ b/PKGBUILD	2018-02-16 13:54:58.669516546 +0100
+@@ -21,7 +21,9 @@ build() {
+   cd $pkgname-$pkgver
+ 
+   export INSTALL_USER=root INSTALL_GROUP=root
+-  ./configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/lib
++  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
++    > config.sub
++  ./configure --host=@TARGET@ --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/lib
+   make
+ }
+ 

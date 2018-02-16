@@ -1,0 +1,21 @@
+--- a/PKGBUILD	2018-02-16 14:38:32.235244930 +0100
++++ b/PKGBUILD	2018-02-16 14:41:16.650413298 +0100
+@@ -22,14 +22,15 @@ prepare() {
+ build() {
+   cd ${pkgname}-${pkgver}
+   ./configure \
++    --host=@TARGET@ \
+     --prefix=/usr \
+     --disable-static \
+     --disable-dependency-tracking \
+     --enable-man \
+-    --enable-gtk-doc \
++    --disable-gtk-doc \
+     --enable-{builtin,runtime}=libidn2 \
+-    --with-psl-file=/usr/share/publicsuffix/effective_tld_names.dat \
+-    --with-psl-testfile=/usr/share/publicsuffix/test_psl.txt
++    --with-psl-file=@SYSROOT@/usr/share/publicsuffix/effective_tld_names.dat \
++    --with-psl-testfile=@SYSROOT@/usr/share/publicsuffix/test_psl.txt
+   LC_CTYPE=en_US.UTF-8 make
+ }
+ 

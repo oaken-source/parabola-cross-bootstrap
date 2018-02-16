@@ -55,6 +55,11 @@ if [ ! -f "$_deptree" ]; then
   # add some additional build-order dependencies by hand
   _tree[libutil-linux]="${_tree[libutil-linux]}pam libcap-ng ncurses "
   _tree[gcc-libs]="${_tree[gcc-libs]}libmpfr "
+  _tree[libpsl]="${_tree[libpsl]}publicsuffix-list "
+  _tree[publicsuffix-list]=""
+
+  # TODO: these packages currently don't build
+  _tree[libatomic_ops]="${_tree[libatomic_ops]}cantbuild "
 
   # log package dependency tree
   truncate -s0 "$_deptree".FULL
