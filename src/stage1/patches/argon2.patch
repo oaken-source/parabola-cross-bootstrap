@@ -1,0 +1,18 @@
+--- a/PKGBUILD	2018-02-16 15:09:16.555812586 +0100
++++ b/PKGBUILD	2018-02-16 15:11:31.917323092 +0100
+@@ -25,6 +25,7 @@ prepare() {
+ build() {
+   cd "$srcdir/phc-winner-$pkgname-$pkgver"
+ 
++  CC=@TARGET@-gcc AS=@TARGET@-as LD=@TARGET@-ld \
+   make OPTTARGET=none
+ }
+ 
+@@ -37,6 +38,7 @@ check() {
+ package() {
+   cd "$srcdir/phc-winner-$pkgname-$pkgver"
+ 
++  CC=@TARGET@-gcc AS=@TARGET@-as LD=@TARGET@-ld \
+   make OPTTARGET=none DESTDIR="$pkgdir" install
+ 
+   install -D -m0644 LICENSE "${pkgdir}/usr/share/licenses/argon2/LICENSE"
