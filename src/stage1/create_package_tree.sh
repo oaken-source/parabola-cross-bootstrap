@@ -27,7 +27,8 @@ if [ ! -f "$_deptree" ]; then
 
   # remove a couple things from base we don't need
   _frontier=($(pacman -Sg $_groups | awk '{print $2}' \
-    | grep -v lvm2))
+    | grep -v lvm2 \
+    | grep -v mdadm))
 
   while [ ${#_frontier[@]} -gt 0 ]; do
     # pop pkg from frontier
@@ -53,6 +54,7 @@ if [ ! -f "$_deptree" ]; then
 
   # add some additional build-order dependencies by hand
   _tree[libutil-linux]="${_tree[libutil-linux]}pam libcap-ng ncurses "
+  _tree[gcc-libs]="${_tree[gcc-libs]}libmpfr "
 
   # log package dependency tree
   truncate -s0 "$_deptree".FULL
@@ -61,6 +63,6 @@ if [ ! -f "$_deptree" ]; then
   done
 fi
 
-cp "$_deptree"{.FULL,}
+[ -n "${CONTINUE:-}" ] || cp "$_deptree"{.FULL,}
 
-echo "total pkges: $(cat "$_deptree" | wc -l)"
+echo "total pkges: $(cat "$_deptree".FULL | wc -l)"

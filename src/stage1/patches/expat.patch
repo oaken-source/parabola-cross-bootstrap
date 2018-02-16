@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-16 13:14:29.306245879 +0100
++++ b/PKGBUILD	2018-02-16 13:16:11.093974920 +0100
+@@ -16,7 +16,7 @@ sha256sums=('d9dc32efba7e74f788fcc4f212a
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  ./configure --prefix=/usr --disable-static
++  ./configure --host=@TARGET@ --prefix=/usr --disable-static
+   make
+ }
+ 

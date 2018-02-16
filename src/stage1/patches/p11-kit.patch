@@ -1,0 +1,16 @@
+--- a/PKGBUILD	2018-02-16 08:16:53.522238284 +0100
++++ b/PKGBUILD	2018-02-16 11:06:10.196130006 +0100
+@@ -37,11 +37,11 @@ prepare() {
+ build() {
+   cd $pkgname
+ 
+-  ./configure --prefix=/usr \
++  ./configure --host=@TARGET@ --prefix=/usr \
+     --sysconfdir=/etc \
+     --localstatedir=/var \
+     --libexecdir=/usr/lib \
+-    --enable-doc \
++    --disable-doc \
+     --with-module-path=/usr/lib/pkcs11 \
+     --with-trust-paths=/etc/ca-certificates/trust-source:/usr/share/ca-certificates/trust-source
+   make

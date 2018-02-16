@@ -23,7 +23,7 @@ set -euo pipefail
 msg "preparing a skeleton $_arch chroot"
 
 # create required directories
-rm -rf "$_chrootdir"
+[ -n "${CONTINUE:-}" ] || rm -rf "$_chrootdir"
 mkdir -pv "$_chrootdir"/etc/pacman.d/{gnupg,hooks} \
           "$_chrootdir"/var/{lib/pacman,cache/pacman/pkg,log} \
           "$_chrootdir"/packages/$_arch \
@@ -45,11 +45,13 @@ SigLevel = Never
 Server = file://$_chrootdir/packages/\$arch
 EOF
 
-# create an empty local package directory
-tar -czf "$_chrootdir"/packages/$_arch/repo.db.tar.gz -T /dev/null
-tar -czf "$_chrootdir"/packages/$_arch/repo.files.tar.gz -T /dev/null
-ln -s repo.db.tar.gz "$_chrootdir"/packages/$_arch/repo.db
-ln -s repo.files.tar.gz "$_chrootdir"/packages/$_arch/repo.files
+if [ ! -h "$_chrootdir"/packages/$_arch/repo.db ]; then
+  # create an empty local package directory
+  tar -czf "$_chrootdir"/packages/$_arch/repo.db.tar.gz -T /dev/null
+  tar -czf "$_chrootdir"/packages/$_arch/repo.files.tar.gz -T /dev/null
+  ln -s repo.db.tar.gz "$_chrootdir"/packages/$_arch/repo.db
+  ln -s repo.files.tar.gz "$_chrootdir"/packages/$_arch/repo.files
 
-# test and initialize ALPM library
-pacman --config "$_chrootdir"/etc/pacman.conf -r "$_chrootdir" -Syyu
+  # test and initialize ALPM library
+  pacman --config "$_chrootdir"/etc/pacman.conf -r "$_chrootdir" -Syyu
+fi

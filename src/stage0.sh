@@ -27,13 +27,14 @@ check_bin() {
 
 msg "performing host system sanity checks"
 
-check_bin pacman
-check_bin makepkg
-check_bin $_target-gcc "$_target prefixed toolchain"
-check_bin repo-add
-check_bin tput
-check_bin bsdtar
 check_bin awk
+check_bin bsdtar
+check_bin makepkg
+check_bin pacman
+check_bin repo-add
 check_bin sudo
+check_bin tput
+check_bin wget
 
-[ "x$_arch" == "x$(uname -m)" ] || check_bin qemu-$_arch-static
+[ "x$_arch" != "x$(uname -m)" ] && check_bin $_target-gcc
+[ "x$_arch" != "x$(uname -m)" ] && check_bin qemu-$_arch-static

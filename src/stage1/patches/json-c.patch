@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-16 08:12:27.566594016 +0100
++++ b/PKGBUILD	2018-02-16 08:12:14.006475850 +0100
+@@ -17,7 +17,7 @@ sha256sums=('26e642456caab38aa9459279b97
+ build() {
+   cd $pkgname-$pkgname-$pkgver-20171207
+   CFLAGS="$CFLAGS -Wno-error"
+-  ./configure --prefix=/usr --disable-static
++  ./configure --host=@TARGET@ --prefix=/usr --disable-static
+   make
+ }
+ 
