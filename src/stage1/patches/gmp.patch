@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-02-16 22:14:13.093407960 +0100
++++ b/PKGBUILD	2018-02-16 22:16:58.398542161 +0100
+@@ -8,7 +8,7 @@ pkgrel=1
+ pkgdesc="A free library for arbitrary precision arithmetic"
+ arch=('x86_64')
+ url="http://gmplib.org/"
+-depends=('gcc-libs' 'sh')
++depends=()
+ license=('LGPL3' 'GPL')
+ source=(https://gmplib.org/download/gmp/gmp-${pkgver}.tar.xz{,.sig})
+ md5sums=('f58fa8001d60c4c77595fbbb62b63c1d'
+@@ -18,7 +18,7 @@ validpgpkeys=('343C2FF0FBEE5EC2EDBEF399F
+ build() {
+   cd "${pkgname}-${pkgver}"
+ 
+-  ./configure --build=${CHOST} \
++  ./configure --host=@TARGET@ --build=${CHOST} \
+     --prefix=/usr \
+     --enable-cxx \
+     --enable-fat

@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-02-16 19:31:06.236301056 +0100
++++ b/PKGBUILD	2018-02-16 19:33:55.671497100 +0100
+@@ -19,7 +19,9 @@ build() {
+   # do not use the main makefile, it calls sub make with -e
+   # exported CLFAGS by makepkg break the version. see FS#50071
+   cd $pkgname
++  CC=@TARGET@-gcc RANLIB=@TARGET@-ranlib AR=@TARGET@-ar \
+   make -C lib PREFIX=/usr
++  CC=@TARGET@-gcc RANLIB=@TARGET@-ranlib AR=@TARGET@-ar \
+   make -C programs PREFIX=/usr lz4 lz4c
+ }
+ 
+@@ -34,6 +36,7 @@ check() {
+ package() {
+   cd $pkgname
+   # mandir is broken since 1.8.0
++  CC=@TARGET@-gcc RANLIB=@TARGET@-ranlib AR=@TARGET@-ar \
+   make install PREFIX=/usr MANDIR=/usr/share/man/man1 DESTDIR="$pkgdir"
+ }
+ 

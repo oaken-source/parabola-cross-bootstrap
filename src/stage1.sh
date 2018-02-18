@@ -34,7 +34,7 @@ export _deptree="$_builddir"/DEPTREE
 . src/stage1/create_package_tree.sh
 
 # create temporary shim packages
-if diff -q "$_deptree"{,.FULL}; then
+if diff -q "$_deptree"{,.FULL} >/dev/null; then
   for s in gcc-libs glibc ca-certificates-utils; do
     . src/stage1/$s-shim.sh
   done

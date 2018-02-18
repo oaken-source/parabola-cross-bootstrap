@@ -23,7 +23,7 @@ set -euo pipefail
 # keep building packages until the deptree is empty
 while [ -s "$_deptree" ]; do
   # grab one without unfulfilled dependencies
-  _pkgname=$(grep '\[ \]' "$_deptree" | head -n1 | awk '{print $1}')
+  _pkgname=$(grep '\[ *\]' "$_deptree" | head -n1 | awk '{print $1}') || true
   [ -n "$_pkgname" ] || die "could not resolve cyclic dependencies. exiting."
 
   _pkgarch=$(pacman -Si $_pkgname | grep '^Architecture' | awk '{print $3}')
@@ -63,6 +63,7 @@ while [ -s "$_deptree" ]; do
       # [ "x$_pkgname" == "xlibffi" ] && die "stopping."
 
       [ -f "$_srcdir"/stage1/patches/$_pkgname.patch ] || die "missing package patch"
+      cp PKGBUILD{,.old}
       patch -Np1 -i "$_srcdir"/stage1/patches/$_pkgname.patch
 
       # substitute common variables

@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-16 22:24:05.046526236 +0100
++++ b/PKGBUILD	2018-02-16 22:24:59.660455083 +0100
+@@ -16,7 +16,7 @@ validpgpkeys=('AD17A21EF8AED8F1CC02DBD9F
+ 
+ build() {
+   cd "${srcdir}/mpc-${pkgver}"
+-  ./configure --prefix=/usr
++  ./configure --host=@TARGET@ --prefix=/usr
+   make
+ }
+ 

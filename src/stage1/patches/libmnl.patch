@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-16 20:20:49.969249889 +0100
++++ b/PKGBUILD	2018-02-16 20:21:37.159770964 +0100
+@@ -18,7 +18,7 @@ sha1sums=('2db40dea612e88c62fd321906be40
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  ./configure --prefix=/usr
++  ./configure --host=@TARGET@ --prefix=/usr
+ }
+ 
+ package() {

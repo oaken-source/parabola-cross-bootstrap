@@ -1,0 +1,17 @@
+--- a/PKGBUILD	2018-02-17 22:05:37.429554808 +0100
++++ b/PKGBUILD	2018-02-18 16:38:45.088908642 +0100
+@@ -21,10 +21,12 @@ validpgpkeys=('C52048C0C0748FEE227D47A27
+ build() {
+   cd $pkgname-$pkgver
+ 
+-  ./configure --prefix=/usr --mandir=/usr/share/man \
++  sed -i 's#extern "C" void exit#//&#' c++/etip.h.in
++  ./configure --host=@TARGET@ --prefix=/usr --mandir=/usr/share/man \
+     --with-pkg-config-libdir=/usr/lib/pkgconfig \
+     --with-shared --with-normal --without-debug --without-ada \
+-    --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared
++    --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared \
++    --disable-stripping CPPFLAGS="-I/usr/@TARGET@/usr/include $CPPFLAGS"
+   make
+ }
+ 

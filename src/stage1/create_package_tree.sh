@@ -52,20 +52,30 @@ if [ ! -f "$_deptree" ]; then
     done
   done
 
-  # add some additional build-order dependencies by hand
-  _tree[libutil-linux]="${_tree[libutil-linux]}pam libcap-ng ncurses "
-  _tree[gcc-libs]="${_tree[gcc-libs]}libmpfr "
-  _tree[libpsl]="${_tree[libpsl]}publicsuffix-list "
+  # we need mpc, mpfr and gmp to build gcc-libs
+  _tree[gcc-libs]="${_tree[gcc-libs]} libmpc mpfr gmp"
+  # gmp and ncurses can build with gcc-libs-shim
+  _tree[gmp]="${_tree[gmp]/gcc-libs}"
+  _tree[ncurses]="${_tree[ncurses]/gcc-libs}"
+  # we need publicsuffix-list to build libpsl
+  _tree[libpsl]="${_tree[libpsl]} publicsuffix-list"
   _tree[publicsuffix-list]=""
+  # we need pam to build libcap
+  _tree[libcap]="${_tree[libcap]} pam"
+  # add util-linux dependencies to libutil-linux
+  _tree[libutil-linux]="${_tree[util-linux]/libutil-linux}"
 
   # TODO: these packages currently don't build
-  _tree[libatomic_ops]="${_tree[libatomic_ops]}cantbuild "
+  _tree[libatomic_ops]="${_tree[libatomic_ops]} FIXME"
 
-  # log package dependency tree
+  # write package dependency tree
   truncate -s0 "$_deptree".FULL
   for i in "${!_tree[@]}"; do
     echo "${i} : [${_tree[$i]} ]" >> "$_deptree".FULL
   done
+  # we need filesystem to be early, for directories and symlinks
+  sed -i "/^filesystem/d; 1ifilesystem : [${_tree[filesystem]} ]" "$_deptree".FULL
+  cp "$_deptree"{.FULL,}
 fi
 
 [ -n "${CONTINUE:-}" ] || cp "$_deptree"{.FULL,}
