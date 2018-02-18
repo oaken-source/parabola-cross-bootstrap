@@ -49,7 +49,7 @@ url = http://pkgs.fedoraproject.org/cgit/rpms/ca-certificates.git
 builddate = $(date '+%s')
 size = 0
 arch = $_arch
-provide = ${_pkgname%-*}
+provides = ${_pkgname%-*}
 conflict = ${_pkgname%-*}
 EOF
 

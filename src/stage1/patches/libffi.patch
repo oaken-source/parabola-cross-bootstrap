@@ -24,7 +24,7 @@
 +  cd riscv-libffi/libffi-3.1
 +  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
 +    > config.sub
-+  ./configure --host=@TARGET@ CFLAGS="-D__riscv64=1 $CFLAGS" --prefix=/usr --disable-static \
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --disable-static \
      --enable-pax_emutramp
    make
  }

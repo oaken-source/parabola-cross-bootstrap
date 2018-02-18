@@ -1,0 +1,21 @@
+--- a/PKGBUILD	2018-02-18 16:49:54.550899083 +0100
++++ b/PKGBUILD	2018-02-18 16:50:52.890052723 +0100
+@@ -33,6 +33,9 @@ prepare() {
+     patch -p0 -i ../readline${_basever//.}-$(printf "%03d" $_p)
+   done
+ 
++  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
++    > support/config.sub
++
+   # remove RPATH from shared objects (FS#14366)
+   sed -i 's|-Wl,-rpath,$(libdir) ||g' support/shobj-conf
+ }
+@@ -43,7 +46,7 @@ build() {
+   # build with -fPIC for x86_64 (FS#15634)
+   [[ $CARCH == "x86_64" ]] && CFLAGS="$CFLAGS -fPIC"
+ 
+-  ./configure --prefix=/usr
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
+   make SHLIB_LIBS=-lncurses
+ }
+ 

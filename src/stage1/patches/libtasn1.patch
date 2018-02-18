@@ -7,7 +7,7 @@
 -  ./configure --prefix=/usr \
 +  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
 +    > build-aux/config.sub
-+  ./configure --host=@TARGET@ --prefix=/usr \
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr \
        --with-packager=Archlinux \
        --with-packager-bug-reports="http://bugs.archlinux.org/" \
        --with-packager-version=${pkgver}-${pkgrel}

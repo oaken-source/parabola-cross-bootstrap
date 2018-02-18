@@ -58,7 +58,7 @@ url = https://github.com/riscv/riscv-gnu-toolchain
 builddate = $(date '+%s')
 size = 0
 arch = $_arch
-provide = ${_pkgname%-*}
+provides = ${_pkgname%-*}
 conflict = ${_pkgname%-*}
 EOF
 

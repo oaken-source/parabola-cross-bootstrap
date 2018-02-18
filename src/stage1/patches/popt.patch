@@ -1,13 +1,14 @@
---- a/PKGBUILD	2018-02-14 21:25:27.205059740 +0100
-+++ b/PKGBUILD	2018-02-14 21:32:44.032635822 +0100
-@@ -15,7 +15,9 @@ sha1sums=('cfe94a15a2404db85858a81ff8de2
+--- a/PKGBUILD	2018-02-18 21:29:32.694062594 +0100
++++ b/PKGBUILD	2018-02-18 21:52:38.404357872 +0100
+@@ -15,7 +15,10 @@ sha1sums=('cfe94a15a2404db85858a81ff8de2
  
  build() {
    cd "${srcdir}/${pkgname}-${pkgver}"
++  LDFLAGS="${LDFLAGS/-L[^ ]*}"
++   curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
++     > config.sub
 -  ./configure --prefix=/usr
-+  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
-+    > config.sub
-+  ./configure --host=@TARGET@ --prefix=/usr
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
    make
  }
  

@@ -5,15 +5,7 @@
  build() {
    cd $srcdir/$pkgname-$pkgver
 -  ./configure --prefix=/usr --sbindir=/usr/bin --without-python
-+  ./configure --host=@TARGET@ --prefix=/usr --sbindir=/usr/bin --without-python
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --sbindir=/usr/bin --without-python
    make 
  }
  
-@@ -26,6 +26,7 @@ check() {
- 
- package() {
-   cd $srcdir/$pkgname-$pkgver
-+  export LD_LIBRARY_PATH="@SYSROOT@/lib:$LD_LIBRARY_PATH"
-   make DESTDIR=$pkgdir install
-   # symlink cracklib-small #34778
-   mkdir -p $pkgdir/usr/share/dict

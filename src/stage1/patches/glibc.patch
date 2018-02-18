@@ -58,7 +58,7 @@
  
 -  "$srcdir/glibc/configure" \
 +  "$srcdir/riscv-gnu-toolchain/riscv-glibc/configure" \
-+      --host=@TARGET@ \
++      --host=@TARGET@ --build=@BUILDHOST@ \
        --libdir=/usr/lib \
        --libexecdir=/usr/lib \
        ${_configure_flags[@]}

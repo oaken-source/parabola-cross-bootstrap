@@ -5,7 +5,7 @@
  build() {
    cd $pkgname-$pkgver
 -  ./configure --prefix=/usr --datadir=/usr/share/file --enable-fsect-man5
-+  ./configure --host=@TARGET@ --build=$(uname -m)-unknown-linux-gnu --prefix=/usr --datadir=/usr/share/file --enable-fsect-man5
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --datadir=/usr/share/file --enable-fsect-man5
    make
  }
  

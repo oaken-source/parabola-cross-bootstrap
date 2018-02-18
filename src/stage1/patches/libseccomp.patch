@@ -630,7 +630,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
    cd $pkgname-$pkgver
 -  ./configure --prefix=/usr
 +  autoreconf
-+  ./configure --host=@TARGET@ --prefix=/usr CFLAGS="-D__riscv64=1 $CFLAGS"
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
    make
  }
  

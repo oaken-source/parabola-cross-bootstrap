@@ -1,0 +1,14 @@
+--- a/PKGBUILD	2018-02-18 17:18:22.070071582 +0100
++++ b/PKGBUILD	2018-02-18 17:23:54.368871201 +0100
+@@ -37,8 +37,10 @@ prepare() {
+ build() {
+   cd ex-$pkgver
+ 
++  sed -i 's/^STRIP/#&/' Makefile
+   make PREFIX=/usr LIBEXECDIR=/usr/lib/ex PRESERVEDIR=/var/lib/ex \
+-    TERMLIB=ncurses FEATURES="-DCHDIR -DFASTTAG -DUCVISUAL -DMB -DBIT8"
++    TERMLIB=ncurses FEATURES="-DCHDIR -DFASTTAG -DUCVISUAL -DMB -DBIT8" \
++    CC=@TARGET@-gcc
+ }
+ 
+ package() {

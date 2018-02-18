@@ -1,0 +1,14 @@
+--- a/PKGBUILD	2018-02-18 23:15:41.900043875 +0100
++++ b/PKGBUILD	2018-02-18 23:17:33.253141312 +0100
+@@ -18,9 +18,8 @@ validpgpkeys=('3690C240CE51B4670D30AD1C3
+ build() {
+ 	cd ${srcdir}/${pkgname}-${pkgver}
+ 
+-	./configure --prefix=/usr \
+-		--disable-rpath \
+-		--enable-werror
++	./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr \
++		--disable-rpath
+ 	make
+ }
+ 

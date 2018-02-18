@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-18 23:11:55.599173182 +0100
++++ b/PKGBUILD	2018-02-18 23:12:14.096608807 +0100
+@@ -20,7 +20,7 @@ build() {
+   # which is a secure version of locate.
+   sed -i '/^SUBDIRS/s/locate//' Makefile.in
+ 
+-  ./configure --prefix=/usr
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
+   # don't build locate, but the docs want a file in there.
+   make -C locate dblocation.texi
+   make

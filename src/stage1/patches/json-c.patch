@@ -5,7 +5,7 @@
    cd $pkgname-$pkgname-$pkgver-20171207
    CFLAGS="$CFLAGS -Wno-error"
 -  ./configure --prefix=/usr --disable-static
-+  ./configure --host=@TARGET@ --prefix=/usr --disable-static
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --disable-static
    make
  }
  

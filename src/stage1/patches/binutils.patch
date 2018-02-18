@@ -4,7 +4,7 @@
    cd binutils-build
  
    "$srcdir/binutils-$pkgver/configure" \
-+    --host=@TARGET@ \
++    --host=@TARGET@ --build=@BUILDHOST@ \
      --prefix=/usr \
      --with-lib-path=/usr/lib:/usr/local/lib \
      --with-bugurl=https://bugs.archlinux.org/ \

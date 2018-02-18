@@ -4,7 +4,7 @@
  
    autoreconf -i
    ./configure \
-+    --host=@TARGET@ \
++    --host=@TARGET@ --build=@BUILDHOST@ \
      --prefix=/usr \
      --disable-examples \
      --disable-python-bindings \

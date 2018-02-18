@@ -68,6 +68,7 @@ while [ -s "$_deptree" ]; do
 
       # substitute common variables
       sed -i "s#@TARGET@#$_target#g" PKGBUILD
+      sed -i "s#@BUILDHOST@#$(uname -m)-unknown-linux-gnu#g" PKGBUILD
       sed -i "s#@SYSROOT@#$_chrootdir#g" PKGBUILD
       sed -i "s#@LINUX_ARCH@#$_linux_arch#g" PKGBUILD
 

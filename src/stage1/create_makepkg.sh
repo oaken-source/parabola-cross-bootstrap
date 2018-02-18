@@ -58,10 +58,10 @@ VCSCLIENTS=('bzr::bzr'
             'svn::subversion')
 CARCH="$_arch"
 CHOST="$_target"
-CPPFLAGS="--sysroot=$_chrootdir -D_FORTIFY_SOURCE=2"
+CPPFLAGS="--sysroot=$_chrootdir -D__riscv64=1 -D_FORTIFY_SOURCE=2"
 CFLAGS="--sysroot=$_chrootdir -O2 -pipe -fstack-protector-strong -fno-plt"
 CXXFLAGS="--sysroot=$_chrootdir -O2 -pipe -fstack-protector-strong -fno-plt"
-LDFLAGS="--sysroot=$_chrootdir -Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
+LDFLAGS="--sysroot=$_chrootdir -L$_chrootdir/lib -Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
 DEBUG_CFLAGS="-g -fvar-tracking-assignments"
 DEBUG_CXXFLAGS="-g -fvar-tracking-assignments"
 BUILDENV=(!distcc color !ccache check !sign)

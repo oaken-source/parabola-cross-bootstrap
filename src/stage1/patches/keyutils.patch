@@ -1,0 +1,12 @@
+--- a/PKGBUILD	2018-02-18 23:10:00.884286131 +0100
++++ b/PKGBUILD	2018-02-18 23:11:01.011841132 +0100
+@@ -24,7 +24,8 @@ prepare() {
+ 
+ build() {
+   cd ${pkgname}-${pkgver}
+-  make CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" SBINDIR='/usr/bin' BINDIR='/usr/bin'
++  make CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" SBINDIR='/usr/bin' BINDIR='/usr/bin' \
++    CC=@TARGET@-gcc
+ }
+ 
+ package() {
