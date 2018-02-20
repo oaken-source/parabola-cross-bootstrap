@@ -24,7 +24,7 @@ set -euo pipefail
 while [ -s "$_deptree" ]; do
   # grab one without unfulfilled dependencies
   _pkgname=$(grep '\[ *\]' "$_deptree" | head -n1 | awk '{print $1}') || true
-  [ -n "$_pkgname" ] || die "could not resolve cyclic dependencies. exiting."
+  [ -n "$_pkgname" ] || die "could not resolve dependencies. exiting."
 
   _pkgarch=$(pacman -Si $_pkgname | grep '^Architecture' | awk '{print $3}')
   _pkgdir="$_makepkgdir"/$_pkgname/pkg/$_pkgname
@@ -106,4 +106,3 @@ while [ -s "$_deptree" ]; do
   # remove pkg from deptree
   sed -i "/^$_pkgname :/d; s/ $_pkgname\b//g" "$_deptree"
 done
-

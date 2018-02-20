@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-20 09:22:44.020330630 +0100
++++ b/PKGBUILD	2018-02-20 09:23:03.883548285 +0100
+@@ -19,7 +19,7 @@ validpgpkeys=('D8692123C4065DEA5E0F3AB52
+               '031EC2536E580D8EA286A9F22071B08A33BD3F06') # NIIBE Yutaka (GnuPG Release Key) <gniibe@fsij.org>
+ build() {
+   cd ${pkgname}-${pkgver}
+-  ./configure --prefix=/usr
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
+   make
+ }
+ 

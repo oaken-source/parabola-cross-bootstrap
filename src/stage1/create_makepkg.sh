@@ -58,10 +58,10 @@ VCSCLIENTS=('bzr::bzr'
             'svn::subversion')
 CARCH="$_arch"
 CHOST="$_target"
-CPPFLAGS="--sysroot=$_chrootdir -D__riscv64=1 -D_FORTIFY_SOURCE=2"
-CFLAGS="--sysroot=$_chrootdir -O2 -pipe -fstack-protector-strong -fno-plt"
-CXXFLAGS="--sysroot=$_chrootdir -O2 -pipe -fstack-protector-strong -fno-plt"
-LDFLAGS="--sysroot=$_chrootdir -L$_chrootdir/lib -Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
+CPPFLAGS="-D_FORTIFY_SOURCE=2"
+CFLAGS="-O2 -pipe -fstack-protector-strong -fno-plt"
+CXXFLAGS="-O2 -pipe -fstack-protector-strong -fno-plt"
+LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
 DEBUG_CFLAGS="-g -fvar-tracking-assignments"
 DEBUG_CXXFLAGS="-g -fvar-tracking-assignments"
 BUILDENV=(!distcc color !ccache check !sign)
@@ -82,3 +82,13 @@ COMPRESSZ=(compress -c -f)
 PKGEXT='.pkg.tar.xz'
 SRCEXT='.src.tar.gz'
 EOF
+
+if [ "x$_arch" != "x$(uname -m)" ]; then
+  # make built packages available in sysroot
+  _sysroot=$($_target-gcc --print-sysroot)
+  mkdir -p $_chrootdir/usr
+  umount "$_sysroot"/usr || true
+  mount -o bind $_chrootdir/usr $_sysroot/usr
+  mkdir -p $_chrootdir/usr/bin
+  cp -v $(which qemu-$_arch-static) $_sysroot/usr/bin
+fi

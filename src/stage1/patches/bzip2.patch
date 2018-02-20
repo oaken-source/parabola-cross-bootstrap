@@ -1,0 +1,13 @@
+--- a/PKGBUILD	2018-02-20 09:55:03.463996102 +0100
++++ b/PKGBUILD	2018-02-20 09:55:35.366908023 +0100
+@@ -31,8 +31,8 @@ build() {
+   # CVE-2016-3189
+   patch -Np1 -i "${srcdir}/fix-heap-use-after-free-bzip2recover.patch"
+ 
+-  make -f Makefile-libbz2_so
+-  make bzip2 bzip2recover
++  make CC=@TARGET@-gcc RANLIB=@TARGET@-ranlib AR=@TARGET@-ar -f Makefile-libbz2_so
++  make CC=@TARGET@-gcc RANLIB=@TARGET@-ranlib AR=@TARGET@-ar bzip2 bzip2recover
+ }
+ 
+ check() {

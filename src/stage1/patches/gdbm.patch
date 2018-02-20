@@ -1,0 +1,13 @@
+--- a/PKGBUILD	2018-02-20 11:31:12.032486635 +0100
++++ b/PKGBUILD	2018-02-20 11:33:05.293863592 +0100
+@@ -20,7 +20,9 @@ md5sums=('c2ddcb3897efa0f57484af2bd4f4f8
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  ./configure --prefix=/usr --enable-libgdbm-compat
++  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
++    > build-aux/config.sub
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --enable-libgdbm-compat
+   make
+ }
+ 

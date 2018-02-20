@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-20 11:28:47.260891678 +0100
++++ b/PKGBUILD	2018-02-20 11:29:03.356079065 +0100
+@@ -19,7 +19,7 @@ validpgpkeys=('D1967C63788713177D861ED7D
+ 
+ build() {
+   cd ${srcdir}/${pkgname}-${pkgver}
+-  ./configure --prefix=/usr --libexecdir=/usr/lib --sysconfdir=/etc --without-libsigsegv
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --libexecdir=/usr/lib --sysconfdir=/etc --without-libsigsegv
+   make
+ }
+ 

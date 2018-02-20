@@ -1,0 +1,22 @@
+--- a/PKGBUILD	2018-02-20 11:53:36.660722046 +0100
++++ b/PKGBUILD	2018-02-20 11:56:48.162812113 +0100
+@@ -39,6 +39,8 @@ build() {
+ 		openssltarget='linux-elf'
+ 		optflags=''
+ 	fi
++  openssltarget='linux-elf'
++  optflags=''
+ 
+ 	# mark stack as non-executable: http://bugs.archlinux.org/task/12434
+ 	./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib \
+@@ -46,8 +48,8 @@ build() {
+ 		"${openssltarget}" \
+ 		"-Wa,--noexecstack ${CPPFLAGS} ${CFLAGS} ${LDFLAGS}"
+ 
+-	make depend
+-	make
++	make TARGETMACH=@TARGET@ BUILDMACH=@BUILDHOST@ CROSS=@TARGET@ CC=@TARGET@-gcc LD=@TARGET@-ld AS=@TARGET@-as depend
++	make TARGETMACH=@TARGET@ BUILDMACH=@BUILDHOST@ CROSS=@TARGET@ CC=@TARGET@-gcc LD=@TARGET@-ld AS=@TARGET@-as
+ }
+ 
+ check() {

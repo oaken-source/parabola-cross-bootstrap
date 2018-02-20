@@ -1,12 +1,11 @@
---- a/PKGBUILD	2018-02-18 22:06:39.148376575 +0100
-+++ b/PKGBUILD	2018-02-18 22:17:54.598004077 +0100
-@@ -21,10 +21,13 @@ validpgpkeys=('C52048C0C0748FEE227D47A27
+--- a/PKGBUILD	2018-02-19 09:58:10.624117850 +0100
++++ b/PKGBUILD	2018-02-19 11:04:15.515591931 +0100
+@@ -21,10 +21,12 @@ validpgpkeys=('C52048C0C0748FEE227D47A27
  build() {
    cd $pkgname-$pkgver
  
 -  ./configure --prefix=/usr --mandir=/usr/share/man \
-+  sed -i 's#extern "C" void exit#//&#' c++/etip.h.in
-+  CPPFLAGS="-I/usr/@TARGET@/usr/include $CPPFLAGS"
++  sed -i 's|CPPFLAGS="\$CPPFLAGS -I\${|#$|' configure
 +  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --mandir=/usr/share/man \
      --with-pkg-config-libdir=/usr/lib/pkgconfig \
      --with-shared --with-normal --without-debug --without-ada \

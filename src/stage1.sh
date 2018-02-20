@@ -23,11 +23,11 @@ set -euo pipefail
 export _chrootdir="$_builddir"/$_arch-root
 export _makepkgdir="$_builddir"/$_arch-makepkg
 
-# prepare makepkg environment
-. src/stage1/create_makepkg.sh
-
 # prepare skeleton chroot
 . src/stage1/create_chroot.sh
+
+# prepare makepkg environment
+. src/stage1/create_makepkg.sh
 
 # create base package tree
 export _deptree="$_builddir"/DEPTREE

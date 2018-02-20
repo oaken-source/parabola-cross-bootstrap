@@ -25,10 +25,11 @@ msg "creating transitive dependency tree for $_groups"
 if [ ! -f "$_deptree" ]; then
   declare -A _tree
 
-  # remove a couple things from base we don't need
+  # remove a couple painful things from base we don't need
   _frontier=($(pacman -Sg $_groups | awk '{print $2}' \
     | grep -v lvm2 \
-    | grep -v mdadm))
+    | grep -v mdadm \
+    | grep -v pciutils))
 
   while [ ${#_frontier[@]} -gt 0 ]; do
     # pop pkg from frontier
@@ -54,7 +55,7 @@ if [ ! -f "$_deptree" ]; then
 
   # we need mpc, mpfr and gmp to build gcc-libs
   _tree[gcc-libs]="${_tree[gcc-libs]} libmpc mpfr gmp"
-  # gmp and ncurses can build with gcc-libs-shim
+  # gmp and ncurses need to build with gcc-libs-shim
   _tree[gmp]="${_tree[gmp]/gcc-libs}"
   _tree[ncurses]="${_tree[ncurses]/gcc-libs}"
   # we need publicsuffix-list to build libpsl
@@ -65,8 +66,13 @@ if [ ! -f "$_deptree" ]; then
   # add util-linux dependencies to libutil-linux
   _tree[libutil-linux]="${_tree[util-linux]/libutil-linux}"
 
-  # TODO: these packages currently don't build
+  # TODO: these do weird things when cross compiling
   _tree[libatomic_ops]="${_tree[libatomic_ops]} FIXME"
+  _tree[libseccomp]="${_tree[libseccomp]} FIXME"
+  _tree[libffi]="${_tree[libffi]} FIXME"
+  _tree[libgpg-error]="${_tree[libgpg-error]} FIXME"
+  _tree[pcre]="${_tree[pcre]} FIXME"
+  _tree[openssl]="${_tree[openssl]} FIXME"
 
   # write package dependency tree
   truncate -s0 "$_deptree".FULL

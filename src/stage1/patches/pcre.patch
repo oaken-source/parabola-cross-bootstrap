@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-02-20 10:01:49.032861586 +0100
++++ b/PKGBUILD	2018-02-20 10:02:08.220256174 +0100
+@@ -33,6 +33,7 @@ prepare() {
+ build() {
+   cd $pkgname-$pkgver
+   ./configure \
++    --host=@TARGET@ --build=@BUILDHOST@ \
+     --prefix=/usr \
+     --enable-unicode-properties \
+     --enable-pcre16 \
