@@ -35,6 +35,7 @@ check_bin repo-add
 check_bin sudo
 check_bin tput
 check_bin wget
+check_bin help2man # for building libtool
 
 [ "x$_arch" != "x$(uname -m)" ] && check_bin $_target-gcc
 [ "x$_arch" != "x$(uname -m)" ] && check_bin qemu-$_arch-static
