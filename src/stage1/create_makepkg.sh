@@ -46,6 +46,7 @@ if [ ! -f "$_makepkgdir"/makepkg-$_arch.sh ]; then
 fi
 
 # create temporary makepkg.conf
+# note that we disable stripping because it tends to break static libraries
 cat > "$_makepkgdir"/makepkg-$_arch.conf << EOF
 DLAGENTS=('ftp::/usr/bin/curl -fC - --ftp-pasv --retry 3 --retry-delay 3 -o %o %u'
           'http::/usr/bin/curl -fLC - --retry 3 --retry-delay 3 -o %o %u'
@@ -65,7 +66,7 @@ LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
 DEBUG_CFLAGS="-g -fvar-tracking-assignments"
 DEBUG_CXXFLAGS="-g -fvar-tracking-assignments"
 BUILDENV=(!distcc color !ccache check !sign)
-OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !optipng !upx !debug)
+OPTIONS=(!strip docs !libtool !staticlibs emptydirs zipman purge !optipng !upx !debug)
 INTEGRITY_CHECK=(md5)
 STRIP_BINARIES="--strip-all"
 STRIP_SHARED="--strip-unneeded"
@@ -85,7 +86,6 @@ EOF
 
 if [ "x$_arch" != "x$(uname -m)" ]; then
   # make built packages available in sysroot
-  _sysroot=$($_target-gcc --print-sysroot)
   mkdir -p $_chrootdir/usr
   umount "$_sysroot"/usr || true
   mount -o bind $_chrootdir/usr $_sysroot/usr

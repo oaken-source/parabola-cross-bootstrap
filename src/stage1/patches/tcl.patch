@@ -1,0 +1,14 @@
+--- a/PKGBUILD	2018-02-20 14:57:44.236937412 +0100
++++ b/PKGBUILD	2018-02-20 15:09:43.351455663 +0100
+@@ -22,7 +22,10 @@ prepare() {
+ build() {
+   cd tcl${pkgver}/unix
+   [[ $CARCH == "x86_64" ]] && BIT="--enable-64bit"
+-  ./configure --prefix=/usr --mandir=/usr/share/man --enable-threads $BIT
++  export CC=@TARGET@-gcc
++  export ac_cv_func_strtod=yes
++  export tcl_cv_strtod_buggy=1
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --mandir=/usr/share/man --enable-threads $BIT
+   make
+ }
+ 

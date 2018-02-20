@@ -1,6 +1,6 @@
---- a/PKGBUILD	2018-02-20 10:01:49.032861586 +0100
-+++ b/PKGBUILD	2018-02-20 10:02:08.220256174 +0100
-@@ -33,6 +33,7 @@ prepare() {
+--- a/PKGBUILD	2018-02-20 18:18:06.973809212 +0100
++++ b/PKGBUILD	2018-02-20 18:24:11.614051950 +0100
+@@ -33,11 +33,12 @@ prepare() {
  build() {
    cd $pkgname-$pkgver
    ./configure \
@@ -8,3 +8,9 @@
      --prefix=/usr \
      --enable-unicode-properties \
      --enable-pcre16 \
+     --enable-pcre32 \
+-    --enable-jit \
++    --disable-jit \
+     --enable-pcregrep-libz \
+     --enable-pcregrep-libbz2 \
+     --enable-pcretest-libreadline

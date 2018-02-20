@@ -1,0 +1,14 @@
+--- a/PKGBUILD	2018-02-20 14:18:35.357272626 +0100
++++ b/PKGBUILD	2018-02-20 14:23:51.687050887 +0100
+@@ -19,7 +19,10 @@ md5sums=('07cf286672ced26fba54cd0313bdc0
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  ./configure --prefix=/usr
++  cat > config.cache << EOF
++gl_cv_func_getopt_gnu=yes
++EOF
++  ./configure --cache-file=config.cache --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
+   make
+ }
+ 

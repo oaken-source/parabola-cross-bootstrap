@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-02-20 18:38:35.276432188 +0100
++++ b/PKGBUILD	2018-02-20 18:38:54.164626414 +0100
+@@ -20,10 +20,11 @@ sha512sums=('44d7db2513d9415dcdf6541366f
+ build() {
+   cd $pkgname-$pkgver
+   ./configure \
++    --host=@TARGET@ --build=@BUILDHOST@ \
+     --prefix=/usr \
+     --enable-pcre2-16 \
+     --enable-pcre2-32 \
+-    --enable-jit \
++    --disable-jit \
+     --enable-pcre2grep-libz \
+     --enable-pcre2grep-libbz2 \
+     --enable-pcre2test-libreadline

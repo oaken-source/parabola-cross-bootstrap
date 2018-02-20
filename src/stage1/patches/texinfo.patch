@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-20 18:30:31.429339479 +0100
++++ b/PKGBUILD	2018-02-20 18:30:48.706526646 +0100
+@@ -23,7 +23,7 @@ validpgpkeys=('EAF669B31E31E1DECBD11513D
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  ./configure --prefix=/usr
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
+   make
+ }
+ 

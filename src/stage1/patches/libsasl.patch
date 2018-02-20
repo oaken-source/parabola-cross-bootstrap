@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-02-20 19:33:10.397502335 +0100
++++ b/PKGBUILD	2018-02-20 19:33:51.535246841 +0100
+@@ -91,6 +91,7 @@ build() {
+   popd
+ 
+   ./configure --prefix=/usr \
++      --host=@TARGET@ --build=@BUILDHOST@ \
+       --sbin=/usr/bin \
+       --mandir=/usr/share/man \
+       --infodir=/usr/share/info \

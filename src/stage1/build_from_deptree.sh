@@ -60,7 +60,7 @@ while [ -s "$_deptree" ]; do
         fi
       done
 
-      # [ "x$_pkgname" == "xlibffi" ] && die "stopping."
+      # [ "x$_pkgname" == "xtcl" ] && die "stopping."
 
       [ -f "$_srcdir"/stage1/patches/$_pkgname.patch ] || die "missing package patch"
       cp PKGBUILD{,.old}
@@ -68,8 +68,8 @@ while [ -s "$_deptree" ]; do
 
       # substitute common variables
       sed -i "s#@TARGET@#$_target#g" PKGBUILD
-      sed -i "s#@BUILDHOST@#$(uname -m)-unknown-linux-gnu#g" PKGBUILD
-      sed -i "s#@SYSROOT@#$_chrootdir#g" PKGBUILD
+      sed -i "s#@BUILDHOST@#$_buildhost#g" PKGBUILD
+      sed -i "s#@SYSROOT@#$_sysroot#g" PKGBUILD
       sed -i "s#@LINUX_ARCH@#$_linux_arch#g" PKGBUILD
 
       # enable the target arch explicitly

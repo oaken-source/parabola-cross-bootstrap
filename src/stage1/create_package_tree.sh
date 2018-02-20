@@ -25,7 +25,7 @@ msg "creating transitive dependency tree for $_groups"
 if [ ! -f "$_deptree" ]; then
   declare -A _tree
 
-  # remove a couple painful things from base we don't need
+  # remove a couple painful things from base we don't need for stage1
   _frontier=($(pacman -Sg $_groups | awk '{print $2}' \
     | grep -v lvm2 \
     | grep -v mdadm \
@@ -53,26 +53,29 @@ if [ ! -f "$_deptree" ]; then
     done
   done
 
-  # we need mpc, mpfr and gmp to build gcc-libs
+  # resolve gmp / gcc-libs cyclic dependency
   _tree[gcc-libs]="${_tree[gcc-libs]} libmpc mpfr gmp"
-  # gmp and ncurses need to build with gcc-libs-shim
   _tree[gmp]="${_tree[gmp]/gcc-libs}"
-  _tree[ncurses]="${_tree[ncurses]/gcc-libs}"
-  # we need publicsuffix-list to build libpsl
+  _tree[gmp]="${_tree[gmp]/bash}"
+  # building libpsl requires publisuffix-list in sysroot
   _tree[libpsl]="${_tree[libpsl]} publicsuffix-list"
   _tree[publicsuffix-list]=""
-  # we need pam to build libcap
+  # building libcap needs pam in sysroot
   _tree[libcap]="${_tree[libcap]} pam"
-  # add util-linux dependencies to libutil-linux
+  # building libutil-linux needs the same stuff as util-linux
   _tree[libutil-linux]="${_tree[util-linux]/libutil-linux}"
+  # building sqlite requires tcl in sysroot
+  _tree[sqlite]="${_tree[sqlite]} tcl"
+  _tree[tcl]=" zlib"
+  # building libsasl requires libldap
+  _tree[libsasl]="${_tree[libsasl]} libldap"
+  _tree[libldap]="${_tree[libldap]/libsasl}"
 
   # TODO: these do weird things when cross compiling
   _tree[libatomic_ops]="${_tree[libatomic_ops]} FIXME"
   _tree[libseccomp]="${_tree[libseccomp]} FIXME"
   _tree[libffi]="${_tree[libffi]} FIXME"
   _tree[libgpg-error]="${_tree[libgpg-error]} FIXME"
-  _tree[pcre]="${_tree[pcre]} FIXME"
-  _tree[openssl]="${_tree[openssl]} FIXME"
 
   # write package dependency tree
   truncate -s0 "$_deptree".FULL

@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-20 18:27:02.619029602 +0100
++++ b/PKGBUILD	2018-02-20 18:27:19.799223473 +0100
+@@ -20,7 +20,7 @@ md5sums=('6a39bccf420c946b0fd7ffc6496131
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  sh configure --prefix=/usr --sysconfdir=/etc --with-regex=pcre
++  sh configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --sysconfdir=/etc --with-regex=pcre
+   make
+ }
+ 

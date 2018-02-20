@@ -29,13 +29,16 @@ msg "performing host system sanity checks"
 
 check_bin awk
 check_bin bsdtar
+check_bin gcc
 check_bin makepkg
 check_bin pacman
 check_bin repo-add
 check_bin sudo
 check_bin tput
 check_bin wget
+
 check_bin help2man # for building libtool
+check_bin tclsh    # for building sqlite
 
 [ "x$_arch" != "x$(uname -m)" ] && check_bin $_target-gcc
 [ "x$_arch" != "x$(uname -m)" ] && check_bin qemu-$_arch-static

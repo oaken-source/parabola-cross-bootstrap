@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-02-20 19:00:21.098573327 +0100
++++ b/PKGBUILD	2018-02-20 19:00:40.900770609 +0100
+@@ -23,6 +23,7 @@ build() {
+   cd $pkgname-$pkgver 
+ 
+   ./configure \
++      --host=@TARGET@ --build=@BUILDHOST@ \
+       --prefix=/usr \
+       --without-xml2 \
+       --without-nettle \

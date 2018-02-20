@@ -41,6 +41,9 @@ chown -v $SUDO_USER "$_builddir"
 # stage 0: prepare host
 ./src/stage0.sh
 
+export _buildhost=$(gcc -dumpmachine)
+export _sysroot=$($_target-gcc --print-sysroot)
+
 # stage 1: cross-makepkg a base system
 ./src/stage1.sh
 
