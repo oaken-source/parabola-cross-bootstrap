@@ -74,6 +74,9 @@ if [ ! -f "$_deptree" ]; then
   _tree[make]="${_tree[make]/guile}"
   unset _tree[guile]
   unset _tree[gc]
+  # we build stage1 pinentry without libsecret
+  _tree[pinentry]="${_tree[pinentry]/libsecret}"
+  unset _tree[libsecret]
   # resolve systemd dependency situation
   _tree[libutil-linux]="${_tree[libutil-linux]/libsystemd}"
   _tree[util-linux]="${_tree[util-linux]/libsystemd}"

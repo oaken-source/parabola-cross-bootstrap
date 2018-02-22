@@ -43,6 +43,29 @@ while [ -s "$_deptree" ]; do
       # simply reuse arch=(any) packages
       _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
       pacman -Sw --noconfirm --cachedir . $_pkgname
+    elif [ "x$_pkgname" == "xca-certificates-mozilla" ]; then
+      # ca-certificates-mozilla should really be arch=(any)
+      _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
+      pacman -Sw --noconfirm --cachedir . $_pkgname
+      mkdir tmp && bsdtar -C tmp -xf $_pkgname-$_pkgver-*.pkg.tar.xz
+      mkdir -p "$_pkgdir"/usr/share/
+      cp -rv tmp/usr/share/ca-certificates/ "$_pkgdir"/usr/share/
+      cat > "$_pkgdir"/.PKGINFO << EOF
+pkgname = $_pkgname
+pkgver = $_pkgver
+pkgdesc = Mozilla's set of trusted CA certificates
+url = https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS
+builddate = $(date '+%s')
+size = 0
+arch = $_pkgarch
+EOF
+      cd "$_pkgdir"
+      env LANG=C bsdtar -czf .MTREE \
+        --format=mtree \
+        --options='!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link' \
+        .PKGINFO *
+      env LANG=C bsdtar -cf - .MTREE .PKGINFO * | xz -c -z - > \
+        "$_makepkgdir"/$_pkgname/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz
     else
       # acquire the pkgbuild and auxiliary files
       _libre=https://www.parabola.nu/packages/libre/x86_64/$_pkgname/

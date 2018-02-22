@@ -1,0 +1,24 @@
+--- a/PKGBUILD	2018-02-22 11:28:46.689144570 +0100
++++ b/PKGBUILD	2018-02-22 11:29:56.353864179 +0100
+@@ -22,15 +22,16 @@ validpgpkeys=('D8692123C4065DEA5E0F3AB52
+ build() {
+ 	cd "${srcdir}/${pkgname}-${pkgver}"
+ 	./configure \
++    --host=@TARGET@ --build=@BUILDHOST@ \
+ 		--prefix=/usr \
+ 		--enable-pinentry-tty \
+ 		--enable-pinentry-curses \
+ 		--enable-fallback-curses \
+-		--enable-pinentry-emacs \
+-		--enable-pinentry-gtk2 \
+-		--enable-pinentry-gnome3 \
+-		--enable-pinentry-qt \
+-		--enable-libsecret \
++		--disable-pinentry-emacs \
++		--disable-pinentry-gtk2 \
++		--disable-pinentry-gnome3 \
++		--disable-pinentry-qt \
++		--disable-libsecret \
+ 
+ 	make
+ }
