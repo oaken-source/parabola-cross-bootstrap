@@ -48,6 +48,4 @@ export _sysroot=$($_target-gcc --print-sysroot)
 # stage 1: cross-makepkg a base system
 ./src/stage1.sh
 
-# cleanup
-# rm -rf "$_builddir"
 echo "all done :)"
