@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-22 15:12:19.947100864 +0100
++++ b/PKGBUILD	2018-02-22 15:21:47.110144429 +0100
+@@ -47,6 +47,8 @@ build() {
+   cd $pkgname-$pkgver
+ 
+   ./configure --prefix=/usr \
++    --host=@TARGET@ --build=@BUILDHOST@ \
++    --with-pkgconfigdir=@SYSROOT@/usr/lib/pkgconfig \
+     --sysconfdir=/etc \
+     --sbindir=/usr/bin \
+     --libexecdir=/usr/lib/iptables \

@@ -54,32 +54,37 @@ if [ ! -f "$_deptree" ]; then
   _tree[gcc-libs]="${_tree[gcc-libs]} libmpc mpfr gmp"
   _tree[gmp]="${_tree[gmp]/gcc-libs}"
   _tree[gmp]="${_tree[gmp]/bash}"
-  # resolve pam dependency cycle
-  _tree[libtirpc]="${_tree[libtirpc]/krb5}"
+  # resolve systemd / util-linux dependency cycle
+  _tree[libutil-linux]="${_tree[libutil-linux]/libsystemd}"
+  _tree[util-linux]="${_tree[util-linux]/libsystemd}"
+
   # building libcap needs pam and unixodbc in sysroot
   _tree[libcap]="${_tree[libcap]} pam unixodbc"
   _tree[unixodbc]=" readline libtool"
   # building libpsl requires publicsuffix-list in sysroot
   _tree[libpsl]="${_tree[libpsl]} publicsuffix-list"
   _tree[publicsuffix-list]=""
-  # building libutil-linux needs the same stuff as util-linux
+  # building libutil-linux needs a bunch of stuff in sysroot
   _tree[libutil-linux]="${_tree[util-linux]/libutil-linux}"
   # building sqlite requires tcl in sysroot
   _tree[sqlite]="${_tree[sqlite]} tcl"
   _tree[tcl]=" zlib"
-  # building libsecret required gobject-introspection-runtime in sysroot
-  #_tree[libsecret]="${_tree[libsecret]} gobject-introspection-runtime"
-  #_tree[gobject-introspection-runtime]=" glib2"
-  # we build stage1 make without guile
+  # building iptables requires libnfnetlink and libnetfilter_conntrack in sysroot
+  _tree[iptables]="${_tree[iptables]} libnfnetlink libnetfilter_conntrack "
+  _tree[libnfnetlink]=" glibc"
+  _tree[libnetfilter_conntrack]=" libnfnetlink libmnl"
+
+  # we build stage1 without guile, gc, libsecret, libldap and krb5
   _tree[make]="${_tree[make]/guile}"
+  _tree[pinentry]="${_tree[pinentry]/libsecret}"
+  _tree[sudo]="${_tree[sudo]/libldap}"
+  _tree[curl]="${_tree[curl]/krb5}"
+  _tree[libtirpc]="${_tree[libtirpc]/krb5}"
   unset _tree[guile]
   unset _tree[gc]
-  # we build stage1 pinentry without libsecret
-  _tree[pinentry]="${_tree[pinentry]/libsecret}"
   unset _tree[libsecret]
-  # resolve systemd dependency situation
-  _tree[libutil-linux]="${_tree[libutil-linux]/libsystemd}"
-  _tree[util-linux]="${_tree[util-linux]/libsystemd}"
+  unset _tree[libldap]
+  unset _tree[krb5]
 
   # write package dependency tree
   truncate -s0 "$_deptree".FULL

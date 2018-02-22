@@ -1,5 +1,5 @@
---- a/PKGBUILD	2018-02-21 17:27:36.799321403 +0100
-+++ b/PKGBUILD	2018-02-21 17:29:23.770185480 +0100
+--- a/PKGBUILD	2018-02-22 11:41:34.950204245 +0100
++++ b/PKGBUILD	2018-02-22 12:09:48.185617250 +0100
 @@ -91,6 +91,7 @@ build() {
    popd
  
@@ -8,9 +8,14 @@
        --sbin=/usr/bin \
        --mandir=/usr/share/man \
        --infodir=/usr/share/info \
-@@ -115,11 +116,11 @@ build() {
-       --with-mysql=/usr \
-       --with-pgsql=/usr/lib \
+@@ -112,18 +113,19 @@ build() {
+       --enable-ntlm \
+       --disable-passdss \
+       --enable-sql \
+-      --with-mysql=/usr \
+-      --with-pgsql=/usr/lib \
++      --without-mysql \
++      --without-pgsql \
        --with-sqlite3=/usr/lib \
 -      --enable-ldapdb \
 +      --disable-ldapdb \
@@ -22,3 +27,8 @@
        --with-dblib=gdbm \
        --with-configdir=/etc/sasl2:/etc/sasl:/usr/lib/sasl2 \
        --sysconfdir=/etc \
+       --with-devrandom=/dev/urandom
++  sed -i 's#/usr/include##' Makefile */Makefile
+   make
+ }
+ 

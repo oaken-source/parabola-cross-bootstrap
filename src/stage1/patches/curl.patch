@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-02-22 14:06:02.824355452 +0100
++++ b/PKGBUILD	2018-02-22 14:06:30.941303407 +0100
+@@ -25,6 +25,7 @@ build() {
+   cd "$pkgname-$pkgver"
+ 
+   ./configure \
++      --host=@TARGET@ --build=@BUILDHOST@ \
+       --prefix=/usr \
+       --mandir=/usr/share/man \
+       --disable-ldap \

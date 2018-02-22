@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-02-22 14:00:23.267098752 +0100
++++ b/PKGBUILD	2018-02-22 14:00:49.069077232 +0100
+@@ -30,6 +30,7 @@ build() {
+   cd "$srcdir/$pkgname-$_sudover"
+ 
+   ./configure \
++    --host=@TARGET@ --build=@BUILDHOST@ \
+     --prefix=/usr \
+     --sbindir=/usr/bin \
+     --libexecdir=/usr/lib \
+@@ -40,8 +41,7 @@ build() {
+     --enable-tmpfiles.d \
+     --with-pam \
+     --with-sssd \
+-    --with-ldap \
+-    --with-ldap-conf-file=/etc/openldap/ldap.conf \
++    --without-ldap \
+     --with-env-editor \
+     --with-passprompt="[sudo] password for %p: " \
+     --with-all-insults

@@ -1,0 +1,14 @@
+--- a/PKGBUILD	2018-02-22 15:04:45.279925965 +0100
++++ b/PKGBUILD	2018-02-22 15:10:49.231451797 +0100
+@@ -32,8 +32,10 @@ build() {
+   cd $pkgname-$pkgver
+   CFLAGS="$CFLAGS -I${srcdir}/include $(pkg-config libnl-genl-3.0 --cflags)" \
+   ./configure --prefix=/usr \
++    --host=@TARGET@ --build=@BUILDHOST@ \
++    --with-pcap=linux \
+     --enable-ipv6 \
+-    --enable-bluetooth \
++    --disable-bluetooth \
+     --with-libnl
+   make
+ }

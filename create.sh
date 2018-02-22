@@ -23,7 +23,7 @@ set -euo pipefail
 . src/feedback.sh
 
 [ $(id -u) -ne 0 ] && die "must be root"
-[ -z "${SUDO_USER:-}" ] && die "SUDO_USER not set"
+[ -z "${SUDO_USER:-}" ] && die "SUDO_USER must be set in environment"
 
 export _startdir="$(pwd)"
 export _builddir="$_startdir"/build
