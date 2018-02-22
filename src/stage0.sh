@@ -38,7 +38,9 @@ check_bin tput
 check_bin wget
 
 check_bin help2man # for building libtool
+check_bin meson    # for building systemd
 check_bin tclsh    # for building sqlite
+check_bin xmlto    # for building ca-certificates-mozilla
 
 [ "x$_arch" != "x$(uname -m)" ] && check_bin $_target-gcc
 [ "x$_arch" != "x$(uname -m)" ] && check_bin qemu-$_arch-static

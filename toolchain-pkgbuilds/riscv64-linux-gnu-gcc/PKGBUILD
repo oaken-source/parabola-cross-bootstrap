@@ -9,7 +9,7 @@ pkgname=$_target-gcc
 pkgver=7.3.0
 _islver=0.18
 pkgrel=1
-_snapshot=7-20180125
+_snapshot=7-20180215
 pkgdesc='The GNU Compiler Collection - cross compiler for riscv64 target'
 arch=(x86_64)
 url='http://gcc.gnu.org/'
@@ -22,7 +22,7 @@ replaces=($pkgname-bootstrap)
 source=(#ftp://gcc.gnu.org/pub/gcc/releases/gcc-$pkgver/gcc-$pkgver.tar.bz2
         ftp://gcc.gnu.org/pub/gcc/snapshots/$_snapshot/gcc-$_snapshot.tar.xz
         http://isl.gforge.inria.fr/isl-$_islver.tar.bz2)
-sha256sums=('f4cad0895aa6dd237cbcb6e81750e40c3fb3eba8a5bcdf25a21c4ee5520c344b'
+sha256sums=('bb276f6fce4822fc0806d1e87d21245854d1e41f2a7027c7288375084176c679'
             '6b8b0fd7f81d0a957beb3679c81bbb34ccc7568d5682844d8924424a0dadcb1b')
 
 if [ -n "$_snapshot" ]; then

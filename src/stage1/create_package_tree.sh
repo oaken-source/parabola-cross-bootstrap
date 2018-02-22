@@ -26,10 +26,7 @@ if [ ! -f "$_deptree" ]; then
   declare -A _tree
 
   # remove a couple painful things from base we don't need for stage1
-  _frontier=($(pacman -Sg $_groups | awk '{print $2}' \
-    | grep -v lvm2 \
-    | grep -v mdadm \
-    | grep -v pciutils))
+  _frontier=($(pacman -Sg $_groups | awk '{print $2}'))
 
   while [ ${#_frontier[@]} -gt 0 ]; do
     # pop pkg from frontier
@@ -57,25 +54,29 @@ if [ ! -f "$_deptree" ]; then
   _tree[gcc-libs]="${_tree[gcc-libs]} libmpc mpfr gmp"
   _tree[gmp]="${_tree[gmp]/gcc-libs}"
   _tree[gmp]="${_tree[gmp]/bash}"
-  # building libpsl requires publisuffix-list in sysroot
+  # resolve pam dependency cycle
+  _tree[libtirpc]="${_tree[libtirpc]/krb5}"
+  # building libcap needs pam and unixodbc in sysroot
+  _tree[libcap]="${_tree[libcap]} pam unixodbc"
+  _tree[unixodbc]=" readline libtool"
+  # building libpsl requires publicsuffix-list in sysroot
   _tree[libpsl]="${_tree[libpsl]} publicsuffix-list"
   _tree[publicsuffix-list]=""
-  # building libcap needs pam in sysroot
-  _tree[libcap]="${_tree[libcap]} pam"
   # building libutil-linux needs the same stuff as util-linux
   _tree[libutil-linux]="${_tree[util-linux]/libutil-linux}"
   # building sqlite requires tcl in sysroot
   _tree[sqlite]="${_tree[sqlite]} tcl"
   _tree[tcl]=" zlib"
-  # building libsasl requires libldap
-  _tree[libsasl]="${_tree[libsasl]} libldap"
-  _tree[libldap]="${_tree[libldap]/libsasl}"
-
-  # TODO: these do weird things when cross compiling
-  _tree[libatomic_ops]="${_tree[libatomic_ops]} FIXME"
-  _tree[libseccomp]="${_tree[libseccomp]} FIXME"
-  _tree[libffi]="${_tree[libffi]} FIXME"
-  _tree[libgpg-error]="${_tree[libgpg-error]} FIXME"
+  # building libsecret required gobject-introspection-runtime in sysroot
+  #_tree[libsecret]="${_tree[libsecret]} gobject-introspection-runtime"
+  #_tree[gobject-introspection-runtime]=" glib2"
+  # we build stage1 make without guile
+  _tree[make]="${_tree[make]/guile}"
+  unset _tree[guile]
+  unset _tree[gc]
+  # resolve systemd dependency situation
+  _tree[libutil-linux]="${_tree[libutil-linux]/libsystemd}"
+  _tree[util-linux]="${_tree[util-linux]/libsystemd}"
 
   # write package dependency tree
   truncate -s0 "$_deptree".FULL

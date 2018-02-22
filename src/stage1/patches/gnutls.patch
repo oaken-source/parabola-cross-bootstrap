@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-21 15:03:51.826746352 +0100
++++ b/PKGBUILD	2018-02-21 15:11:06.745631750 +0100
+@@ -34,6 +34,8 @@ build() {
+   # http://lists.gnupg.org/pipermail/gnutls-devel/2015-May/007582.html
+ 
+   ./configure --prefix=/usr \
++  --host=@TARGET@ --build=@BUILDHOST@ \
++  --with-libunistring-prefix=@SYSROOT@/usr \
+ 	--with-zlib \
+ 	--disable-static \
+ 	--without-idn \

@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-21 18:41:17.141706035 +0100
++++ b/PKGBUILD	2018-02-21 18:41:43.627843941 +0100
+@@ -38,7 +38,7 @@ prepare() {
+ 
+ build() {
+   cd ${srcdir}/${pkgname}-${pkgver}
+-  ./configure --prefix=/usr --datadir=/usr/share/kbd --mandir=/usr/share/man
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --datadir=/usr/share/kbd --mandir=/usr/share/man
+   make KEYCODES_PROGS=yes RESIZECONS_PROGS=yes
+ }
+ 

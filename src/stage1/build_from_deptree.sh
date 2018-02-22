@@ -101,7 +101,7 @@ while [ -s "$_deptree" ]; do
   rm -rf "$_chrootdir"/packages/$_arch/repo.{db,files}*
   repo-add -q -R "$_chrootdir"/packages/$_arch/{repo.db.tar.gz,*.pkg.tar.xz}
   (yes || true) | pacman --noscriptlet --config "$_chrootdir"/etc/pacman.conf \
-    -r "$_chrootdir" -Syy $_pkgname
+    -r "$_chrootdir" -Syydd $_pkgname
 
   # remove pkg from deptree
   sed -i "/^$_pkgname :/d; s/ $_pkgname\b//g" "$_deptree"

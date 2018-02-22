@@ -31,8 +31,9 @@ export _srcdir="$_startdir"/src
 export _target=riscv64-linux-gnu
 export _arch=${_target%%-*}
 export _linux_arch=riscv
-export _groups="base base-devel"
-#export _groups="base"
+export _archflags="-march=rv64gc -mabi=lp64d"
+# to begin stage1, we only need to bootstrap base-devel
+export _groups="base-devel"
 
 msg "preparing builddir"
 mkdir -vp "$_builddir"

@@ -1,0 +1,36 @@
+--- a/PKGBUILD	2018-02-21 19:30:29.308880981 +0100
++++ b/PKGBUILD	2018-02-21 19:35:16.578673882 +0100
+@@ -14,26 +14,27 @@ url='https://github.com/ivmai/libatomic_
+ depends=(glibc)
+ license=(GPL2 MIT)
+ options=(!docs)
+-source=($url/releases/download/v$pkgver/${pkgname}-${pkgver}.tar.gz)
++source=("git+https://github.com/ivmai/libatomic_ops.git#commit=393d7a7ff54565230f44e59a9c73addc9e627f56")
+ sha256sums=('219724edad3d580d4d37b22e1d7cb52f0006d282d26a9b8681b560a625142ee6')
+ 
+ prepare() {
+-  cd $pkgname-$pkgver
++  cd $pkgname
+ }
+ 
+ build() {
+-  cd $pkgname-$pkgver
+-  ./configure --prefix=/usr --disable-static --enable-shared
++  cd $pkgname
++  autoreconf --install
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --disable-static --enable-shared
+   make
+ }
+ 
+ check() {
+-  cd $pkgname-$pkgver
++  cd $pkgname
+   make check
+ }
+ 
+ package() {
+-  cd $pkgname-$pkgver
++  cd $pkgname
+   make DESTDIR="$pkgdir" install
+   install -Dm644 doc/LICENSING.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }

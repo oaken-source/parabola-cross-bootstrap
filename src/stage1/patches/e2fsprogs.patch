@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-02-21 21:46:56.529163326 +0100
++++ b/PKGBUILD	2018-02-21 21:47:33.048113095 +0100
+@@ -33,6 +33,7 @@ build() {
+   cd "${srcdir}/${pkgname}-${pkgver}"
+ 
+   ./configure \
++      --host=@TARGET@ --build=@BUILDHOST@ \
+       --prefix=/usr \
+       --with-root-prefix="" \
+       --libdir=/usr/lib \

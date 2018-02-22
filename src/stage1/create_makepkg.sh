@@ -46,7 +46,6 @@ if [ ! -f "$_makepkgdir"/makepkg-$_arch.sh ]; then
 fi
 
 # create temporary makepkg.conf
-# note that we disable stripping because it tends to break static libraries
 cat > "$_makepkgdir"/makepkg-$_arch.conf << EOF
 DLAGENTS=('ftp::/usr/bin/curl -fC - --ftp-pasv --retry 3 --retry-delay 3 -o %o %u'
           'http::/usr/bin/curl -fLC - --retry 3 --retry-delay 3 -o %o %u'
@@ -60,8 +59,8 @@ VCSCLIENTS=('bzr::bzr'
 CARCH="$_arch"
 CHOST="$_target"
 CPPFLAGS="-D_FORTIFY_SOURCE=2"
-CFLAGS="-O2 -pipe -fstack-protector-strong -fno-plt"
-CXXFLAGS="-O2 -pipe -fstack-protector-strong -fno-plt"
+CFLAGS="$_archflags -O2 -pipe -fstack-protector-strong -fno-plt"
+CXXFLAGS="$_archflags -O2 -pipe -fstack-protector-strong -fno-plt"
 LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
 DEBUG_CFLAGS="-g -fvar-tracking-assignments"
 DEBUG_CXXFLAGS="-g -fvar-tracking-assignments"

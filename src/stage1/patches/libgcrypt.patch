@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-02-22 08:29:13.484044489 +0100
++++ b/PKGBUILD	2018-02-22 08:29:33.980655617 +0100
+@@ -37,6 +37,7 @@ prepare() {
+ build() {
+   cd ${pkgname}-${pkgver}
+   ./configure --prefix=/usr \
++  --host=@TARGET@ --build=@BUILDHOST@ \
+ 	--disable-static \
+ 	--disable-padlock-support
+   make

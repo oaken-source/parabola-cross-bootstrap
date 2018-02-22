@@ -1,0 +1,38 @@
+--- a/PKGBUILD	2018-02-21 21:08:31.805898301 +0100
++++ b/PKGBUILD	2018-02-21 21:36:01.371436135 +0100
+@@ -13,7 +13,7 @@ url="https://www.kernel.org/pub/linux/ut
+ arch=('x86_64')
+ makedepends=('systemd' 'python' 'libcap-ng')
+ license=('GPL2')
+-options=('strip' 'debug')
++options=('debug')
+ validpgpkeys=('B0C64D14301CC6EFAEDF60E4E4B71D5EEC39C284')  # Karel Zak
+ source=("https://www.kernel.org/pub/linux/utils/util-linux/v$_pkgmajor/$pkgbase-$pkgver.tar."{xz,sign}
+         pam-{login,common,su}
+@@ -35,6 +35,8 @@ build() {
+   cd "$pkgbase-$pkgver"
+ 
+   ./configure --prefix=/usr \
++              --host=@TARGET@ --build=@BUILDHOST@ \
++              --without-systemd \
+               --libdir=/usr/lib \
+               --bindir=/usr/bin \
+               --localstatedir=/run \
+@@ -45,7 +47,7 @@ build() {
+               --enable-chfn-chsh \
+               --enable-write \
+               --enable-mesg \
+-              --with-python=3
++              --without-python
+ 
+   make
+ }
+@@ -78,7 +80,7 @@ package_util-linux() {
+   install -m644 "$srcdir/pam-su" "$pkgdir/etc/pam.d/su-l"
+ 
+   # TODO(dreisner): offer this upstream?
+-  sed -i '/ListenStream/ aRuntimeDirectory=uuidd' "$pkgdir/usr/lib/systemd/system/uuidd.socket"
++  #sed -i '/ListenStream/ aRuntimeDirectory=uuidd' "$pkgdir/usr/lib/systemd/system/uuidd.socket"
+ 
+   # adjust for usrmove
+   # TODO(dreisner): fix configure.ac upstream so that this isn't needed

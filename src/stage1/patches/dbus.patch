@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-02-22 10:25:32.778956705 +0100
++++ b/PKGBUILD	2018-02-22 10:25:46.272000778 +0100
+@@ -40,6 +40,7 @@ prepare() {
+ build() {
+   cd $pkgbase
+   ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
++      --host=@TARGET@ --build=@BUILDHOST@ \
+       --libexecdir=/usr/lib/dbus-1.0 --with-dbus-user=dbus \
+       --with-system-pid-file=/run/dbus/pid \
+       --with-system-socket=/run/dbus/system_bus_socket \

@@ -1,0 +1,51 @@
+--- a/PKGBUILD	2018-02-21 21:54:28.027494092 +0100
++++ b/PKGBUILD	2018-02-21 22:13:00.992257732 +0100
+@@ -2,7 +2,7 @@
+ # Maintainer: Jan de Groot <jgc@archlinux.org>
+ 
+ pkgbase=glib2
+-pkgname=(glib2 glib2-docs)
++pkgname=(glib2)
+ pkgver=2.54.3+2+g94b38beff
+ pkgrel=1
+ pkgdesc="Low level core library"
+@@ -40,13 +40,18 @@ prepare() {
+ 
+ build() {
+   cd glib
++  cat > config.cache << EOF
++glib_cv_stack_grows=no
++glib_cv_uscore=no
++EOF
+   ./configure \
++    --host=@TARGET@ --build=@BUILDHOST@ \
++    --cache-file=config.cache \
+     --prefix=/usr \
+     --libdir=/usr/lib \
+     --sysconfdir=/etc \
+     --with-pcre=system \
+     --enable-debug=yes \
+-    --enable-gtk-doc \
+     --disable-fam
+   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+   make
+@@ -60,19 +65,6 @@ check() {
+ package_glib2() {
+   cd glib
+   make DESTDIR="$pkgdir" install
+-  mv "$pkgdir/usr/share/gtk-doc" "$srcdir"
+ 
+   install -Dt "$pkgdir/usr/share/libalpm/hooks" -m644 ../*.hook
+ }
+-
+-package_glib2-docs() {
+-  pkgdesc="Documentation for GLib"
+-  depends=()
+-  optdepends=()
+-  license+=(custom)
+-
+-  mkdir -p "$pkgdir/usr/share"
+-  mv gtk-doc "$pkgdir/usr/share"
+-
+-  install -Dt "$pkgdir/usr/share/licenses/glib2-docs" -m644 glib/docs/reference/COPYING
+-}

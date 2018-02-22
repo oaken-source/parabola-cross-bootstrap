@@ -1,0 +1,12 @@
+--- a/PKGBUILD	2018-02-21 20:40:30.577039973 +0100
++++ b/PKGBUILD	2018-02-21 20:42:35.027633492 +0100
+@@ -26,7 +26,8 @@ prepare() {
+ 
+ build() {
+   cd ${pkgname}-${pkgver}
+-  ./configure --prefix=/usr
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --without-guile --prefix=/usr \
++    LDFLAGS="-lc $LDFLAGS"
+   make
+ }
+ 

@@ -1,11 +1,53 @@
---- a/PKGBUILD	2018-02-20 09:22:44.020330630 +0100
-+++ b/PKGBUILD	2018-02-20 09:23:03.883548285 +0100
-@@ -19,7 +19,7 @@ validpgpkeys=('D8692123C4065DEA5E0F3AB52
+--- a/PKGBUILD	2018-02-22 08:03:14.564663999 +0100
++++ b/PKGBUILD	2018-02-22 08:26:37.783659199 +0100
+@@ -10,16 +10,19 @@ arch=(x86_64)
+ url="https://www.gnupg.org"
+ license=('LGPL')
+ depends=('glibc' 'sh')
+-source=(ftp://ftp.gnupg.org/gcrypt/libgpg-error/${pkgname}-${pkgver}.tar.bz2{,.sig})
++source=(ftp://ftp.gnupg.org/gcrypt/libgpg-error/${pkgname}-${pkgver}.tar.bz2{,.sig}
++        lock-obj-pub.riscv64-unknown-linux-gnu.h)
+ 	#ftp://ftp.franken.de/pub/crypt/mirror/ftp.gnupg.org/gcrypt/libgpg-error/${pkgname}-${pkgver}.tar.bz2)
+ # https://www.gnupg.org/download/integrity_check.html
+ sha1sums=('a428758999ff573e62d06892e3d2c0b0f335787c'
+-          'SKIP')
++          'SKIP'
++          'e7a718fdcca098d2ae5331313aef59b2d3031929')
+ validpgpkeys=('D8692123C4065DEA5E0F3AB5249B39D24F25E3B6'  # Werner Koch
                '031EC2536E580D8EA286A9F22071B08A33BD3F06') # NIIBE Yutaka (GnuPG Release Key) <gniibe@fsij.org>
  build() {
    cd ${pkgname}-${pkgver}
 -  ./configure --prefix=/usr
++  cp ${srcdir}/lock-obj-pub.riscv64-unknown-linux-gnu.h src/syscfg/
 +  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
    make
  }
  
+--- /dev/null	2018-02-17 13:03:10.829324204 +0100
++++ b/lock-obj-pub.riscv64-unknown-linux-gnu.h	2018-02-22 08:24:44.383181745 +0100
+@@ -0,0 +1,25 @@
++## lock-obj-pub.riscv64-unknown-linux-gnu.h
++## File created by gen-posix-lock-obj - DO NOT EDIT
++## To be included by mkheader into gpg-error.h
++
++typedef struct
++{
++  long _vers;
++  union {
++    volatile char _priv[40];
++    long _x_align;
++    long *_xp_align;
++  } u;
++} gpgrt_lock_t;
++
++#define GPGRT_LOCK_INITIALIZER {1,{{0,0,0,0,0,0,0,0, \
++                                    0,0,0,0,0,0,0,0, \
++                                    0,0,0,0,0,0,0,0, \
++                                    0,0,0,0,0,0,0,0, \
++                                    0,0,0,0,0,0,0,0}}}
++##
++## Local Variables:
++## mode: c
++## buffer-read-only: t
++## End:
++##

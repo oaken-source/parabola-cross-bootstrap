@@ -1,0 +1,28 @@
+--- a/PKGBUILD	2018-02-21 19:19:53.058846708 +0100
++++ b/PKGBUILD	2018-02-21 19:25:13.491197185 +0100
+@@ -28,10 +28,11 @@ sha1sums=('SKIP'
+ build() {
+   cd "${srcdir}/${pkgname}"
+ 
++  CC=@TARGET@-gcc \
+   make USE_NETTLE=no USE_GNUTLS=no CCOPTOPT="$CFLAGS"
+   # fix perl-sgmls
+   sed -i -e 's#sgmlspl#sgmlspl.pl#g' "${srcdir}/${pkgname}/doc/Makefile"
+-  make -C doc man
++  #make -C doc man
+ }
+ 
+ package() {
+@@ -41,9 +42,9 @@ package() {
+ 
+   install -m755 arping clockdiff ping rarpd rdisc tftpd tracepath "${pkgdir}"/usr/bin/
+ 
+-  install -dm755 "${pkgdir}"/usr/share/man/man8
+-  install -m644 doc/{arping,clockdiff,ping,rarpd,rdisc,tftpd,tracepath}.8 \
+-     "${pkgdir}"/usr/share/man/man8/
++  #install -dm755 "${pkgdir}"/usr/share/man/man8
++  #install -m644 doc/{arping,clockdiff,ping,rarpd,rdisc,tftpd,tracepath}.8 \
++  #   "${pkgdir}"/usr/share/man/man8/
+ 
+   # FS#24768
+   install -dm755 "${pkgdir}"/etc/xinetd.d/

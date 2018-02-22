@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-02-21 18:06:57.527211918 +0100
++++ b/PKGBUILD	2018-02-21 18:15:29.193976527 +0100
+@@ -9,7 +9,7 @@ pkgdesc="Transport Independent RPC libra
+ arch=('x86_64')
+ url="http://libtirpc.sourceforge.net/"
+ license=('BSD')
+-depends=('krb5')
++depends=()
+ backup=('etc/netconfig')
+ # git tree: git://linux-nfs.org/~steved/libtirpc
+ source=(http://downloads.sourceforge.net/sourceforge/libtirpc/${pkgname}-${pkgver}.tar.bz2
+@@ -27,7 +27,7 @@ prepare() {
+ 
+ build() {
+   cd ${pkgname}-${pkgver}
+-  ./configure --prefix=/usr --sysconf=/etc
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --disable-gssapi --prefix=/usr --sysconf=/etc
+   make
+ }
+ 

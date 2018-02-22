@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-02-21 21:02:19.655165323 +0100
++++ b/PKGBUILD	2018-02-21 21:03:34.912657502 +0100
+@@ -28,6 +28,7 @@ build() {
+   cd "${srcdir}"/$pkgname-${pkgver}
+ 
+   ./configure \
++    --host=@TARGET@ --build=@BUILDHOST@ \
+     --prefix=/usr \
+     --sbindir=/usr/bin \
+     --enable-libargon2 \

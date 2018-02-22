@@ -1,0 +1,28 @@
+--- a/PKGBUILD	2018-02-21 18:38:07.422735642 +0100
++++ b/PKGBUILD	2018-02-21 18:39:52.272267854 +0100
+@@ -31,11 +31,17 @@ prepare () {
+ 
+ build() {
+   cd $srcdir/Linux-PAM-$pkgver
+-  ./configure --libdir=/usr/lib --sbindir=/usr/bin --disable-db
++  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
++    > build-aux/config.sub
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --libdir=/usr/lib --sbindir=/usr/bin --disable-db
+   make
+ 
+   cd $srcdir/pam_unix2-2.9.1
+   # modify flags to build against the pam compiled here, not a system lib.
++  CFLAGS=${CFLAGS/-march=rv64gc}
++  CFLAGS=${CFLAGS/-mabi=lp64d}
++  CXXFLAGS=${CXXFLAGS/-march=rv64gc}
++  CXXFLAGS=${CXXFLAGS/-mabi=lp64d}
+   ./configure \
+       CFLAGS="$CFLAGS -I$srcdir/Linux-PAM-$pkgver/libpam/include/" \
+       LDFLAGS="$LDFLAGS -L$srcdir/Linux-PAM-$pkgver/libpam/.libs/" \
+@@ -64,5 +70,5 @@ package() {
+   chmod +s $pkgdir/usr/bin/unix_chkpwd
+   # remove doc which is not used anymore
+   # FS #40749
+-  rm $pkgdir/usr/share/doc/Linux-PAM/sag-pam_userdb.html
++  rm -f $pkgdir/usr/share/doc/Linux-PAM/sag-pam_userdb.html
+ }

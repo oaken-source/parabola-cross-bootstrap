@@ -1,48 +1,43 @@
---- a/PKGBUILD	2018-02-14 14:48:10.984568398 +0100
-+++ b/PKGBUILD	2018-02-14 14:48:49.988404621 +0100
+--- a/PKGBUILD	2018-02-21 10:54:25.542580179 +0100
++++ b/PKGBUILD	2018-02-21 11:05:05.742063167 +0100
 @@ -6,16 +6,16 @@
  # NOTE: valgrind requires rebuilt with each major glibc version
  
  pkgbase=glibc
 -pkgname=(glibc lib32-glibc)
+-pkgver=2.26
+-pkgrel=11
 +pkgname=(glibc)
- pkgver=2.26
- pkgrel=11
++pkgver=2.27
++pkgrel=1
  arch=(x86_64)
  url='http://www.gnu.org/software/libc'
  license=(GPL LGPL)
 -makedepends=(git gd lib32-gcc-libs)
-+makedepends=(git)
++makedepends=(git gd)
  options=(!strip staticlibs)
--_commit=de51f431ed6226ec68ca76e578f2cbd55b6262cb
+ _commit=de51f431ed6226ec68ca76e578f2cbd55b6262cb
 -source=(git+https://sourceware.org/git/glibc.git#commit=${_commit}
-+_snapshot=20171231
-+source=(git+https://github.com/riscv/riscv-gnu-toolchain#tag=v${_snapshot}
++source=(git+https://sourceware.org/git/glibc.git#tag=glibc-$pkgver
          locale.gen.txt
          locale-gen
          lib32-glibc.conf
-@@ -29,7 +29,14 @@ md5sums=('SKIP'
+@@ -27,7 +27,7 @@ md5sums=('SKIP'
+          'dc0d3ad59aeaaf591b085a77de6e03e9')
+ 
  prepare() {
-   mkdir -p glibc-build lib32-glibc-build
+-  mkdir -p glibc-build lib32-glibc-build
++  mkdir -p glibc-build
  
--  cd glibc
-+  cd riscv-gnu-toolchain
-+
-+  # fix submodule repo paths
-+  sed -i 's#\.\.#git://github.com/riscv#' .gitmodules
-+  # update submodule
-+  git submodule update --init riscv-glibc
-+
-+  cd riscv-glibc
+   cd glibc
  
-   local i; for i in ${source[@]}; do
-     case ${i%::*} in
-@@ -44,12 +51,12 @@ prepare() {
+@@ -44,12 +44,13 @@ prepare() {
  build() {
    local _configure_flags=(
        --prefix=/usr
 -      --with-headers=/usr/include
-+      --with-headers=/usr/@TARGET@/include
++      --host=@TARGET@ --build=@BUILDHOST@
++      --with-headers=@SYSROOT@/usr/include
        --with-bugurl=https://bugs.archlinux.org/
        --enable-add-ons
        --enable-bind-now
@@ -52,17 +47,7 @@
        --enable-obsolete-nsl
        --enable-obsolete-rpc
        --enable-stack-protector=strong
-@@ -68,7 +75,8 @@ build() {
-   # remove fortify for building libraries
-   CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
- 
--  "$srcdir/glibc/configure" \
-+  "$srcdir/riscv-gnu-toolchain/riscv-glibc/configure" \
-+      --host=@TARGET@ --build=@BUILDHOST@ \
-       --libdir=/usr/lib \
-       --libexecdir=/usr/lib \
-       ${_configure_flags[@]}
-@@ -83,38 +91,6 @@ build() {
+@@ -83,38 +84,6 @@ build() {
    echo "CC += -D_FORTIFY_SOURCE=2" >> configparms
    echo "CXX += -D_FORTIFY_SOURCE=2" >> configparms
    make
@@ -101,25 +86,7 @@
  }
  
  check() {
-@@ -143,7 +119,7 @@ package_glibc() {
-   make -C glibc-build install_root="$pkgdir" install
-   rm -f "$pkgdir"/etc/ld.so.{cache,conf}
- 
--  cd glibc
-+  cd riscv-gnu-toolchain/riscv-glibc
- 
-   install -dm755 "$pkgdir"/usr/lib/{locale,systemd/system,tmpfiles.d}
-   install -m644 nscd/nscd.conf "$pkgdir/etc/nscd.conf"
-@@ -158,7 +134,7 @@ package_glibc() {
-   # create /etc/locale.gen
-   install -m644 "$srcdir/locale.gen.txt" "$pkgdir/etc/locale.gen"
-   sed -e '1,3d' -e 's|/| |g' -e 's|\\| |g' -e 's|^|#|g' \
--    "$srcdir/glibc/localedata/SUPPORTED" >> "$pkgdir/etc/locale.gen"
-+    "$srcdir/riscv-gnu-toolchain/riscv-glibc/localedata/SUPPORTED" >> "$pkgdir/etc/locale.gen"
- 
-   # Do not strip the following files for improved debugging support
-   # ("improved" as in not breaking gdb and valgrind...):
-@@ -169,56 +145,20 @@ package_glibc() {
+@@ -169,56 +138,20 @@ package_glibc() {
  
    if check_option 'debug' n; then
      cd "$pkgdir"

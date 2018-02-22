@@ -1,0 +1,89 @@
+--- a/PKGBUILD	2018-02-21 21:13:06.562254936 +0100
++++ b/PKGBUILD	2018-02-22 09:32:22.835497788 +0100
+@@ -26,7 +26,6 @@ makedepends=('acl' 'cryptsetup' 'docbook
+              'meson' 'libseccomp' 'pcre2')
+ makedepends_i686=('gnu-efi-libs')
+ makedepends_x86_64=('gnu-efi-libs')
+-options=('strip')
+ validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4')  # Lennart Poettering <lennart@poettering.net>
+ source=('git://github.com/systemd/systemd-stable.git'
+         'git://github.com/systemd/systemd.git' # pull in for tags, backports & reverts
+@@ -146,10 +145,30 @@ build() {
+     CXXFLAGS+=" -fno-lto"
+   fi
+ 
++  cat > cross-file << EOF
++[binaries]
++c = '@TARGET@-gcc'
++cpp = '@TARGET@-g++'
++ar = '@TARGET@-ar'
++strip = '@TARGET@-strip'
++pkgconfig = 'pkg-config'
++[host_machine]
++system = 'linux'
++cpu_family = 'riscv64'
++cpu = 'rv64gc'
++endian = 'little'
++EOF
++
+   local meson_options=(
+     -Daudit=false
+     -Dima=false
+     -Dlz4=true
++    -Dlibcryptsetup=false
++    -Dlibiptc=false
++    -Dxkbcommon=false
++    -Dlibcurl=false
++    -Dman=false
++    -Dtests=false
+ 
+     -Ddbuspolicydir=/usr/share/dbus-1/system.d
+     -Ddefault-dnssec=no
+@@ -166,7 +185,7 @@ build() {
+     meson_options+=(-Dgnuefi=true)
+   fi
+ 
+-  arch-meson "$pkgbase-stable" build "${meson_options[@]}"
++  arch-meson "$pkgbase-stable" build "${meson_options[@]}" --cross-file cross-file
+ 
+   ninja -C build
+ 
+@@ -181,28 +200,21 @@ build() {
+   mv -T "$srcdir/dest"/{systemd,libsystemd}/usr/include/systemd
+   mv -T "$srcdir/dest"/{systemd,libsystemd}/usr/lib/pkgconfig/libsystemd.pc
+   mv "$srcdir/dest"/systemd/usr/lib/libsystemd.so*      -t "$srcdir/dest"/libsystemd/usr/lib/
+-  mv "$srcdir/dest"/systemd/usr/share/man/man3/{SD,sd}* -t "$srcdir/dest"/libsystemd/usr/share/man/man3/
+ 
+   install -dm755 "$srcdir/dest/libudev"/usr/{lib/pkgconfig,share/man/man3,include}
+   mv -T "$srcdir/dest"/{systemd,libudev}/usr/include/libudev.h
+   mv -T "$srcdir/dest"/{systemd,libudev}/usr/lib/pkgconfig/libudev.pc
+   mv "$srcdir/dest"/systemd/usr/lib/libudev.so*       -t "$srcdir/dest"/libudev/usr/lib/
+-  mv "$srcdir/dest"/systemd/usr/share/man/man3/*udev* -t "$srcdir/dest"/libudev/usr/share/man/man3/
+ 
+   local nssmodule
+   for nssmodule in systemd myhostname mymachines resolve; do
+     install -dm755 "$srcdir/dest/nss-$nssmodule"/usr/{lib,share/man/man8}
+-    mv -t "$srcdir/dest"/nss-$nssmodule/usr/share/man/man8/ -- \
+-       "$srcdir/dest"/systemd/usr/share/man/man8/nss-$nssmodule.8 \
+-       "$srcdir/dest"/systemd/usr/share/man/man8/libnss_$nssmodule.*.8
+     mv "$srcdir/dest"/systemd/usr/lib/libnss_$nssmodule.so* -t "$srcdir/dest"/nss-$nssmodule/usr/lib/
+   done
+ 
+   install -dm755 "$srcdir/dest/systemd-sysvcompat"/usr/share/man/man8
+-  mv "$srcdir/dest/systemd"/usr/share/man/man8/{telinit,halt,reboot,poweroff,runlevel,shutdown}.8 \
+-     -t "$srcdir/dest/systemd-sysvcompat"/usr/share/man/man8
+ 
+-  rmdir "$srcdir/dest"/systemd/usr/{share/man/man3,lib/pkgconfig,include}
++  rmdir "$srcdir/dest"/systemd/usr/{share/man/man3,lib/pkgconfig,include} || true
+ }
+ 
+ package_systemd() {
+@@ -267,7 +279,7 @@ package_systemd() {
+   chmod 0750     "$pkgdir"/usr/share/polkit-1/rules.d
+ 
+   # we'll create this on installation
+-  rmdir "$pkgdir/var/log/journal/remote"
++  rmdir "$pkgdir/var/log/journal/remote" || true
+ 
+   # ship default policy to leave services disabled
+   echo 'disable *' >"$pkgdir"/usr/lib/systemd/system-preset/99-default.preset

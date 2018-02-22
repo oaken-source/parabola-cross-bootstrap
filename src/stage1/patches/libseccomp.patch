@@ -616,7 +616,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
              '190c6dd821ddad9ee0aefa720a86dd744acd279c095b07f099a7e0e72d1ce543')
  
  prepare() {
-@@ -21,11 +27,16 @@ prepare() {
+@@ -21,11 +27,17 @@ prepare() {
  
    # arch: add the statx syscall
    patch -Np1 < "${srcdir}"/0001-arch-add-the-statx-syscall.patch
@@ -630,7 +630,8 @@ diff -rupN a/PKGBUILD b/PKGBUILD
    cd $pkgname-$pkgver
 -  ./configure --prefix=/usr
 +  autoreconf
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr \
++    CPPFLAGS="-D__riscv64 $CPPFLAGS"
    make
  }
  

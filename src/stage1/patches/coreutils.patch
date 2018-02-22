@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-02-21 19:08:59.405457046 +0100
++++ b/PKGBUILD	2018-02-21 19:09:17.544717891 +0100
+@@ -34,6 +34,7 @@ prepare() {
+ build() {
+   cd $pkgname-$pkgver
+   ./configure \
++      --host=@TARGET@ --build=@BUILDHOST@ \
+       --prefix=/usr \
+       --libexecdir=/usr/lib \
+       --with-openssl \

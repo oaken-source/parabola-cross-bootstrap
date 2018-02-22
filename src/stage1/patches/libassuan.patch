@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-22 08:47:40.952261927 +0100
++++ b/PKGBUILD	2018-02-22 08:47:59.137271654 +0100
+@@ -17,7 +17,7 @@ sha256sums=('47f96c37b4f2aac289f0bc1bacf
+ 
+ build() {
+ 	cd "${srcdir}/${pkgname}-${pkgver}"
+-	./configure --prefix=/usr
++	./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
+ 	make
+ }
+ 

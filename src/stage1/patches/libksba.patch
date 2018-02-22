@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-22 08:48:42.189301069 +0100
++++ b/PKGBUILD	2018-02-22 08:49:09.748324230 +0100
+@@ -16,7 +16,7 @@ sha1sums=('a98385734a0c3f5b713198e8d6e6e
+ validpgpkeys=('D8692123C4065DEA5E0F3AB5249B39D24F25E3B6') # Werner Koch
+ build() {
+   cd $srcdir/$pkgname-$pkgver
+-  ./configure --prefix=/usr
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
+   make
+ }
+ 

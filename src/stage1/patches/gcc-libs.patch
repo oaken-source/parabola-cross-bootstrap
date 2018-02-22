@@ -1,5 +1,5 @@
---- a/PKGBUILD	2018-02-20 07:33:26.821634820 +0100
-+++ b/PKGBUILD	2018-02-20 08:15:13.516269932 +0100
+--- a/PKGBUILD	2018-02-21 11:24:36.137279640 +0100
++++ b/PKGBUILD	2018-02-21 13:55:40.607963706 +0100
 @@ -5,7 +5,7 @@
  # toolchain build order: linux-api-headers->glibc->binutils->gcc->binutils->glibc
  # NOTE: libtool requires rebuilt with each new gcc version
@@ -18,13 +18,19 @@
  checkdepends=(dejagnu inetutils)
  options=(!emptydirs)
  #source=(https://sources.archlinux.org/other/gcc/gcc-${pkgver/+/-}.tar.xz{,.sig}
-@@ -77,16 +77,18 @@ build() {
+@@ -77,16 +77,24 @@ build() {
    CFLAGS=${CFLAGS/-pipe/}
    CXXFLAGS=${CXXFLAGS/-pipe/}
  
 -  "$srcdir/gcc/configure" --prefix=/usr \
-+  sed -i 's#export_sym_check="\$gcc_cv_objdump#export_sym_check="@TARGET@-objdump#' $srcdir/gcc/libcc1/configure
++  CFLAGS=${CFLAGS/-march=rv64gc}
++  CFLAGS=${CFLAGS/-mabi=lp64d}
++  CXXFLAGS=${CXXFLAGS/-march=rv64gc}
++  CXXFLAGS=${CXXFLAGS/-mabi=lp64d}
++
++  sed -i 's/gcc_cv_objdump/ac_cv_prog_OBJDUMP/' $srcdir/gcc/libcc1/configure
 +  "$srcdir/gcc/configure" --host=@TARGET@ --build=@BUILDHOST@ --target=@TARGET@ --prefix=/usr \
++      --with-arch=rv64gc --with-api=lp64d \
 +      --disable-bootstrap \
        --libdir=/usr/lib \
        --libexecdir=/usr/lib \
@@ -40,7 +46,7 @@
        --with-system-zlib \
        --with-isl \
        --enable-__cxa_atexit \
-@@ -101,7 +103,7 @@ build() {
+@@ -101,7 +109,7 @@ build() {
        --enable-install-libiberty \
        --with-linker-hash-style=gnu \
        --enable-gnu-indirect-function \
@@ -49,7 +55,7 @@
        --disable-werror \
        --enable-checking=release \
        --enable-default-pie \
-@@ -134,32 +136,19 @@ package_gcc-libs() {
+@@ -134,32 +142,19 @@ package_gcc-libs() {
    rm -f "$pkgdir/$_libdir/libgcc_eh.a"
  
    for lib in libatomic \
@@ -83,7 +89,7 @@
    # Install Runtime Library Exception
    install -Dm644 "$srcdir/gcc/COPYING.RUNTIME" \
      "$pkgdir/usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION"
-@@ -169,7 +158,6 @@ package_gcc() {
+@@ -169,7 +164,6 @@ package_gcc() {
    pkgdesc="The GNU Compiler Collection - C and C++ frontends"
    depends=("gcc-libs=$pkgver-$pkgrel" 'binutils>=2.28' libmpc)
    groups=('base-devel')
@@ -91,7 +97,7 @@
    provides=($pkgname-multilib)
    replaces=($pkgname-multilib)
    options+=(staticlibs)
-@@ -183,22 +171,18 @@ package_gcc() {
+@@ -183,22 +177,18 @@ package_gcc() {
    install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
@@ -116,7 +122,7 @@
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -208,26 +192,13 @@ package_gcc() {
+@@ -208,26 +198,13 @@ package_gcc() {
    ln -s /${_libdir}/liblto_plugin.so \
      "$pkgdir/usr/lib/bfd-plugins/"
  
@@ -143,7 +149,7 @@
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -239,147 +210,8 @@ package_gcc() {
+@@ -239,147 +216,8 @@ package_gcc() {
    install -Dm755 "$srcdir/c89" "$pkgdir/usr/bin/c89"
    install -Dm755 "$srcdir/c99" "$pkgdir/usr/bin/c99"
  

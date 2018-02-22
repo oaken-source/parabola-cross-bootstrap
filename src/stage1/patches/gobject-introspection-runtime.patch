@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-02-22 08:44:15.636283407 +0100
++++ b/PKGBUILD	2018-02-22 08:45:01.928254941 +0100
+@@ -28,7 +28,7 @@ prepare() {
+   
+ build() {
+   cd $pkgbase
+-  ./configure --prefix=/usr --disable-static --enable-doctool --enable-gtk-doc
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --disable-static --disable-doctool --disable-gtk-doc
+   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+   make
+ }

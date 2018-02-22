@@ -1,5 +1,5 @@
---- a/PKGBUILD	2018-02-15 08:27:03.495301696 +0100
-+++ b/PKGBUILD	2018-02-15 08:28:25.326381705 +0100
+--- a/PKGBUILD	2018-02-20 22:35:38.140743909 +0100
++++ b/PKGBUILD	2018-02-20 22:37:37.399728944 +0100
 @@ -4,30 +4,32 @@
  # Contributor: Jan de Groot <jgc@archlinux.org>
  
@@ -21,11 +21,12 @@
  build() {
 -  cd $pkgname-$pkgver
 -  ./configure --prefix=/usr --disable-static \
+-    --enable-pax_emutramp
 +  cd riscv-libffi/libffi-3.1
 +  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
 +    > config.sub
 +  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --disable-static \
-     --enable-pax_emutramp
++    --enable-pax_emutramp CPPFLAGS="-D__riscv64 $CPPFLAGS"
    make
  }
  

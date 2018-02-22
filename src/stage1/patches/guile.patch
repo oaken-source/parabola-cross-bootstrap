@@ -1,0 +1,13 @@
+--- a/PKGBUILD	2018-02-21 19:43:16.351151414 +0100
++++ b/PKGBUILD	2018-02-21 20:12:32.677790467 +0100
+@@ -21,6 +21,10 @@ sha256sums=('87ee07caef33c97ddc74bf3c29c
+ build() {
+   cd $pkgname-$pkgver
+   ./configure --prefix=/usr \
++    --host=@TARGET@ --build=@BUILDHOST@ \
++    --with-libltdl-prefix=/usr/@TARGET@/usr \
++    --with-libgmp-prefix=/usr/riscv64-linux-gun/usr \
++    --with-libunistring-prefix=/usr/@TARGET@/usr \
+     --disable-static  \
+     --disable-error-on-warning
+   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool

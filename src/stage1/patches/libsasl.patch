@@ -1,5 +1,5 @@
---- a/PKGBUILD	2018-02-20 19:33:10.397502335 +0100
-+++ b/PKGBUILD	2018-02-20 19:33:51.535246841 +0100
+--- a/PKGBUILD	2018-02-21 17:27:36.799321403 +0100
++++ b/PKGBUILD	2018-02-21 17:29:23.770185480 +0100
 @@ -91,6 +91,7 @@ build() {
    popd
  
@@ -8,3 +8,17 @@
        --sbin=/usr/bin \
        --mandir=/usr/share/man \
        --infodir=/usr/share/info \
+@@ -115,11 +116,11 @@ build() {
+       --with-mysql=/usr \
+       --with-pgsql=/usr/lib \
+       --with-sqlite3=/usr/lib \
+-      --enable-ldapdb \
++      --disable-ldapdb \
+       --disable-macos-framework \
+       --with-pam \
+       --with-saslauthd=/var/run/saslauthd \
+-      --with-ldap \
++      --without-ldap \
+       --with-dblib=gdbm \
+       --with-configdir=/etc/sasl2:/etc/sasl:/usr/lib/sasl2 \
+       --sysconfdir=/etc \
