@@ -1,3 +1,5 @@
+This patch is specific to riscv64. I am not sure why this is needed tbh.
+
 --- a/PKGBUILD	2018-02-20 22:35:38.140743909 +0100
 +++ b/PKGBUILD	2018-02-20 22:37:37.399728944 +0100
 @@ -4,30 +4,32 @@

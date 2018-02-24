@@ -12,10 +12,10 @@
  
    cd $srcdir/pam_unix2-2.9.1
    # modify flags to build against the pam compiled here, not a system lib.
-+  CFLAGS=${CFLAGS/-march=rv64gc}
-+  CFLAGS=${CFLAGS/-mabi=lp64d}
-+  CXXFLAGS=${CXXFLAGS/-march=rv64gc}
-+  CXXFLAGS=${CXXFLAGS/-mabi=lp64d}
++  CFLAGS=${CFLAGS/-march=@GCC_MARCH@}
++  CFLAGS=${CFLAGS/-mabi=@GCC_MABI@}
++  CXXFLAGS=${CXXFLAGS/-march=@GCC_MARCH@}
++  CXXFLAGS=${CXXFLAGS/-mabi=@GCC_MABI@}
    ./configure \
        CFLAGS="$CFLAGS -I$srcdir/Linux-PAM-$pkgver/libpam/include/" \
        LDFLAGS="$LDFLAGS -L$srcdir/Linux-PAM-$pkgver/libpam/.libs/" \

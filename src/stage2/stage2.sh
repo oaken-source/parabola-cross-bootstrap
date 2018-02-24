@@ -121,6 +121,8 @@ EOF
 
     # substitute common variables
     sed -i "s#@TARGET@#$CHOST#g; \
+            s#@GCC_MARCH@#$GCC_MARCH#g; \
+            s#@GCC_MABI@#$GCC_MABI#g; \
             s#@BUILDHOST@#$_buildhost#g; \
             s#@SYSROOT@#$_sysroot#g; \
             s#@LINUX_ARCH@#$LINUX_ARCH#g" \

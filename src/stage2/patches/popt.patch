@@ -5,8 +5,8 @@
  build() {
    cd "${srcdir}/${pkgname}-${pkgver}"
 +  LDFLAGS="${LDFLAGS/-L[^ ]*}"
-+   curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
-+     > config.sub
++  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
++    > config.sub
 -  ./configure --prefix=/usr
 +  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
    make

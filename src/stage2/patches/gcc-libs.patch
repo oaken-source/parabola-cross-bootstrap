@@ -23,14 +23,14 @@
    CXXFLAGS=${CXXFLAGS/-pipe/}
  
 -  "$srcdir/gcc/configure" --prefix=/usr \
-+  CFLAGS=${CFLAGS/-march=rv64gc}
-+  CFLAGS=${CFLAGS/-mabi=lp64d}
-+  CXXFLAGS=${CXXFLAGS/-march=rv64gc}
-+  CXXFLAGS=${CXXFLAGS/-mabi=lp64d}
++  CFLAGS=${CFLAGS/-march=@GCC_MARCH@}
++  CFLAGS=${CFLAGS/-mabi=@GCC_MABI@}
++  CXXFLAGS=${CXXFLAGS/-march=@GCC_MARCH@}
++  CXXFLAGS=${CXXFLAGS/-mabi=@GCC_MABI@}
 +
 +  sed -i 's/gcc_cv_objdump/ac_cv_prog_OBJDUMP/' $srcdir/gcc/libcc1/configure
 +  "$srcdir/gcc/configure" --host=@TARGET@ --build=@BUILDHOST@ --target=@TARGET@ --prefix=/usr \
-+      --with-arch=rv64gc --with-api=lp64d \
++      --with-arch=@GCC_MARCH@ --with-api=@GCC_MABI@ \
 +      --disable-bootstrap \
        --libdir=/usr/lib \
        --libexecdir=/usr/lib \

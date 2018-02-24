@@ -21,8 +21,8 @@
 +pkgconfig = 'pkg-config'
 +[host_machine]
 +system = 'linux'
-+cpu_family = 'riscv64'
-+cpu = 'rv64gc'
++cpu_family = '@CARCH@'
++cpu = '@GCC_MARCH@'
 +endian = 'little'
 +EOF
 +

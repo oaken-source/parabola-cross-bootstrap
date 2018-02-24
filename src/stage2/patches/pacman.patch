@@ -1,3 +1,6 @@
+This patch is specific to riscv64, and should probably be unified / merged to
+the upstream pkgbuild.
+
 --- a/PKGBUILD	2018-02-22 14:14:29.100909778 +0100
 +++ b/PKGBUILD	2018-02-22 14:16:13.593060069 +0100
 @@ -45,6 +45,7 @@ sha256sums=('dfd36086ad68564bcd977f4a1fa
