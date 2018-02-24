@@ -2,23 +2,100 @@
 parabola-riscv64-bootstrap
 ==========================
 
-an attempt at creating a self-contained parabola GNU/Linux-libre system on the
-riscv64 architecture.
+1. Introduction
+---------------
 
-prerequesites
--------------
+This project is an attempt to bootstrap a self-contained parabola
+GNU/Linux-libre system for the riscv64 architecture. The scripts are created
+with the goal to be as generic as possible, to make future porting effort
+easier. Feel free to adapt them to target any architecture you want by
+modifying the variables in create.sh
 
-to create parabola-riscv64, you need a riscv64-linux-gnu toolchain. On parabola
-GNU/Linux-libre, this toolchain has been pre-packaged and can be installed by
-invoking:
+The build process is split into several stages, the rationale of which is
+outlined in section 2 below.
 
-  $> pacman -S riscv64-linux-gnu-{gcc,gdb}
+To initiate a complete build of all stages, run:
+  $> sudo ./create
 
-the PKGBUILDS used for building these packages, as well as documentation
-towards the process of bootstrapping the toolchain is included in the
-subdirectory `toolchain-pkgbuilds'.
+To discard fragments from an earlier run and start from a clean slate, run:
+  $> sudo rm -rf build && sudo ./create
 
-bootstrapping
--------------
+To capture the build output and debug issues, it may be useful to run:
+  &> sudo ./create 2>&1 | tee create.out
 
-to bootstrap parabola-riscv64, run the create.sh script, and hope for the best.
+1.1. A note to the reader
+-------------------------
+
+The scripts assume to be running on a parabola GNU/Linux-libre system, and may
+fail in subtle and unexpected ways otherwise. They also may fail in subtle and
+unexpected ways anyway, because they are modifying upstream PKGBUILD files,
+which are very volatile and change without notice. When adapting this project
+to a new architecture, or a different flavour of archlinux, execrcise caution,
+pay close attention to any output, and be prepared to fix and modify patches
+and scripts.
+
+Also, if you found this project useful, and want to chat about anything, you
+can email me at <andreas@grapentin.org>.
+
+1.2. Current state of the project
+---------------------------------
+
+The stage2 cross-compiled base-devel makepkg chroot is finished, and stage3 is
+primed to begin with native compilation of base-devel in the chroot.
+
+2. Build Stages
+---------------
+
+The following subsections outline the reasoning behind the separate bootstrap
+stages. More details about *how* things are done may be gathered from reading
+the inline comments of the respective scripts.
+
+2.1. Stage 1
+------------
+
+The first stage creates a cross-compile toolchain for the target triplet
+defined in $CHOST, consisting of binutils, linux-libre-api-headers, gcc and
+glibc. This toolchain has been pre-packaged for riscv64-linux-gnu on parabola
+GNU/Linux-libre and may be installed by running:
+
+  $> sudo pacman -S riscv64-linux-gnu-{gcc,gdb}
+
+In any case, the toolchain will be bootstrapped by the stage1.sh script, unless
+it is already installed. The scripts will check for $CHOST-ar and $CHOST-gcc in
+$PATH to determine whether binutils and gcc are installed, and will then
+proceed to look for the following files in $CHOST-gcc's sysroot:
+
+  $sysroot/lib/libc.so.6              # for $CHOST-glibc
+  $sysroot/include/linux/kernel.h     # for $CHOST-linux-libre-api-headers
+
+If your system contains these files, the toolchain bootstrap process will be
+skipped. Otherwise, the scripts will create a new toolchain as follows:
+
+ - compile $CHOST-binutils
+ - compile $CHOST-linux-libre-api-headers
+ - compile $CHOST-gcc-bootstrap, without glibc dependency
+ - cross-compile $CHOST-glibc using $CHOST-gcc-bootstrap
+ - compile $CHOST-gcc against the created $CHOST-glibc
+
+The sysroot of the created toolchain is set as /usr/$CHOST.
+
+The $CHOST-{binutils,linux-libre-api-headers,gcc,glibc} packages are installed
+as regular pacman packages on the build system, and are not automatically
+removed by the scripts after the build is completed (or has failed).
+
+For more information, you might want to check the PKGBUILD files located in
+src/stage1/toolchain-pkgbuilds/*.
+
+2.2. Stage 2
+------------
+
+The second stage uses the cross-compile toolchain created in Stage 1 to
+bootstrap the base-devel group of packages to prepare a complete build chroot
+in which Stage 3 will then proceed to bootstrap native packages.
+
+This stage uses the upstream PKGBUILD files from the archlinux and parabola
+GNU/Linux-libre repositories, along with a hand-crafted patch for each package
+to allow it to cross-compile to the target architecture. Since the upstream
+PKGBUILDS change frequently, and the patches are unlikely to be maintained once
+the initial bootstrap is done and stable, they can only represent a snapshot in
+time and will probably cease to function in the near future.

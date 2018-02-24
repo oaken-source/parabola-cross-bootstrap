@@ -1,12 +1,8 @@
 # Maintainer: David P. <megver83@parabola.nu>
 # Maintainer (Arch): Anatol Pomozov <anatol.pomozov@gmail.com>
-# Contributor: Andreas Grapentin <andreas@grapentin.org>
 
-# parabola changes and rationale:
-#  - adapted from aarch64-linux-libre-gnu-binutils
-
-_target_arch=riscv
-_target=riscv64-linux-gnu
+_target_arch=@LINUX_ARCH@
+_target=@CHOST@
 pkgname=$_target-linux-libre-api-headers
 _pkgver=4.15-gnu
 

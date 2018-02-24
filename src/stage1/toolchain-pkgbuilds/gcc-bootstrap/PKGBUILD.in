@@ -1,24 +1,20 @@
 # Maintainer (Arch): Anatol Pomozov <anatol.pomozov@gmail.com>
-# Contributor: Andreas Grapentin <andreas@grapentin.org>
 
-# parabola changes and rationale:
-#  - adapted from aarch64-linux-gnu-gcc
-
-_target=riscv64-linux-gnu
-pkgname=$_target-gcc
-pkgver=7.3.0
+_target=@CHOST@
+pkgname=$_target-gcc-bootstrap
+pkgver=7.3.1
 _islver=0.18
 pkgrel=1
 _snapshot=7-20180215
-pkgdesc='The GNU Compiler Collection - cross compiler for riscv64 target'
+pkgdesc='The GNU Compiler Collection - cross compiler for @CARCH@ target - bootstrap version. only used to build initial glibc and compiler'
 arch=(x86_64)
 url='http://gcc.gnu.org/'
 license=(GPL LGPL FDL)
-depends=($_target-binutils $_target-glibc libmpc zlib)
+depends=($_target-binutils libmpc zlib)
 makedepends=(gmp mpfr)
-options=(!emptydirs !strip staticlibs)
-conflicts=($pkgname-bootstrap)
-replaces=($pkgname-bootstrap)
+options=(!emptydirs !strip)
+provides=(${pkgname%-bootstrap})
+conflicts=(${pkgname%-bootstrap})
 source=(#ftp://gcc.gnu.org/pub/gcc/releases/gcc-$pkgver/gcc-$pkgver.tar.bz2
         ftp://gcc.gnu.org/pub/gcc/snapshots/$_snapshot/gcc-$_snapshot.tar.xz
         http://isl.gforge.inria.fr/isl-$_islver.tar.bz2)
@@ -65,35 +61,40 @@ build() {
       --with-build-sysroot=/usr/$_target \
       --libdir=/usr/lib --libexecdir=/usr/lib \
       --target=$_target --host=$CHOST --build=$CHOST \
+		  --with-newlib \
+		  --without-headers \
+		  --disable-shared \
+		  --disable-threads \
       --with-system-zlib \
-		  --enable-shared \
 		  --enable-tls \
-		  --enable-languages=c,c++,fortran \
+		  --enable-languages=c \
+		  --disable-libatomic \
 		  --disable-libmudflap \
 		  --disable-libssp \
 		  --disable-libquadmath \
+		  --disable-libgomp \
 		  --disable-nls \
 		  --disable-bootstrap \
       --enable-checking=release \
       --disable-multilib
 
-  make
+	make inhibit-libc=true all-gcc
+	make inhibit-libc=true all-target-libgcc
 }
 
 package() {
   cd gcc-build
 
-  make DESTDIR="$pkgdir" install
+	make DESTDIR="$pkgdir" inhibit-libc=true install-gcc
+	make DESTDIR="$pkgdir" inhibit-libc=true install-target-libgcc
 
   # strip target binaries
-  find "$pkgdir"/usr/lib/gcc/$_target/ "$pkgdir"/usr/$_target/lib -type f -and \( -name \*.a -or -name \*.o \) -exec $_target-objcopy -R .comment -R .note -R .debug_info -R .debug_aranges -R .debug_pubnames -R .debug_pubtypes -R .debug_abbrev -R .debug_line -R .debug_str -R .debug_ranges -R .debug_loc '{}' \;
+  find "$pkgdir"/usr/lib/gcc/$_target/ -type f -and \( -name \*.a -or -name \*.o \) -exec $_target-objcopy -R .comment -R .note -R .debug_info -R .debug_aranges -R .debug_pubnames -R .debug_pubtypes -R .debug_abbrev -R .debug_line -R .debug_str -R .debug_ranges -R .debug_loc '{}' \;
 
   # strip host binaries
   find "$pkgdir"/usr/bin/ "$pkgdir"/usr/lib/gcc/$_target/ -type f -and \( -executable \) -exec strip '{}' \;
 
   # Remove files that conflict with host gcc package
-  rm -r "$pkgdir"/usr/lib/libcc1.so{,.0,.0.0.0}
   rm -r "$pkgdir"/usr/share/man/man7
   rm -r "$pkgdir"/usr/share/info
-  rm -r "$pkgdir"/usr/share/gcc-$pkgver
 }

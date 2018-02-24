@@ -20,32 +20,31 @@
 
 set -euo pipefail
 
+# target options
+export CARCH=riscv64
+export CHOST=riscv64-linux-gnu
+export LINUX_ARCH=riscv
+export GCC_MARCH=rv64gc
+export GCC_MABI=lp64d
+
+# common directories
+export startdir="$(pwd)"
+export topbuilddir="$startdir"/build
+export topsrcdir="$startdir"/src
+
+# output control
 . src/feedback.sh
 
 [ $(id -u) -ne 0 ] && die "must be root"
 [ -z "${SUDO_USER:-}" ] && die "SUDO_USER must be set in environment"
 
-export _startdir="$(pwd)"
-export _builddir="$_startdir"/build
-export _srcdir="$_startdir"/src
-export _target=riscv64-linux-gnu
-export _arch=${_target%%-*}
-export _linux_arch=riscv
-export _archflags="-march=rv64gc -mabi=lp64d"
-# to begin stage1, we only need to bootstrap base-devel
-export _groups="base-devel"
+mkdir -p "$topbuilddir"
+chown $SUDO_USER "$topbuilddir"
 
-msg "preparing builddir"
-mkdir -vp "$_builddir"
-chown -v $SUDO_USER "$_builddir"
+# Stage 1: prepare cross toolchain
+./src/stage1/stage1.sh 2>&1 | tee "$topbuilddir"/stage1.log
 
-# stage 0: prepare host
-./src/stage0.sh
+# Stage 2: cross-compile base-devel
+./src/stage2/stage2.sh 2>&1 | tee "$topbuilddir"/stage2.log
 
-export _buildhost=$(gcc -dumpmachine)
-export _sysroot=$($_target-gcc --print-sysroot)
-
-# stage 1: cross-makepkg a base system
-./src/stage1.sh
-
-echo "all done :)"
+msg "all done."

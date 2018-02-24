@@ -20,12 +20,14 @@
 
 set -euo pipefail
 
-msg "creating transitive dependency tree for $_groups"
+msg "preparing transitive dependency tree for $_groups"
 
-if [ ! -f "$_deptree" ]; then
+echo -n "checking for complete deptree ... "
+[ -f "$_deptree".FULL ] && _have_deptree=yes || _have_deptree=no
+echo $_have_deptree
+
+if [ "x$_have_deptree" == "xno" ]; then
   declare -A _tree
-
-  # remove a couple painful things from base we don't need for stage1
   _frontier=($(pacman -Sg $_groups | awk '{print $2}'))
 
   while [ ${#_frontier[@]} -gt 0 ]; do
@@ -36,6 +38,8 @@ if [ ! -f "$_deptree" ]; then
     # if seen before, skip, otherwise create entry in dependency tree
     [[ -v _tree[$_pkgname] ]] && continue
     _tree[$_pkgname]=""
+
+    echo -en "\r  pkges: ${#_tree[@]} "
 
     _pkgdeps=$(pacman -Si $_pkgname | grep '^Depends' | cut -d':' -f2 | sed 's/None//')
 
@@ -50,6 +54,10 @@ if [ ! -f "$_deptree" ]; then
     done
   done
 
+  echo -en "\r"
+
+  # following is a bit of magic to untangle the build dependencies within base-devel
+
   # resolve gmp / gcc-libs cyclic dependency
   _tree[gcc-libs]="${_tree[gcc-libs]} libmpc mpfr gmp"
   _tree[gmp]="${_tree[gmp]/gcc-libs}"
@@ -57,6 +65,9 @@ if [ ! -f "$_deptree" ]; then
   # resolve systemd / util-linux dependency cycle
   _tree[libutil-linux]="${_tree[libutil-linux]/libsystemd}"
   _tree[util-linux]="${_tree[util-linux]/libsystemd}"
+  for d in nss-{systemd,resolve,my{hostname,machines}} lib{udev,systemd{,-standalone}}; do
+    _tree[$d]="${_tree[$d]} libutil-linux pcre2"
+  done
 
   # building libcap needs pam and unixodbc in sysroot
   _tree[libcap]="${_tree[libcap]} pam unixodbc"
@@ -91,11 +102,12 @@ if [ ! -f "$_deptree" ]; then
   for i in "${!_tree[@]}"; do
     echo "${i} : [${_tree[$i]} ]" >> "$_deptree".FULL
   done
-  # we need filesystem to be early, for directories and symlinks
+
+  # pull filesystem to the front, for directories and symlinks
   sed -i "/^filesystem/d; 1ifilesystem : [${_tree[filesystem]} ]" "$_deptree".FULL
-  cp "$_deptree"{.FULL,}
 fi
 
-[ -n "${CONTINUE:-}" ] || cp "$_deptree"{.FULL,}
+[ -f "$_deptree" ] || cp "$_deptree"{.FULL,}
 
-echo "total pkges: $(cat "$_deptree".FULL | wc -l)"
+echo "  total pkges:      $(cat "$_deptree".FULL | wc -l)"
+echo "  remaining pkges:  $(cat "$_deptree" | wc -l)"

@@ -20,27 +20,41 @@
 
 set -euo pipefail
 
-check_bin() {
-  echo -n "checking for $1 ... "
-  type -p $1 >/dev/null && echo yes || (echo no && die "missing ${2:-$1} in \$PATH")
-}
+msg "preparing a $CARCH cross makepkg environment"
 
-msg "performing host system sanity checks"
+echo -n "checking for makepkg-$CARCH.sh ... "
+[ -f "$_builddir"/makepkg-$CARCH.sh ] && _have_makepkg=yes || _have_makepkg=no
+echo $_have_makepkg
 
-check_bin awk
-check_bin bsdtar
-check_bin gcc
-check_bin makepkg
-check_bin pacman
-check_bin repo-add
-check_bin sudo
-check_bin tput
-check_bin wget
+if [ "x$_have_makepkg" == "xno" ]; then
+  rm -rf "$_makepkgdir"/makepkg-$CARCH
+  mkdir -p "$_makepkgdir"/makepkg-$CARCH
+  pushd "$_makepkgdir"/makepkg-$CARCH >/dev/null
 
-check_bin help2man # for building libtool
-check_bin meson    # for building systemd
-check_bin tclsh    # for building sqlite
-check_bin xmlto    # for building ca-certificates-mozilla
+  # fetch pacman package to excract makepkg
+  pacman -Sw --noconfirm --cachedir . pacman
+  mkdir tmp && bsdtar -C tmp -xf pacman-*.pkg.tar.xz
 
-[ "x$_arch" != "x$(uname -m)" ] && check_bin $_target-gcc
-[ "x$_arch" != "x$(uname -m)" ] && check_bin qemu-$_arch-static
+  # install makepkg
+  cp -Lv tmp/usr/bin/makepkg "$_builddir"/makepkg-$CARCH.sh
+
+  # patch run_pacman in makepkg, we cannot pass the pacman root to it as parameter ATM
+  sed -i "s#\"\$PACMAN_PATH\"#& --config $_chrootdir/etc/pacman.conf -r $_chrootdir#" \
+    "$_builddir"/makepkg-$CARCH.sh
+  popd >/dev/null
+fi
+
+# create a sane makepkg.conf
+cat "$_srcdir"/makepkg.conf.in > "$_builddir"/makepkg-$CARCH.conf
+cat >> "$_builddir"/makepkg-$CARCH.conf << EOF
+CARCH="$CARCH"
+CHOST="$CHOST"
+CFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
+CXXFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
+PKGDEST="$_pkgdest"
+LOGDEST="$_logdest"
+EOF
+
+# create buildlog destination
+mkdir -p "$_logdest"
+chown $SUDO_USER "$_logdest"

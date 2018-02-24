@@ -1,15 +1,11 @@
 # $Id$
 # Maintainer (Arch): Anatol Pomozov <anatol.pomozov@gmail.com>
-# Contributor: Andreas Grapentin <andreas@grapentin.org>
 
-# parabola changes and rationale:
-#  - adapted from aarch64-linux-gnu-binutils
-
-_target=riscv64-linux-gnu
+_target=@CHOST@
 pkgname=$_target-binutils
 pkgver=2.30
 pkgrel=1
-pkgdesc='A set of programs to assemble and manipulate binary and object files for the riscv64 target'
+pkgdesc='A set of programs to assemble and manipulate binary and object files for the @CARCH@ target'
 arch=(x86_64)
 url='http://www.gnu.org/software/binutils/'
 license=(GPL)

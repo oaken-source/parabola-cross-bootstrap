@@ -1,15 +1,11 @@
 # Maintainer (Arch): Anatol Pomozov
-# Contributor: Andreas Grapentin <andreas@grapentin.org>
 
-# parabola changes and rationale:
-#  - adapted from aarch64-linux-gnu-glibc
-
-_target=riscv64-linux-gnu
+_target=@CHOST@
 pkgname=$_target-glibc
 pkgver=2.27
 pkgrel=1
 _commit=be176490b818b65b5162c332eb6b581690b16e5c
-pkgdesc="GNU C Library riscv64 target"
+pkgdesc="GNU C Library @CARCH@ target"
 arch=('x86_64')
 url='http://www.gnu.org/software/libc/'
 license=('GPL' 'LGPL')
@@ -33,8 +29,10 @@ build() {
   echo "rootsbindir=/bin" >> configparms
 
   # remove hardening options for building libraries
-  export CFLAGS="-U_FORTIFY_SOURCE -mlittle-endian -O2"
-  export CPPFLAGS="-U_FORTIFY_SOURCE -O2"
+  export CFLAGS="${CFLAGS/-fstack-protector-strong}"
+  export CFLAGS="${CFLAGS/-fno-plt}"
+  export CXXFLAGS="${CFLAGS/-fstack-protector-strong}"
+  export CXXFLAGS="${CFLAGS/-fno-plt}"
   unset LD_LIBRARY_PATH
 
   export BUILD_CC=gcc
@@ -53,7 +51,7 @@ build() {
       --with-headers=/usr/$_target/include \
       --with-bugurl=https://bugs.archlinux.org/ \
       --enable-add-ons \
-      --enable-obsolete-rpc
+      --enable-obsolete-rpc \
       --enable-kernel=3.0.0 \
       --enable-bind-now \
       --disable-profile \
