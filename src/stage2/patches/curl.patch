@@ -1,5 +1,14 @@
---- a/PKGBUILD	2018-02-22 14:06:02.824355452 +0100
-+++ b/PKGBUILD	2018-02-22 14:06:30.941303407 +0100
+--- a/PKGBUILD	2018-02-24 21:54:37.769350140 +0100
++++ b/PKGBUILD	2018-02-26 18:19:33.801102562 +0100
+@@ -12,7 +12,7 @@ pkgdesc="An URL retrieval utility and li
+ arch=('x86_64')
+ url="https://curl.haxx.se"
+ license=('MIT')
+-depends=('ca-certificates' 'krb5' 'libssh2' 'openssl' 'zlib' 'libpsl' 'libnghttp2')
++depends=('ca-certificates' 'libssh2' 'openssl' 'zlib' 'libpsl' 'libnghttp2')
+ provides=('libcurl.so')
+ options=('strip' 'debug')
+ source=("https://curl.haxx.se/download/$pkgname-$pkgver.tar.gz"{,.asc})
 @@ -25,6 +25,7 @@ build() {
    cd "$pkgname-$pkgver"
  

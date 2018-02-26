@@ -1,5 +1,14 @@
---- a/PKGBUILD	2018-02-22 11:28:46.689144570 +0100
-+++ b/PKGBUILD	2018-02-22 11:29:56.353864179 +0100
+--- a/PKGBUILD	2018-02-24 21:11:19.960151917 +0100
++++ b/PKGBUILD	2018-02-26 18:22:05.483328241 +0100
+@@ -9,7 +9,7 @@ pkgdesc='Collection of simple PIN or pas
+ url='http://gnupg.org/related_software/pinentry/'
+ arch=('x86_64')
+ license=('GPL')
+-depends=('ncurses' 'libcap' 'libassuan' 'libsecret')
++depends=('ncurses' 'libcap' 'libassuan')
+ makedepends=('gtk2' 'qt5-base' 'gcr')
+ optdepends=('gtk2: gtk2 backend'
+             'qt5-base: qt backend'
 @@ -22,15 +22,16 @@ validpgpkeys=('D8692123C4065DEA5E0F3AB52
  build() {
  	cd "${srcdir}/${pkgname}-${pkgver}"

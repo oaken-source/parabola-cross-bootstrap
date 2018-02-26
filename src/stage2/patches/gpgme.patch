@@ -4,10 +4,10 @@
  # Contributor: Sarah Hay <sarah@archlinux.org>
  
  pkgbase=gpgme
--pkgname=(gpgme qgpgme python-gpgme)
+-pkgname=(gpgme qgpgme python-gpgme python2-gpgme)
 +pkgname=(gpgme)
  pkgver=1.10.0
- pkgrel=1
+ pkgrel=2
  pkgdesc="A C wrapper library for GnuPG"
 @@ -20,6 +20,7 @@ validpgpkeys=('D8692123C4065DEA5E0F3AB52
  build() {

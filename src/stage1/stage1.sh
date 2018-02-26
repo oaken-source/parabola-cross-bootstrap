@@ -27,26 +27,31 @@ _builddir="$topbuilddir"/stage1
 _srcdir="$topsrcdir"/stage1
 
 function check_toolchain() {
-  echo -n "checking for complete $CHOST prefixed toolchain ... "
-  local _toolchain=yes
-  local _missing=
-  if ! type -p $CHOST-ar >/dev/null; then
-    _toolchain=no
-    _missing="$_missing binutils"
-  fi
-  if ! type -p $CHOST-gcc >/dev/null; then
-    _toolchain=no
-    _missing="$_missing gcc glibc linux-libre-api-headers"
-  elif [ ! -e $($CHOST-gcc --print-sysroot)/lib/libc.so.6 ]; then
-    _toolchain=no
-    _missing="$_missing glibc"
-  elif [ ! -f $($CHOST-gcc --print-sysroot)/include/linux/kernel.h ]; then
-    _toolchain=no
-    _missing="$_missing linux-libre-api-headers"
-  fi
-  echo $_toolchain
-  [ "x$_toolchain" == "xyes" ] || echo "  missing:$_missing"
-  [ "x$_toolchain" == "xyes" ]
+  echo -n "checking for $CHOST binutils ... "
+  local _have_binutils
+  type -p $CHOST-ar >/dev/null && _have_binutils=yes || _have_binutils=no
+  echo $_have_binutils
+  [ "x$_have_binutils" == "xyes" ] || return 1
+
+  echo -n "checking for $CHOST gcc ... "
+  local _have_gcc
+  type -p $CHOST-gcc >/dev/null && _have_gcc=yes || _have_gcc=no
+  echo $_have_gcc
+  [ "x$_have_gcc" == "xyes" ] || return 1
+
+  local _sysroot=$($CHOST-gcc --print-sysroot)
+
+  echo -n "checking for $CHOST linux api headers ... "
+  local _have_headers
+  [ -e "$_sysroot"/include/linux/kernel.h ] && _have_headers=yes || _have_headers=no
+  echo $_have_headers
+  [ "x$_have_headers" == "xyes" ] || return 1
+
+  echo -n "checking for $CHOST glibc ... "
+  local _have_glibc
+  [ -e "$_sysroot"/lib/libc.so.6 ] && _have_glibc=yes || _have_glibc=no
+  echo $_have_glibc
+  [ "x$_have_glibc" == "xyes" ] || return 1
 }
 
 # simply return if the toolchain is already there

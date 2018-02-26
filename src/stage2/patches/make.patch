@@ -1,5 +1,14 @@
---- a/PKGBUILD	2018-02-21 20:40:30.577039973 +0100
-+++ b/PKGBUILD	2018-02-21 20:42:35.027633492 +0100
+--- a/PKGBUILD	2018-02-24 21:10:21.233328122 +0100
++++ b/PKGBUILD	2018-02-26 18:14:31.968676490 +0100
+@@ -10,7 +10,7 @@ arch=('x86_64')
+ url="http://www.gnu.org/software/make"
+ license=('GPL3')
+ groups=('base-devel')
+-depends=('glibc' 'guile')
++depends=('glibc')
+ source=(ftp://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.bz2{,.sig}
+         guile-2.2.patch)
+ md5sums=('15b012617e7c44c0ed482721629577ac'
 @@ -26,7 +26,8 @@ prepare() {
  
  build() {

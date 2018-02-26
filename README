@@ -89,13 +89,44 @@ src/stage1/toolchain-pkgbuilds/*.
 2.2. Stage 2
 ------------
 
-The second stage uses the cross-compile toolchain created in Stage 1 to
-bootstrap the base-devel group of packages to prepare a complete build chroot
-in which Stage 3 will then proceed to bootstrap native packages.
+The second stage uses the toolchain created in Stage 1 to cross-compile the
+transitive dependency hull around the packages listed in base-devel group of
+packages to bootstrap a complete cross-makepkg chroot, in which native packages
+can then be built. In other words, we cross-compile everything in base-devel
+and dependencies to get something that librechroot and libremakepkg can work
+with.
 
-This stage uses the upstream PKGBUILD files from the archlinux and parabola
-GNU/Linux-libre repositories, along with a hand-crafted patch for each package
-to allow it to cross-compile to the target architecture. Since the upstream
-PKGBUILDS change frequently, and the patches are unlikely to be maintained once
-the initial bootstrap is done and stable, they can only represent a snapshot in
-time and will probably cease to function in the near future.
+First, a skeleton chroot is created, where packages are installed into, and
+where new packages will be built and linked into. A sane makepkg.conf is
+created, and a modified makepkg script to work in the prepared chroot root
+directory. For the cross toolchain to find include headers and libraries, the
+/usr directory of the chroot is mounted into the toolchain sysroot temporarily
+for the Stage 2 build, and the contents of /usr in the toolchain sysroot are
+copied into the chroot directory.
+
+Second, the transitive dependency tree of the base-devel package group is
+created, and slightly modified in a way that resolves any cyclic dependencies,
+and preserves a somewhat sane build-order of the packages. Some packages that
+are too painful to cross-compile are removed entirely.
+
+Then, the package tree is traversed and packages are built in order, using
+specially created patches to cross-compile for the given $CHOST target. Most of
+these patches are agnostic to the actual target triplet, but some contain
+changes dedicated to the riscv64 target, such as changed package versions when
+upstream does not support the target yet, or additional compile time settings
+for the target architecture, when the configure scripts of the package are not
+smart enough. This is the point where the most work will probably need to be
+done when porting this project to another architecture.
+
+As a final note, this stage uses the upstream PKGBUILD files from the archlinux
+and parabola GNU/Linux-libre repositories, along with a hand-crafted patch for
+each package to allow it to cross-compile to the target architecture. Since the
+upstream PKGBUILDS change frequently, and the patches are unlikely to be
+maintained once the initial bootstrap is done and stable, they can only
+represent a snapshot in time and will probably cease to function in the near
+future. Exercise caution.
+
+2.3. Stage 3
+------------
+
+tbd.

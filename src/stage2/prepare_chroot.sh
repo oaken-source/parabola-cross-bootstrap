@@ -34,10 +34,10 @@ if [ "x$_have_chroot" == "xno" ]; then
     | sed "s#$_chrootdir#\$_chrootdir#"
 
   # create an empty local package directory
-  tar -czf "$_chrootdir"/packages/$CARCH/repo.db.tar.gz -T /dev/null
-  tar -czf "$_chrootdir"/packages/$CARCH/repo.files.tar.gz -T /dev/null
-  ln -s repo.db.tar.gz "$_chrootdir"/packages/$CARCH/repo.db
-  ln -s repo.files.tar.gz "$_chrootdir"/packages/$CARCH/repo.files
+  tar -czf "$_chrootdir"/packages/$CARCH/cross.db.tar.gz -T /dev/null
+  tar -czf "$_chrootdir"/packages/$CARCH/cross.files.tar.gz -T /dev/null
+  ln -s cross.db.tar.gz "$_chrootdir"/packages/$CARCH/cross.db
+  ln -s cross.files.tar.gz "$_chrootdir"/packages/$CARCH/cross.files
 
   # copy sysroot /usr to chroot
   cp -ar "$_sysroot"/usr "$_chrootdir"/
@@ -53,7 +53,7 @@ GPGDir = $_chrootdir/etc/pacman.d/gnupg
 HookDir = $_chrootdir/etc/pacman.d/hooks
 Architecture = $CARCH
 
-[repo]
+[cross]
 SigLevel = Never
 Server = file://${_pkgdest%/$CARCH}/\$arch
 EOF

@@ -20,25 +20,21 @@
 
 set -euo pipefail
 
-# output formatting
-export BO=$(tput bold)
-export NO=$(tput sgr0)
-export RE=$(tput setf 4)
-export GR=$(tput setf 2)
-export WH=$(tput setf 7)
+msg "Entering Stage 3"
 
-# messaging functions
-die() { echo "$BO$RE==> ERROR:$WH $*$NO" 1>&2 ; exit 1; }
-msg() { echo "$BO$GR==>$WH $*$NO"; }
-export -f die msg
+# set a bunch of convenience variables
+_builddir="$topbuilddir"/stage3
+_srcdir="$topsrcdir"/stage3
+_chrootdir="$_builddir"/$CARCH-root
+_deptree="$_builddir"/DEPTREE
+_groups="base-devel"
+_pkgdest="$_builddir"/packages
+_logdest="$_builddir"/makepkglogs
 
-# host system check helpers
-check_exe() {
-  echo -n "checking for $1 ... "
-  type -p $1 >/dev/null && echo yes || (echo no && die "missing ${2:-$1} in \$PATH")
-}
-check_file() {
-  echo -n "checking for $1 ... "
-  [ -f "$1" ] && echo yes || (echo no && die "missing ${2:-$1} in filesystem")
-}
-export -f check_exe check_file
+check_exe librechroot
+check_exe librelib
+check_exe libremakepkg
+
+# prepare for the build
+. "$_srcdir"/prepare_libretools.sh
+

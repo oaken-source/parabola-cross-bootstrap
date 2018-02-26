@@ -42,9 +42,12 @@ mkdir -p "$topbuilddir"
 chown $SUDO_USER "$topbuilddir"
 
 # Stage 1: prepare cross toolchain
-./src/stage1/stage1.sh 2>&1 | tee "$topbuilddir"/stage1.log
+./src/stage1/stage1.sh
 
 # Stage 2: cross-compile base-devel
-./src/stage2/stage2.sh 2>&1 | tee "$topbuilddir"/stage2.log
+./src/stage2/stage2.sh
+
+# Stage 3: libremakepkg native base-devel
+./src/stage3/stage3.sh
 
 msg "all done."

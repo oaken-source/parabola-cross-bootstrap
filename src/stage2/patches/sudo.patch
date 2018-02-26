@@ -1,5 +1,14 @@
---- a/PKGBUILD	2018-02-22 14:00:23.267098752 +0100
-+++ b/PKGBUILD	2018-02-22 14:00:49.069077232 +0100
+--- a/PKGBUILD	2018-02-24 21:00:44.772836909 +0100
++++ b/PKGBUILD	2018-02-26 18:21:18.315946756 +0100
+@@ -12,7 +12,7 @@ arch=('x86_64')
+ url="https://www.sudo.ws/sudo/"
+ license=('custom')
+ groups=('base-devel')
+-depends=('glibc' 'libgcrypt' 'pam' 'libldap')
++depends=('glibc' 'libgcrypt' 'pam')
+ backup=('etc/sudoers' 'etc/pam.d/sudo')
+ install=$pkgname.install
+ source=(https://www.sudo.ws/sudo/dist/$pkgname-$_sudover.tar.gz{,.sig}
 @@ -30,6 +30,7 @@ build() {
    cd "$srcdir/$pkgname-$_sudover"
  
