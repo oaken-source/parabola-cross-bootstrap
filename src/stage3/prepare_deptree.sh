@@ -26,15 +26,6 @@ echo -n "checking for complete deptree ... "
 [ -f "$_deptree".FULL ] && _have_deptree=yes || _have_deptree=no
 echo $_have_deptree
 
-function add_dep() {
-  # translate dependency string to actual package
-  realdep=$(pacman --noconfirm -Sw "$2" | grep '^Packages' | awk '{print $3}')
-  realdep=${realdep%-*-*}
-  # add dependency to tree and frontier
-  _tree[$1]="${_tree[$1]} $realdep"
-  _frontier+=($realdep)
-}
-
 if [ "x$_have_deptree" == "xno" ]; then
   declare -A _tree
   _frontier=($(pacman -Sg $_groups | awk '{print $2}'))
@@ -52,16 +43,24 @@ if [ "x$_have_deptree" == "xno" ]; then
 
     _pkgdeps=$(pacman -Si $_pkgname | grep '^Depends' | cut -d':' -f2 | sed 's/None//')
 
-    # iterate dependencies for pkg
-    for _dep in $_pkgdeps; do
-      add_dep $_pkgname $_dep
-    done
-
-    # add some additional hand-picked dependencies
+    # add some additional build-time dependencies
+    _extra_deps=""
     case $_pkgname in
+      gcc-libs)
+        _extra_deps="dejagnu inetutils doxygen" ;;
       libffi)
-        add_dep $_pkgname dejagnu ;;
+        _extra_deps="dejagnu" ;;
     esac
+
+    # iterate dependencies for pkg
+    for _dep in $_pkgdeps $_extra_deps; do
+      # translate dependency string to actual package
+      realdep=$(pacman --noconfirm -Sw "$_dep" | grep '^Packages' | awk '{print $3}')
+      realdep=${realdep%-*-*}
+      # add dependency to tree and frontier
+      _tree[$_pkgname]="${_tree[$_pkgname]} $realdep"
+      _frontier+=($realdep)
+    done
   done
 
   # write package dependency tree

@@ -43,10 +43,29 @@ if [ "x$_have_deptree" == "xno" ]; then
 
     _pkgdeps=$(pacman -Si $_pkgname | grep '^Depends' | cut -d':' -f2 | sed 's/None//')
 
+    # add some additional build-time dependencies
+    _extra_deps=""
+    case $_pkgname in
+      gcc-libs)
+        _extra_deps="libmpc mpfr gmp" ;;
+      iptables)
+        _extra_deps="libnfnetlink lidnfnetfilter_conntrack" ;;
+      libcap)
+        _extra_deps="pam unixodbc" ;;
+      libpsl)
+        _extra_deps="publicsuffix-list" ;;
+      libutil-linux)
+        _extra_deps="pam shadow coreutils libcap-ng" ;;
+      nss-*|libudev|libsystemd*)
+        _extra_deps="libutil-linux pcre2" ;;
+      sqlite)
+        _extra_deps="tcl" ;;
+    esac
+
     # iterate dependencies for pkg
-    for dep in $_pkgdeps; do
+    for _dep in $_pkgdeps $_extra_deps; do
       # translate dependency string to actual package
-      realdep=$(pacman --noconfirm -Sw "$dep" | grep '^Packages' | awk '{print $3}')
+      realdep=$(pacman --noconfirm -Sw "$_dep" | grep '^Packages' | awk '{print $3}')
       realdep=${realdep%-*-*}
       # add dependency to tree and frontier
       _tree[$_pkgname]="${_tree[$_pkgname]} $realdep"
@@ -56,36 +75,12 @@ if [ "x$_have_deptree" == "xno" ]; then
 
   echo -en "\r"
 
-  # following is a bit of magic to untangle the build dependencies within base-devel
-
-  # resolve gmp / gcc-libs cyclic dependency
-  _tree[gcc-libs]="${_tree[gcc-libs]} libmpc mpfr gmp"
+  # following is a bit of magic to untangle the build dependencies
   _tree[gmp]="${_tree[gmp]/gcc-libs}"
   _tree[gmp]="${_tree[gmp]/bash}"
-  # resolve systemd / util-linux dependency cycle
-  _tree[libutil-linux]="${_tree[libutil-linux]/libsystemd}"
   _tree[util-linux]="${_tree[util-linux]/libsystemd}"
-  for d in nss-{systemd,resolve,my{hostname,machines}} lib{udev,systemd{,-standalone}}; do
-    _tree[$d]="${_tree[$d]} libutil-linux pcre2"
-  done
 
-  # building libcap needs pam and unixodbc in sysroot
-  _tree[libcap]="${_tree[libcap]} pam unixodbc"
-  _tree[unixodbc]=" readline libtool"
-  # building libpsl requires publicsuffix-list in sysroot
-  _tree[libpsl]="${_tree[libpsl]} publicsuffix-list"
-  _tree[publicsuffix-list]=""
-  # building libutil-linux needs a bunch of stuff in sysroot
-  _tree[libutil-linux]="${_tree[util-linux]/libutil-linux}"
-  # building sqlite requires tcl in sysroot
-  _tree[sqlite]="${_tree[sqlite]} tcl"
-  _tree[tcl]=" zlib"
-  # building iptables requires libnfnetlink and libnetfilter_conntrack in sysroot
-  _tree[iptables]="${_tree[iptables]} libnfnetlink libnetfilter_conntrack "
-  _tree[libnfnetlink]=" glibc"
-  _tree[libnetfilter_conntrack]=" libnfnetlink libmnl"
-
-  # we build stage1 without guile, gc, libsecret, libldap and krb5
+  # we build stage2 without guile, gc, libsecret, libldap and krb5
   _tree[make]="${_tree[make]/guile}"
   _tree[pinentry]="${_tree[pinentry]/libsecret}"
   _tree[sudo]="${_tree[sudo]/libldap}"
