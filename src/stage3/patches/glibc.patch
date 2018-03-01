@@ -1,14 +1,15 @@
---- a/PKGBUILD	2018-03-01 07:07:23.230885844 +0100
-+++ b/PKGBUILD	2018-03-01 07:55:12.196458937 +0100
+--- a/PKGBUILD	2018-03-01 13:34:35.714316214 +0100
++++ b/PKGBUILD	2018-03-01 13:34:35.713316212 +0100
 @@ -6,16 +6,14 @@
  # NOTE: valgrind requires rebuilt with each major glibc version
  
  pkgbase=glibc
 -pkgname=(glibc lib32-glibc)
 -pkgver=2.26
+-pkgrel=11
 +pkgname=(glibc)
 +pkgver=2.27
- pkgrel=11
++pkgrel=1
  arch=(x86_64)
  url='http://www.gnu.org/software/libc'
  license=(GPL LGPL)

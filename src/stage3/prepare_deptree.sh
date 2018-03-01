@@ -26,6 +26,15 @@ echo -n "checking for complete deptree ... "
 [ -f "$_deptree".FULL ] && _have_deptree=yes || _have_deptree=no
 echo $_have_deptree
 
+function add_dep() {
+  # translate dependency string to actual package
+  realdep=$(pacman --noconfirm -Sw "$2" | grep '^Packages' | awk '{print $3}')
+  realdep=${realdep%-*-*}
+  # add dependency to tree and frontier
+  _tree[$1]="${_tree[$1]} $realdep"
+  _frontier+=($realdep)
+}
+
 if [ "x$_have_deptree" == "xno" ]; then
   declare -A _tree
   _frontier=($(pacman -Sg $_groups | awk '{print $2}'))
@@ -44,17 +53,16 @@ if [ "x$_have_deptree" == "xno" ]; then
     _pkgdeps=$(pacman -Si $_pkgname | grep '^Depends' | cut -d':' -f2 | sed 's/None//')
 
     # iterate dependencies for pkg
-    for dep in $_pkgdeps; do
-      # translate dependency string to actual package
-      realdep=$(pacman --noconfirm -Sw "$dep" | grep '^Packages' | awk '{print $3}')
-      realdep=${realdep%-*-*}
-      # add dependency to tree and frontier
-      _tree[$_pkgname]="${_tree[$_pkgname]} $realdep"
-      _frontier+=($realdep)
+    for _dep in $_pkgdeps; do
+      add_dep $_pkgname $_dep
     done
-  done
 
-  # modify build order a bit
+    # add some additional hand-picked dependencies
+    case $_pkgname in
+      libffi)
+        add_dep $_pkgname dejagnu ;;
+    esac
+  done
 
   # write package dependency tree
   truncate -s0 "$_deptree".FULL

@@ -119,11 +119,10 @@ EOF
         fi
       done
 
-      # patch for cross-compiling
-      if [ -f "$_srcdir"/patches/$_pkgname.patch ]; then
-        cp PKGBUILD{,.old}
+      # patch if necessary
+      cp PKGBUILD{,.old}
+      [ -f "$_srcdir"/patches/$_pkgname.patch ] && \
         patch -Np1 -i "$_srcdir"/patches/$_pkgname.patch
-      fi
 
       # substitute common variables
       _config="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"

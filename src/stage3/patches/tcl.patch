@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-03-01 14:03:27.177548304 +0100
++++ b/PKGBUILD	2018-03-01 14:03:27.177548304 +0100
+@@ -11,7 +11,7 @@ license=('custom')
+ depends=('zlib')
+ options=('staticlibs')
+ source=(http://downloads.sourceforge.net/sourceforge/tcl/tcl${pkgver}-src.tar.gz)
+-sha1sums=('0d014d97ca38534d4be1dfc6c563a7a3a6aa737f')
++sha1sums=('24c6e9477a83f2e67e3ac6fcd6fec6fbb393b289')
+ 
+ prepare() {
+   cd tcl${pkgver}
+@@ -21,7 +21,7 @@ prepare() {
+ 
+ build() {
+   cd tcl${pkgver}/unix
+-  [[ $CARCH == "x86_64" ]] && BIT="--enable-64bit"
++  [[ $CARCH == *"64" ]] && BIT="--enable-64bit"
+   ./configure --prefix=/usr --mandir=/usr/share/man --enable-threads $BIT
+   make
+ }
