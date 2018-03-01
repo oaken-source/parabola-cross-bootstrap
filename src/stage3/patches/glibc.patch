@@ -1,0 +1,168 @@
+--- a/PKGBUILD	2018-03-01 07:07:23.230885844 +0100
++++ b/PKGBUILD	2018-03-01 07:55:12.196458937 +0100
+@@ -6,16 +6,14 @@
+ # NOTE: valgrind requires rebuilt with each major glibc version
+ 
+ pkgbase=glibc
+-pkgname=(glibc lib32-glibc)
+-pkgver=2.26
++pkgname=(glibc)
++pkgver=2.27
+ pkgrel=11
+ arch=(x86_64)
+ url='http://www.gnu.org/software/libc'
+ license=(GPL LGPL)
+-makedepends=(git gd lib32-gcc-libs)
+ options=(!strip staticlibs)
+-_commit=de51f431ed6226ec68ca76e578f2cbd55b6262cb
+-source=(git+https://sourceware.org/git/glibc.git#commit=${_commit}
++source=(https://ftp.gnu.org/gnu/libc/glibc-$pkgver.tar.gz
+         locale.gen.txt
+         locale-gen
+         lib32-glibc.conf
+@@ -27,9 +25,9 @@ md5sums=('SKIP'
+          'dc0d3ad59aeaaf591b085a77de6e03e9')
+ 
+ prepare() {
+-  mkdir -p glibc-build lib32-glibc-build
++  mkdir -p glibc-build
+ 
+-  cd glibc
++  cd glibc-$pkgver
+ 
+   local i; for i in ${source[@]}; do
+     case ${i%::*} in
+@@ -49,7 +47,7 @@ build() {
+       --enable-add-ons
+       --enable-bind-now
+       --enable-lock-elision
+-      --enable-multi-arch
++      --disable-multi-arch
+       --enable-obsolete-nsl
+       --enable-obsolete-rpc
+       --enable-stack-protector=strong
+@@ -68,7 +66,7 @@ build() {
+   # remove fortify for building libraries
+   CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
+ 
+-  "$srcdir/glibc/configure" \
++  "$srcdir/glibc-$pkgver/configure" \
+       --libdir=/usr/lib \
+       --libexecdir=/usr/lib \
+       ${_configure_flags[@]}
+@@ -83,48 +81,6 @@ build() {
+   echo "CC += -D_FORTIFY_SOURCE=2" >> configparms
+   echo "CXX += -D_FORTIFY_SOURCE=2" >> configparms
+   make
+-
+-  cd "$srcdir/lib32-glibc-build"
+-  export CC="gcc -m32 -mstackrealign"
+-  export CXX="g++ -m32 -mstackrealign"
+-
+-  echo "slibdir=/usr/lib32" >> configparms
+-  echo "rtlddir=/usr/lib32" >> configparms
+-  echo "sbindir=/usr/bin" >> configparms
+-  echo "rootsbindir=/usr/bin" >> configparms
+-
+-  # remove fortify for building libraries
+-  CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
+-  CFLAGS=${CFLAGS/-fno-plt/}
+-  CXXFLAGS=${CXXFLAGS/-fno-plt/}
+-
+-  "$srcdir/glibc/configure" \
+-      --host=i686-pc-linux-gnu \
+-      --libdir=/usr/lib32 \
+-      --libexecdir=/usr/lib32 \
+-      ${_configure_flags[@]}
+-
+-  # build libraries with fortify disabled
+-  echo "build-programs=no" >> configparms
+-  make
+-
+-  # re-enable fortify for programs
+-  sed -i "/build-programs=/s#no#yes#" configparms
+-
+-  echo "CC += -D_FORTIFY_SOURCE=2" >> configparms
+-  echo "CXX += -D_FORTIFY_SOURCE=2" >> configparms
+-  make
+-
+-}
+-
+-check() {
+-  cd glibc-build
+-
+-  # remove fortify in preparation to run test-suite
+-  sed -i '/FORTIFY/d' configparms
+-
+-  # some failures are "expected"
+-  make check || true
+ }
+ 
+ package_glibc() {
+@@ -143,7 +99,7 @@ package_glibc() {
+   make -C glibc-build install_root="$pkgdir" install
+   rm -f "$pkgdir"/etc/ld.so.{cache,conf}
+ 
+-  cd glibc
++  cd glibc-$pkgver
+ 
+   install -dm755 "$pkgdir"/usr/lib/{locale,systemd/system,tmpfiles.d}
+   install -m644 nscd/nscd.conf "$pkgdir/etc/nscd.conf"
+@@ -158,7 +114,7 @@ package_glibc() {
+   # create /etc/locale.gen
+   install -m644 "$srcdir/locale.gen.txt" "$pkgdir/etc/locale.gen"
+   sed -e '1,3d' -e 's|/| |g' -e 's|\\| |g' -e 's|^|#|g' \
+-    "$srcdir/glibc/localedata/SUPPORTED" >> "$pkgdir/etc/locale.gen"
++    "$srcdir/glibc-$pkgver/localedata/SUPPORTED" >> "$pkgdir/etc/locale.gen"
+ 
+   # Do not strip the following files for improved debugging support
+   # ("improved" as in not breaking gdb and valgrind...):
+@@ -177,7 +133,7 @@ package_glibc() {
+     strip $STRIP_STATIC usr/lib/lib{anl,BrokenLocale,c{,_nonshared},crypt}.a \
+                         usr/lib/lib{dl,g,ieee,mcheck,nsl,pthread{,_nonshared}}.a \
+                         usr/lib/lib{resolv,rpcsvc,rt,util}.a \
+-                        usr/lib/lib{m-${pkgver},mvec{,_nonshared}}.a
++                        usr/lib/lib{m-${pkgver},mvec{,_nonshared}}.a || true
+ 
+     strip $STRIP_SHARED usr/lib/lib{anl,BrokenLocale,cidn,crypt}-${pkgver}.so \
+                         usr/lib/libnss_{compat,db,dns,files,hesiod,nis,nisplus}-*.so \
+@@ -186,39 +142,3 @@ package_glibc() {
+                         usr/lib/{audit,gconv}/*.so usr/lib/libmvec-*.so || true
+   fi
+ }
+-
+-package_lib32-glibc() {
+-  pkgdesc='GNU C Library (32-bit)'
+-  depends=("glibc=$pkgver")
+-
+-  cd lib32-glibc-build
+-
+-  make install_root="$pkgdir" install
+-  rm -rf "$pkgdir"/{etc,sbin,usr/{bin,sbin,share},var}
+-
+-  # We need to keep 32 bit specific header files
+-  find "$pkgdir/usr/include" -type f -not -name '*-32.h' -delete
+-
+-  # Dynamic linker
+-  install -d "$pkgdir/usr/lib"
+-  ln -s ../lib32/ld-linux.so.2 "$pkgdir/usr/lib/"
+-
+-  # Add lib32 paths to the default library search path
+-  install -Dm644 "$srcdir/lib32-glibc.conf" "$pkgdir/etc/ld.so.conf.d/lib32-glibc.conf"
+-
+-  # Symlink /usr/lib32/locale to /usr/lib/locale
+-  ln -s ../lib/locale "$pkgdir/usr/lib32/locale"
+-
+-  if check_option 'debug' n; then
+-    cd $pkgdir
+-    strip $STRIP_BINARIES usr/lib32/getconf/*
+-    strip $STRIP_STATIC usr/lib32/lib{anl,BrokenLocale,c{,_nonshared},crypt}.a \
+-                        usr/lib32/lib{dl,g,ieee,mcheck,nsl,pthread{,_nonshared}}.a \
+-                        usr/lib32/lib{resolv,rpcsvc,rt,util,m}.a
+-    strip $STRIP_SHARED usr/lib32/lib{anl,BrokenLocale,cidn,crypt}-${pkgver}.so \
+-                        usr/lib32/libnss_{compat,db,dns,files,hesiod,nis,nisplus}-*.so \
+-                        usr/lib32/lib{dl,m,nsl,resolv,rt,util}-${pkgver}.so \
+-                        usr/lib32/lib{memusage,pcprofile,SegFault}.so \
+-                        usr/lib32/{audit,gconv}/*.so || true
+-  fi
+-}

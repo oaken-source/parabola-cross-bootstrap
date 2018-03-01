@@ -1,0 +1,29 @@
+--- a/PKGBUILD	2018-02-28 11:35:48.000000000 +0100
++++ b/PKGBUILD	2018-02-28 11:36:16.214443244 +0100
+@@ -10,7 +10,8 @@ arch=('x86_64')
+ url="http://www.gnu.org/software/make"
+ license=('GPL3')
+ groups=('base-devel')
+-depends=('glibc' 'guile')
++depends=('glibc')
++options=(!strip debug)
+ source=(ftp://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.bz2{,.sig}
+         guile-2.2.patch)
+ md5sums=('15b012617e7c44c0ed482721629577ac'
+@@ -20,13 +21,15 @@ validpgpkeys=('3D2554F0A15338AB9AF1BB9D9
+ 
+ prepare() {
+   cd ${pkgname}-${pkgver}
++  # workaround for glibc-2.27 issues
++  sed -i '211,217 d; 219,229 d; 232 d' glob/glob.c
+   patch -p1 -i ${srcdir}/guile-2.2.patch
+   autoreconf -fi
+ }
+ 
+ build() {
+   cd ${pkgname}-${pkgver}
+-  ./configure --prefix=/usr
++  ./configure --without-guile --prefix=/usr
+   make
+ }
+ 

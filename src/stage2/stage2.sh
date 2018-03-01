@@ -31,7 +31,7 @@ _deptree="$_builddir"/DEPTREE
 _sysroot="$($CHOST-gcc --print-sysroot)"
 _buildhost="$(gcc -dumpmachine)"
 _groups="base-devel"
-_pkgdest="$_chrootdir"/packages/$CARCH
+_pkgdest="$_builddir"/packages/$CARCH
 _logdest="$_builddir"/makepkglogs
 
 # check for required programs
@@ -45,8 +45,8 @@ check_exe tar
 check_file /usr/share/aclocal/ax_append_flag.m4
 
 # prepare for the build
-. "$_srcdir"/prepare_chroot.sh
 . "$_srcdir"/prepare_makepkg.sh
+. "$_srcdir"/prepare_chroot.sh
 . "$_srcdir"/prepare_deptree.sh
 
 msg "starting $CARCH cross-build"
@@ -147,13 +147,6 @@ EOF
       sudo -u $SUDO_USER \
       "$_builddir"/makepkg-$CARCH.sh -fLC --config "$_builddir"/makepkg-$CARCH.conf \
         --skipchecksums --skippgpcheck --nocheck --nodeps
-
-      # construct pkgver from pkgbuild
-      _srcinfo=$(sudo -u $SUDO_USER makepkg --printsrcinfo)
-      _pkgver=$(echo "$_srcinfo" | grep 'pkgver =' | head -n1 | awk '{print $3}')
-      _pkgrel=$(echo "$_srcinfo" | grep 'pkgrel =' | head -n1 | awk '{print $3}')
-      _epoch=$(echo "$_srcinfo" | grep 'epoch =' | head -n1 | awk '{print $3}'): || _epoch=""
-      _pkgver="$_epoch$_pkgver-$_pkgrel"
     fi
 
     popd >/dev/null

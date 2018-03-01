@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-02-28 17:41:33.989077360 +0100
++++ b/PKGBUILD	2018-02-28 17:40:34.265666511 +0100
+@@ -11,7 +11,7 @@ pkgrel=1
+ pkgdesc="Miscellaneous system utilities for Linux"
+ url="https://www.kernel.org/pub/linux/utils/util-linux/"
+ arch=('x86_64')
+-makedepends=('systemd' 'python' 'libcap-ng')
++makedepends=('systemd' 'libcap-ng')
+ license=('GPL2')
+ options=('strip' 'debug')
+ validpgpkeys=('B0C64D14301CC6EFAEDF60E4E4B71D5EEC39C284')  # Karel Zak
+@@ -45,7 +45,7 @@ build() {
+               --enable-chfn-chsh \
+               --enable-write \
+               --enable-mesg \
+-              --with-python=3
++              --without-python
+ 
+   make
+ }

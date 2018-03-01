@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-02-28 11:29:30.000000000 +0100
++++ b/PKGBUILD	2018-02-28 11:34:24.502495515 +0100
+@@ -17,6 +17,7 @@ backup=(etc/bash.bash{rc,_logout} etc/sk
+ depends=('readline>=7.0' glibc ncurses)
+ optdepends=('bash-completion: for tab completion')
+ provides=('sh')
++options=(!strip debug)
+ source=(https://ftp.gnu.org/gnu/bash/bash-$_basever.tar.gz{,.sig}
+         dot.bashrc
+         dot.bash_profile
+@@ -34,6 +35,9 @@ fi
+ prepare() {
+   cd $pkgname-$_basever
+ 
++  @CONFIG_SUB@ > support/config.sub
++  @CONFIG_GUESS@ > support/config.guess
++
+   for (( _p=1; _p<=$((10#${_patchlevel})); _p++ )); do
+     msg "applying patch bash${_basever//.}-$(printf "%03d" $_p)"
+     patch -p0 -i ../bash${_basever//.}-$(printf "%03d" $_p)

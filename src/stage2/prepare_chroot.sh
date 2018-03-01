@@ -30,14 +30,7 @@ if [ "x$_have_chroot" == "xno" ]; then
   # create required directories
   mkdir -pv "$_chrootdir"/etc/pacman.d/{gnupg,hooks} \
             "$_chrootdir"/var/{lib/pacman,cache/pacman/pkg,log} \
-            "$_chrootdir"/packages/$CARCH \
     | sed "s#$_chrootdir#\$_chrootdir#"
-
-  # create an empty local package directory
-  tar -czf "$_chrootdir"/packages/$CARCH/cross.db.tar.gz -T /dev/null
-  tar -czf "$_chrootdir"/packages/$CARCH/cross.files.tar.gz -T /dev/null
-  ln -s cross.db.tar.gz "$_chrootdir"/packages/$CARCH/cross.db
-  ln -s cross.files.tar.gz "$_chrootdir"/packages/$CARCH/cross.files
 
   # copy sysroot /usr to chroot
   cp -ar "$_sysroot"/usr "$_chrootdir"/
@@ -60,9 +53,6 @@ EOF
 
   # test and initialize ALPM library
   pacman --config "$_chrootdir"/etc/pacman.conf -r "$_chrootdir" -Syyu
-
-  # make the package repository location writable to $SUDO_USER
-  chown -R $SUDO_USER "$_chrootdir"/packages
 fi
 
 # mount chroot /usr to sysroot

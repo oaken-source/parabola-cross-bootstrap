@@ -20,53 +20,47 @@
 
 set -euo pipefail
 
-msg "preparing a $CARCH cross makepkg environment"
+msg "preparing $CARCH librechroot"
 
-echo -n "checking for makepkg-$CARCH.sh ... "
-[ -f "$_builddir"/makepkg-$CARCH.sh ] && _have_makepkg=yes || _have_makepkg=no
-echo $_have_makepkg
+# create directories
+mkdir -p "$_pkgdest" "$_logdest"
 
-if [ "x$_have_makepkg" == "xno" ]; then
-  rm -rf "$_makepkgdir"/makepkg-$CARCH
-  mkdir -p "$_makepkgdir"/makepkg-$CARCH
-  pushd "$_makepkgdir"/makepkg-$CARCH >/dev/null
+# initialize [native] repo
+echo -n "checking for $CARCH [native] repo ... "
+[ -e "$_pkgdest"/native.db ] && _have_native=yes || _have_native=no
+echo $_have_native
 
-  # fetch pacman package to excract makepkg
-  pacman -Sw --noconfirm --cachedir . pacman
-  mkdir tmp && bsdtar -C tmp -xf pacman-*.pkg.tar.xz
-
-  # install makepkg
-  cp -Lv tmp/usr/bin/makepkg "$_builddir"/makepkg-$CARCH.sh
-
-  # patch run_pacman in makepkg, we cannot pass the pacman root to it as parameter ATM
-  sed -i "s#\"\$PACMAN_PATH\"#& --config $_chrootdir/etc/pacman.conf -r $_chrootdir#" \
-    "$_builddir"/makepkg-$CARCH.sh
-  popd >/dev/null
+if [ "x$_have_native" == "xno" ]; then
+  tar -czf "$_pkgdest"/native.db.tar.gz -T /dev/null
+  tar -czf "$_pkgdest"/native.files.tar.gz -T /dev/null
+  ln -s native.db.tar.gz "$_pkgdest"/native.db
+  ln -s native.files.tar.gz "$_pkgdest"/native.files
 fi
 
-# create a sane makepkg.conf
-cat "$_srcdir"/makepkg.conf.in > "$_builddir"/makepkg-$CARCH.conf
-cat >> "$_builddir"/makepkg-$CARCH.conf << EOF
+# create configurations
+mkdir -p "$_builddir"/config
+
+cat > "$_builddir"/config/pacman.conf << EOF
+[options]
+Architecture = $CARCH
+[native]
+Server = file://${_pkgdest%/$CARCH}/\$arch
+[cross]
+Server = file://$topbuilddir/stage2/packages/\$arch
+EOF
+
+cat "$_srcdir"/makepkg.conf.in > "$_builddir"/config/makepkg.conf
+cat >> "$_builddir"/config/makepkg.conf << EOF
 CARCH="$CARCH"
 CHOST="$CHOST"
 CFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
 CXXFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
-PKGDEST="$_pkgdest"
-LOGDEST="$_logdest"
 EOF
 
-# create build artefact directories
-mkdir -p "$_logdest" "$_pkgdest"
-chown $SUDO_USER "$_logdest" "$_pkgdest"
-
-# initialize [cross] repo
-echo -n "checking for $CARCH [cross] repo ... "
-[ -e "$_pkgdest"/cross.db ] && _have_cross=yes || _have_cross=no
-echo $_have_cross
-
-if [ "x$_have_cross" == "xno" ]; then
-  tar -czf "$_pkgdest"/cross.db.tar.gz -T /dev/null
-  tar -czf "$_pkgdest"/cross.files.tar.gz -T /dev/null
-  ln -s cross.db.tar.gz "$_pkgdest"/cross.db
-  ln -s cross.files.tar.gz "$_pkgdest"/cross.files
-fi
+# initialize the chroot using the cross-compiled packages
+rm -rf /var/cache/pacman/pkg-$CARCH/*
+librechroot \
+    -n "$CHOST-stage3" \
+    -C "$_builddir"/config/pacman.conf \
+    -M "$_builddir"/config/makepkg.conf \
+  make

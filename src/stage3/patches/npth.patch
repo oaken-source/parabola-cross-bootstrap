@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-02-28 18:14:30.650703312 +0100
++++ b/PKGBUILD	2018-02-28 18:18:23.894843772 +0100
+@@ -17,6 +17,12 @@ source=("ftp://ftp.gnupg.org/gcrypt/${pk
+ sha256sums=('294a690c1f537b92ed829d867bee537e46be93fbd60b16c04630fbbfcd9db3c2'
+             'SKIP')
+ 
++prepare() {
++	cd "${srcdir}/${pkgname}-${pkgver}"
++	@CONFIG_SUB@ > build-aux/config.sub
++	@CONFIG_GUESS@ > build-aux/config.guess
++}
++
+ build() {
+ 	cd "${srcdir}/${pkgname}-${pkgver}"
+ 	./configure --prefix=/usr --enable-maintainer-mode
