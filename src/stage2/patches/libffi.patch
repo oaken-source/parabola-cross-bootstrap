@@ -17,8 +17,9 @@ This patch is specific to riscv64. I am not sure why this is needed tbh.
  depends=('glibc')
  checkdepends=('dejagnu')
 -source=(ftp://sourceware.org/pub/libffi/libffi-$pkgver.tar.gz)
+-sha1sums=('280c265b789e041c02e5c97815793dfc283fb1e6')
 +source=(git+https://github.com/riscv/riscv-libffi.git)
- sha1sums=('280c265b789e041c02e5c97815793dfc283fb1e6')
++sha1sums=('SKIP')
  
  build() {
 -  cd $pkgname-$pkgver

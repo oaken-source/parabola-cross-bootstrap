@@ -49,7 +49,7 @@ if [ "x$_have_deptree" == "xno" ]; then
       gcc-libs)
         _extra_deps="libmpc mpfr gmp" ;;
       iptables)
-        _extra_deps="libnfnetlink lidnfnetfilter_conntrack" ;;
+        _extra_deps="libnfnetlink libnetfilter_conntrack" ;;
       libcap)
         _extra_deps="pam unixodbc" ;;
       libpsl)

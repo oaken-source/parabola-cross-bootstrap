@@ -2,7 +2,7 @@
 
 _target=@CHOST@
 pkgname=$_target-gcc-bootstrap
-pkgver=7.3.1
+pkgver=7.3.0
 _islver=0.18
 pkgrel=1
 _snapshot=7-20180215
@@ -54,13 +54,14 @@ build() {
   CXXFLAGS=${CXXFLAGS/-pipe/}
 
   $srcdir/$_basedir/configure \
+      --target=$_target \
       --prefix=/usr \
+      --libdir=/usr/lib \
+      --libexecdir=/usr/lib \
       --program-prefix=$_target- \
       --with-local-prefix=/usr/$_target \
-      --with-sysroot=/usr/$_target \
       --with-build-sysroot=/usr/$_target \
-      --libdir=/usr/lib --libexecdir=/usr/lib \
-      --target=$_target --host=$CHOST --build=$CHOST \
+      --with-sysroot=/usr/$_target \
 		  --with-newlib \
 		  --without-headers \
 		  --disable-shared \
@@ -74,9 +75,11 @@ build() {
 		  --disable-libquadmath \
 		  --disable-libgomp \
 		  --disable-nls \
+      --@MULTILIB@-multilib \
+      --with-abi=@GCC_MABI@ \
+      --with-arch=@GCC_MARCH@ \
 		  --disable-bootstrap \
-      --enable-checking=release \
-      --disable-multilib
+      --enable-checking=release
 
 	make inhibit-libc=true all-gcc
 	make inhibit-libc=true all-target-libgcc

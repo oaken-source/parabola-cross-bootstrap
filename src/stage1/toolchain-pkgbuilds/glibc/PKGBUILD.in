@@ -17,53 +17,98 @@ sha1sums=('1f7a9c43026484943ef7cf6885f2176a2bc1e093'
 validpgpkeys=(7273542B39962DF7B299931416792B4EA25340F8)  # "Carlos O'Donell <carlos@systemhalted.org>"
 
 prepare() {
-  mkdir -p glibc-build
+  mkdir -p glibc-build lib32-glibc-build
 }
 
 build() {
-  cd glibc-build
+  local _configure_flags=(
+      --prefix=/usr
+      --disable-werror
+      --enable-shared
+      --enable-obsolete-rpc
+      --with-headers=/usr/$_target/include
+      --@MULTILIB@-multilib
+      --enable-kernel=3.0.0
+  )
 
-  echo "slibdir=/lib" >> configparms
-  echo "rtlddir=/lib" >> configparms
-  echo "sbindir=/bin" >> configparms
-  echo "rootsbindir=/bin" >> configparms
+  cd "$srcdir/glibc-build"
 
-  # remove hardening options for building libraries
-  export CFLAGS="${CFLAGS/-fstack-protector-strong}"
-  export CFLAGS="${CFLAGS/-fno-plt}"
-  export CXXFLAGS="${CFLAGS/-fstack-protector-strong}"
-  export CXXFLAGS="${CFLAGS/-fno-plt}"
-  unset LD_LIBRARY_PATH
+  echo "slibdir=/usr/lib" >> configparms
+  echo "rtlddir=/usr/lib" >> configparms
+  echo "sbindir=/usr/bin" >> configparms
+  echo "rootsbindir=/usr/bin" >> configparms
+
+  # remove fortify for building libraries
+  CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
 
   export BUILD_CC=gcc
-  export CC=${_target}-gcc
-  export CXX=${_target}-g++
+  export CC="${_target}-gcc -march=@GCC_MARCH@ -mabi=@GCC_MABI@"
   export AR=${_target}-ar
   export RANLIB=${_target}-ranlib
 
-  ../glibc-$pkgver/configure \
-      --prefix=/usr \
-      --target=$_target \
+	CFLAGS="$CFLAGS -mcmodel=medlow -g -O2 -march=@GCC_MARCH@ -mabi=@GCC_MABI@" \
+	ASFLAGS="$ASFLAGS -mcmodel=medlow -march=@GCC_MARCH@ -mabi=@GCC_MABI@" \
+  "$srcdir/glibc-$pkgver/configure" \
       --host=$_target \
-      --build=$CHOST \
       --libdir=/usr/lib \
       --libexecdir=/usr/lib \
-      --with-headers=/usr/$_target/include \
-      --with-bugurl=https://bugs.archlinux.org/ \
-      --enable-add-ons \
-      --enable-obsolete-rpc \
-      --enable-kernel=3.0.0 \
-      --enable-bind-now \
-      --disable-profile \
-      --enable-shared \
-      --disable-multilib \
-      --disable-werror
+      ${_configure_flags[@]}
 
+  # build libraries with fortify disabled
+  echo "build-programs=no" >> configparms
   make
+
+  # re-enable fortify for programs
+  sed -i "/build-programs=/s#no#yes#" configparms
+
+  echo "CC += -D_FORTIFY_SOURCE=2" >> configparms
+  echo "CXX += -D_FORTIFY_SOURCE=2" >> configparms
+  make
+
+  [ "x@MULTILIB@" == "xenable" ] || return 0
+
+  cd "$srcdir/lib32-glibc-build"
+  export CC="${_target}-gcc -march=@GCC_32_MARCH@ -mabi=@GCC_32_MABI@"
+
+  echo "slibdir=/usr/lib32" >> configparms
+  echo "rtlddir=/usr/lib32" >> configparms
+  echo "sbindir=/usr/bin" >> configparms
+  echo "rootsbindir=/usr/bin" >> configparms
+
+  # remove fortify for building libraries
+  CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
+  CFLAGS=${CFLAGS/-fno-plt/}
+  CXXFLAGS=${CXXFLAGS/-fno-plt/}
+
+	CFLAGS="$CFLAGS -mcmodel=medlow -g -O2 -march=@GCC_32_MARCH@ -mabi=@GCC_32_MABI@" \
+	ASFLAGS="$ASFLAGS -mcmodel=medlow -march=@GCC_32_MARCH@ -mabi=@GCC_32_MABI@" \
+  "$srcdir/glibc-$pkgver/configure" \
+      --host=@CHOST32@ \
+      --libdir=/usr/lib32 \
+      --libexecdir=/usr/lib32 \
+      ${_configure_flags[@]}
+
+  # build libraries with fortify disabled
+  echo "build-programs=no" >> configparms
+  make
+
+  # re-enable fortify for programs
+  sed -i "/build-programs=/s#no#yes#" configparms
+
+  echo "CC += -D_FORTIFY_SOURCE=2" >> configparms
+  echo "CXX += -D_FORTIFY_SOURCE=2" >> configparms
+  make
+
 }
 
 package() {
   cd glibc-build
+
+  make install_root=$pkgdir/usr/$_target install
+
+  [ "x@MULTILIB@" == "xenable" ] || return 0
+
+  cd lib32-glibc-build
 
   make install_root=$pkgdir/usr/$_target install
 }

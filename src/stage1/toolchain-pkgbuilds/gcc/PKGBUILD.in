@@ -54,24 +54,27 @@ build() {
   CXXFLAGS=${CXXFLAGS/-pipe/}
 
   $srcdir/$_basedir/configure \
+      --target=$_target \
       --prefix=/usr \
+      --libdir=/usr/lib \
+      --libexecdir=/usr/lib \
       --program-prefix=$_target- \
       --with-local-prefix=/usr/$_target \
-      --with-sysroot=/usr/$_target \
       --with-build-sysroot=/usr/$_target \
-      --libdir=/usr/lib --libexecdir=/usr/lib \
-      --target=$_target --host=$CHOST --build=$CHOST \
+      --with-sysroot=/usr/$_target \
       --with-system-zlib \
 		  --enable-shared \
 		  --enable-tls \
-		  --enable-languages=c,c++,fortran \
+		  --enable-languages=c,c++,fortran,ada \
 		  --disable-libmudflap \
 		  --disable-libssp \
 		  --disable-libquadmath \
 		  --disable-nls \
 		  --disable-bootstrap \
       --enable-checking=release \
-      --disable-multilib
+      --@MULTILIB@-multilib \
+      --with-abi=@GCC_MABI@ \
+      --with-arch=@GCC_MARCH@
 
   make
 }

@@ -136,7 +136,12 @@ EOF
               s#@GCC_MABI@#$GCC_MABI#g; \
               s#@BUILDHOST@#$_buildhost#g; \
               s#@SYSROOT@#$_sysroot#g; \
-              s#@LINUX_ARCH@#$LINUX_ARCH#g" \
+              s#@LINUX_ARCH@#$LINUX_ARCH#g; \
+              s#@MULTILIB@#${MULTILIB:-disable}#; \
+              s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#; \
+              s#@GCC_32_MABI@#${GCC_32_MABI:-}#; \
+              s#@CARCH32@#${CARCH32:-}#; \
+              s#@CHOST32@#${CHOST32:-}#" \
         PKGBUILD
 
       # enable the target CARCH in arch array
@@ -146,7 +151,7 @@ EOF
       chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
       sudo -u $SUDO_USER \
       "$_builddir"/makepkg-$CARCH.sh -fLC --config "$_builddir"/makepkg-$CARCH.conf \
-        --skipchecksums --skippgpcheck --nocheck --nodeps
+        --nocheck --nodeps
     fi
 
     popd >/dev/null

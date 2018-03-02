@@ -25,6 +25,8 @@ msg "Entering Stage 1"
 # set a bunch of convenience variables
 _builddir="$topbuilddir"/stage1
 _srcdir="$topsrcdir"/stage1
+_pkgdest="$_builddir"/packages
+_logdest="$_builddir"/makepkglogs
 
 function check_toolchain() {
   echo -n "checking for $CHOST binutils ... "
@@ -35,7 +37,7 @@ function check_toolchain() {
 
   echo -n "checking for $CHOST gcc ... "
   local _have_gcc
-  type -p $CHOST-gcc >/dev/null && _have_gcc=yes || _have_gcc=no
+  type -p $CHOST-g++ >/dev/null && _have_gcc=yes || _have_gcc=no
   echo $_have_gcc
   [ "x$_have_gcc" == "xyes" ] || return 1
 
@@ -49,7 +51,7 @@ function check_toolchain() {
 
   echo -n "checking for $CHOST glibc ... "
   local _have_glibc
-  [ -e "$_sysroot"/lib/libc.so.6 ] && _have_glibc=yes || _have_glibc=no
+  [ -e "$_sysroot"/usr/lib/libc.so.6 ] && _have_glibc=yes || _have_glibc=no
   echo $_have_glibc
   [ "x$_have_glibc" == "xyes" ] || return 1
 }
@@ -58,13 +60,15 @@ function check_toolchain() {
 if check_toolchain; then exit 0; fi
 
 # check for required programs in $PATH to build the toolchain
+check_exe gnatmake
 check_exe makepkg
 check_exe pacman
 check_exe sed
 check_exe sudo
 
 # create required directories
-mkdir -p "$_builddir"
+mkdir -p "$_logdest" "$_pkgdest"
+chown $SUDO_USER "$_logdest" "$_pkgdest"
 
 # create a sane makepkg.conf
 cat "$_srcdir"/makepkg.conf.in > "$_builddir"/makepkg.conf
@@ -75,32 +79,52 @@ CPPFLAGS="$(source /etc/makepkg.conf && echo $CPPFLAGS)"
 CFLAGS="$(source /etc/makepkg.conf && echo $CFLAGS)"
 CXXFLAGS="$(source /etc/makepkg.conf && echo $CXXFLAGS)"
 LDFLAGS="$(source /etc/makepkg.conf && echo $LDFLAGS)"
+LOGDEST="$_logdest"
+PKGDEST="$_pkgdest"
 EOF
+
+_srcdest="$(source /etc/makepkg.conf && echo $SRCDEST || true)"
+[ -z "$_srcdest" ] || echo "SRCDEST=\"$_srcdest\"" >> "$_builddir"/makepkg.conf
 
 # build and install the toolchain packages
 for pkg in binutils linux-libre-api-headers gcc-bootstrap glibc gcc; do
-  msg "makepkg: $CHOST-$pkg"
-  rm -rf "$_builddir"/$CHOST-$pkg
-  mkdir -p "$_builddir"/$CHOST-$pkg
-  cp "$_srcdir"/toolchain-pkgbuilds/$pkg/PKGBUILD.in "$_builddir"/$CHOST-$pkg/PKGBUILD
-  pushd "$_builddir"/$CHOST-$pkg >/dev/null
+  echo -n "checking for $CHOST-$pkg ... "
+  _pkgfile=$(find $_pkgdest -regex "^.*/$CHOST-$pkg-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$")
+  [ -n "$_pkgfile" ] && _have_pkg=yes || _have_pkg=no
+  echo $_have_pkg
 
-  # substitute architecture variables
-  sed -i "s#@CHOST@#$CHOST#; \
-          s#@CARCH@#$CARCH#; \
-          s#@LINUX_ARCH@#$LINUX_ARCH#" \
-    PKGBUILD
+  if [ "x$_have_pkg" == "xno" ]; then
+    msg "makepkg: $CHOST-$pkg"
+    rm -rf "$_builddir"/$CHOST-$pkg
+    mkdir -p "$_builddir"/$CHOST-$pkg
+    cp "$_srcdir"/toolchain-pkgbuilds/$pkg/PKGBUILD.in "$_builddir"/$CHOST-$pkg/PKGBUILD
+    pushd "$_builddir"/$CHOST-$pkg >/dev/null
 
-  # build the package
-  chown -R $SUDO_USER .
-  sudo -u $SUDO_USER makepkg -C --config "$_builddir"/makepkg.conf \
-    2>&1 | tee makepkg.log
+    # substitute architecture variables
+    sed -i "s#@CHOST@#$CHOST#; \
+            s#@CARCH@#$CARCH#; \
+            s#@LINUX_ARCH@#$LINUX_ARCH#; \
+            s#@GCC_MARCH@#${GCC_MARCH:-}#; \
+            s#@GCC_MABI@#${GCC_MABI:-}#; \
+            s#@MULTILIB@#${MULTILIB:-disable}#; \
+            s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#; \
+            s#@GCC_32_MABI@#${GCC_32_MABI:-}#; \
+            s#@CARCH32@#${CARCH32:-}#; \
+            s#@CHOST32@#${CHOST32:-}#" \
+      PKGBUILD
+
+    # build the package
+    chown -R $SUDO_USER .
+    sudo -u $SUDO_USER makepkg -LC --config "$_builddir"/makepkg.conf
+
+    popd >/dev/null
+  fi
 
   # install the package
   set +o pipefail
-  yes | pacman -U $CHOST-$pkg-*.pkg.tar.xz
+  _pkgfile=$(find $_pkgdest -regex "^.*/$CHOST-$pkg-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$" | head -n1)
+  yes | pacman -U "$_pkgfile"
   set -o pipefail
-  popd >/dev/null
 done
 
 # final sanity check

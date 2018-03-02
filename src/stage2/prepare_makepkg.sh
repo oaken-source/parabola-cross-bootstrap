@@ -55,6 +55,9 @@ PKGDEST="$_pkgdest"
 LOGDEST="$_logdest"
 EOF
 
+_srcdest="$(source /etc/makepkg.conf && echo $SRCDEST || true)"
+[ -z "$_srcdest" ] || echo "SRCDEST=\"$_srcdest\"" >> "$_builddir"/makepkg-$CARCH.conf
+
 # create build artefact directories
 mkdir -p "$_logdest" "$_pkgdest"
 chown $SUDO_USER "$_logdest" "$_pkgdest"
