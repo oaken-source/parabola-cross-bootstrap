@@ -1,5 +1,5 @@
---- a/PKGBUILD	2018-02-21 21:13:06.562254936 +0100
-+++ b/PKGBUILD	2018-02-22 09:32:22.835497788 +0100
+--- a/PKGBUILD	2018-03-05 11:20:19.665799440 +0100
++++ b/PKGBUILD	2018-03-05 11:20:19.664799432 +0100
 @@ -26,7 +26,6 @@ makedepends=('acl' 'cryptsetup' 'docbook
               'meson' 'libseccomp' 'pcre2')
  makedepends_i686=('gnu-efi-libs')
@@ -48,7 +48,7 @@
  
    ninja -C build
  
-@@ -181,28 +200,21 @@ build() {
+@@ -181,28 +202,21 @@ build() {
    mv -T "$srcdir/dest"/{systemd,libsystemd}/usr/include/systemd
    mv -T "$srcdir/dest"/{systemd,libsystemd}/usr/lib/pkgconfig/libsystemd.pc
    mv "$srcdir/dest"/systemd/usr/lib/libsystemd.so*      -t "$srcdir/dest"/libsystemd/usr/lib/
@@ -78,7 +78,7 @@
  }
  
  package_systemd() {
-@@ -267,7 +279,7 @@ package_systemd() {
+@@ -267,7 +281,7 @@ package_systemd() {
    chmod 0750     "$pkgdir"/usr/share/polkit-1/rules.d
  
    # we'll create this on installation

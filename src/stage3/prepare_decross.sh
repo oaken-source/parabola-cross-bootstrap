@@ -23,7 +23,7 @@ set -euo pipefail
 msg "preparing native $CARCH decross'd packages"
 
 # cross-compiled packages con be a bit derpy.
-# rebuild a couple of things using native patches
+# rebuild a couple of things using native toolchain and custom patches
 
 _decross="bash make"
 

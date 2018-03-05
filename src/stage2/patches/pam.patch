@@ -1,12 +1,11 @@
 --- a/PKGBUILD	2018-02-21 18:38:07.422735642 +0100
 +++ b/PKGBUILD	2018-02-21 18:39:52.272267854 +0100
-@@ -31,11 +31,17 @@ prepare () {
+@@ -31,11 +31,16 @@ prepare () {
  
  build() {
    cd $srcdir/Linux-PAM-$pkgver
 -  ./configure --libdir=/usr/lib --sbindir=/usr/bin --disable-db
-+  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
-+    > build-aux/config.sub
++  @CONFIG_SUB@ > build-aux/config.sub
 +  ./configure --host=@TARGET@ --build=@BUILDHOST@ --libdir=/usr/lib --sbindir=/usr/bin --disable-db
    make
  

@@ -38,6 +38,9 @@ check_exe librechroot
 check_exe libremakepkg
 check_exe makepkg
 
+# make sure that binfmt is *enabled* for stage2 build
+echo 1 > /proc/sys/fs/binfmt_misc/status
+
 # prepare for the build
 . "$_srcdir"/prepare_chroot.sh
 . "$_srcdir"/prepare_deptree.sh
@@ -119,17 +122,22 @@ EOF
         fi
       done
 
+      # import keys
+      keys="$(source PKGBUILD && echo "${validpgpkeys[@]}")"
+      [ -z "$keys" ] || sudo -u $SUDO_USER gpg --recv-keys $keys
+
       # patch if necessary
       cp PKGBUILD{,.old}
       [ -f "$_srcdir"/patches/$_pkgname.patch ] && \
         patch -Np1 -i "$_srcdir"/patches/$_pkgname.patch
+      cp PKGBUILD{,.in}
 
       # substitute common variables
       _config="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
       _config_sub="$_config;f=config.sub;hb=HEAD"
       _config_guess="$_config;f=config.guess;hb=HEAD"
       sed -i "s#@CONFIG_SUB@#curl \"$_config_sub\"#g; \
-              s#@CONFIG_GUESS@#curl \"$_config_guess\"#g;" \
+              s#@CONFIG_GUESS@#curl \"$_config_guess\"#g" \
         PKGBUILD
 
       # enable the target CARCH in arch array

@@ -1,5 +1,5 @@
---- a/PKGBUILD	2018-02-16 15:07:18.597829833 +0100
-+++ b/PKGBUILD	2018-02-16 15:06:07.657038447 +0100
+--- a/PKGBUILD	2018-03-05 07:50:12.797543567 +0100
++++ b/PKGBUILD	2018-03-05 07:50:12.796543567 +0100
 @@ -15,7 +15,7 @@ md5sums=('c52f463585d85924b28cdc1e373ae0
  
  build() {
@@ -9,3 +9,10 @@
    make 
  }
  
+@@ -30,6 +30,4 @@ package() {
+   # symlink cracklib-small #34778
+   mkdir -p $pkgdir/usr/share/dict
+   ln -sf /usr/share/cracklib/cracklib-small $pkgdir/usr/share/dict/cracklib-small
+-  sh ./util/cracklib-format dicts/cracklib-small \
+-    | sh ./util/cracklib-packer $pkgdir/usr/share/cracklib/pw_dict
+ }

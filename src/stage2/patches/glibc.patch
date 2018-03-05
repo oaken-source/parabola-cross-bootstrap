@@ -78,9 +78,8 @@
 +    @TARGET@-strip $STRIP_BINARIES usr/lib32/getconf/*
 +    @TARGET@-strip $STRIP_STATIC usr/lib32/lib{anl,BrokenLocale,c{,_nonshared},crypt}.a \
                          usr/lib32/lib{dl,g,ieee,mcheck,nsl,pthread{,_nonshared}}.a \
--                        usr/lib32/lib{resolv,rpcsvc,rt,util,m}.a
+                         usr/lib32/lib{resolv,rpcsvc,rt,util,m}.a
 -    strip $STRIP_SHARED usr/lib32/lib{anl,BrokenLocale,cidn,crypt}-${pkgver}.so \
-+                        usr/lib32/lib{resolv,rpcsvc,rt,util,m}.a || true
 +    @TARGET@-strip $STRIP_SHARED usr/lib32/lib{anl,BrokenLocale,cidn,crypt}-${pkgver}.so \
                          usr/lib32/libnss_{compat,db,dns,files,hesiod,nis,nisplus}-*.so \
                          usr/lib32/lib{dl,m,nsl,resolv,rt,util}-${pkgver}.so \

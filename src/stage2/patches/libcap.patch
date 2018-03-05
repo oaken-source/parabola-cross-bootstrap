@@ -1,6 +1,6 @@
 --- a/PKGBUILD	2018-02-16 19:41:56.996792407 +0100
 +++ b/PKGBUILD	2018-02-16 20:17:25.900329276 +0100
-@@ -13,21 +13,26 @@ license=('GPL2')
+@@ -13,16 +13,20 @@ license=('GPL2')
  depends=('glibc' 'attr')
  makedepends=('linux-api-headers')
  validpgpkeys=('38A644698C69787344E954CE29EE848AE2CCF3F4') # Andrew G. Morgan <morgan@kernel.org>
@@ -19,18 +19,11 @@
  
  build() {
 -  make -C $pkgname-$pkgver KERNEL_HEADERS=/usr/include
-+  make -C $pkgname-$pkgver KERNEL_HEADERS=@SYSROOT@/usr/include \
-+    CC=@TARGET@-gcc AR=@TARGET@-ar RANLIB=@TARGET@-ranlib
++  make -C $pkgname-$pkgver KERNEL_HEADERS=/usr/include \
++    BUILD_CC=gcc CC=@TARGET@-gcc AR=@TARGET@-ar RANLIB=@TARGET@-ranlib
  }
  
  package() {
-   cd $pkgname-$pkgver
--  make prefix=/usr lib=/lib DESTDIR="$pkgdir" RAISE_SETFCAP=no install
-+  make prefix=/usr lib=/lib DESTDIR="$pkgdir" RAISE_SETFCAP=no install \
-+    CC=@TARGET@-gcc AR=@TARGET@-ar RANLIB=@TARGET@-ranlib
- 
-   install -Dm644 pam_cap/capability.conf \
-     "$pkgdir"/usr/share/doc/$pkgname/capability.conf.example
 --- /dev/null	2018-01-19 16:58:13.730539592 +0100
 +++ b/libcap-2.25-gperf.patch	2018-02-16 20:15:03.278753235 +0100
 @@ -0,0 +1,12 @@

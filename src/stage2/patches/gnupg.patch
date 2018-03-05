@@ -4,7 +4,7 @@
  build() {
  	cd "${srcdir}/${pkgname}-${pkgver}"
  	./configure \
-+    --host=@TARGET@ --build=@BUILDHOST@ \
++		--host=@TARGET@ --build=@BUILDHOST@ \
  		--prefix=/usr \
  		--sysconfdir=/etc \
  		--sbindir=/usr/bin \

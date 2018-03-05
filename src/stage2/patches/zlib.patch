@@ -9,7 +9,7 @@
  epoch=1
  pkgver=1.2.11
  pkgrel=2
-@@ -24,22 +24,12 @@ prepare() {
+@@ -24,14 +24,7 @@ prepare() {
  build() {
  	cd ${srcdir}/zlib-$pkgver
  	./configure --prefix=/usr
@@ -25,24 +25,3 @@
  }
  
  check() {
- 	cd ${srcdir}/zlib-$pkgver
- 	make test
--
--	cd contrib/minizip
--	make -f Makefile.orig test
- }
- 
- package_zlib() {
-@@ -49,12 +39,3 @@ package_zlib() {
- 	make install DESTDIR=${pkgdir}
- 	install -D -m644 LICENSE ${pkgdir}/usr/share/licenses/zlib/LICENSE
- }
--
--package_minizip() {
--	pkgdesc='Mini zip and unzip based on zlib'
--	depends=('zlib')
--
--	cd ${srcdir}/zlib-$pkgver/contrib/minizip
--	make install DESTDIR=${pkgdir}
--	install -D -m644 ${srcdir}/zlib-$pkgver/LICENSE ${pkgdir}/usr/share/licenses/minizip/LICENSE
--}

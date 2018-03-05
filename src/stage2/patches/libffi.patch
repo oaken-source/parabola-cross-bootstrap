@@ -1,46 +1,32 @@
-This patch is specific to riscv64. I am not sure why this is needed tbh.
-
---- a/PKGBUILD	2018-02-20 22:35:38.140743909 +0100
-+++ b/PKGBUILD	2018-02-20 22:37:37.399728944 +0100
-@@ -4,30 +4,32 @@
- # Contributor: Jan de Groot <jgc@archlinux.org>
- 
- pkgname=libffi
--pkgver=3.2.1
-+pkgver=3.1
- pkgrel=2
- pkgdesc='Portable foreign function interface library'
- arch=('x86_64')
--url='http://sourceware.org/libffi/'
-+url='https://github.com/riscv/riscv-libffi'
+--- a/PKGBUILD	2018-03-03 22:03:14.363545840 +0100
++++ b/PKGBUILD	2018-03-03 22:03:14.363545840 +0100
+@@ -12,22 +12,23 @@ url='http://sourceware.org/libffi/'
  license=('MIT')
  depends=('glibc')
  checkdepends=('dejagnu')
 -source=(ftp://sourceware.org/pub/libffi/libffi-$pkgver.tar.gz)
 -sha1sums=('280c265b789e041c02e5c97815793dfc283fb1e6')
-+source=(git+https://github.com/riscv/riscv-libffi.git)
++source=("git+https://github.com/sorear/libffi-riscv.git#branch=riscv-$pkgver")
 +sha1sums=('SKIP')
  
  build() {
 -  cd $pkgname-$pkgver
 -  ./configure --prefix=/usr --disable-static \
--    --enable-pax_emutramp
-+  cd riscv-libffi/libffi-3.1
-+  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
-+    > config.sub
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --disable-static \
-+    --enable-pax_emutramp CPPFLAGS="-D__riscv64 $CPPFLAGS"
++  cd libffi-riscv
++  autoreconf --install
++  ./configure --host=riscv64-linux-gnu --build=x86_64-pc-linux-gnu --prefix=/usr --disable-static \
+     --enable-pax_emutramp
    make
  }
  
  check() {
 -  make -C $pkgname-$pkgver check
-+  make -C riscv-libffi/libffi-3.1 check
++  make -C libffi-riscv check
  }
  
  package() {
 -  cd $pkgname-$pkgver
-+  cd riscv-libffi/libffi-3.1
++  cd libffi-riscv
    make DESTDIR="$pkgdir" install
    install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
  }

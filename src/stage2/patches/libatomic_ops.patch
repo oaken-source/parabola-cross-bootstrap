@@ -1,16 +1,13 @@
-This patch is specific to riscv64.
-  As of 2018-02-24, latest stable libatomic_ops doesn't support riscv,
-  but the latest master does.
-
---- a/PKGBUILD	2018-02-21 19:30:29.308880981 +0100
-+++ b/PKGBUILD	2018-02-21 19:35:16.578673882 +0100
+--- a/PKGBUILD	2018-03-04 10:52:27.843093733 +0100
++++ b/PKGBUILD	2018-03-04 10:52:27.843093733 +0100
 @@ -14,26 +14,27 @@ url='https://github.com/ivmai/libatomic_
  depends=(glibc)
  license=(GPL2 MIT)
  options=(!docs)
 -source=($url/releases/download/v$pkgver/${pkgname}-${pkgver}.tar.gz)
-+source=("git+https://github.com/ivmai/libatomic_ops.git#commit=393d7a7ff54565230f44e59a9c73addc9e627f56")
- sha256sums=('219724edad3d580d4d37b22e1d7cb52f0006d282d26a9b8681b560a625142ee6')
+-sha256sums=('219724edad3d580d4d37b22e1d7cb52f0006d282d26a9b8681b560a625142ee6')
++source=(git+https://github.com/ivmai/libatomic_ops.git)
++sha256sums=('SKIP')
  
  prepare() {
 -  cd $pkgname-$pkgver

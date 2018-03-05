@@ -29,7 +29,7 @@
      --disable-fam
    sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
    make
-@@ -60,19 +65,6 @@ check() {
+@@ -60,7 +65,6 @@ check() {
  package_glib2() {
    cd glib
    make DESTDIR="$pkgdir" install
@@ -37,15 +37,3 @@
  
    install -Dt "$pkgdir/usr/share/libalpm/hooks" -m644 ../*.hook
  }
--
--package_glib2-docs() {
--  pkgdesc="Documentation for GLib"
--  depends=()
--  optdepends=()
--  license+=(custom)
--
--  mkdir -p "$pkgdir/usr/share"
--  mv gtk-doc "$pkgdir/usr/share"
--
--  install -Dt "$pkgdir/usr/share/licenses/glib2-docs" -m644 glib/docs/reference/COPYING
--}

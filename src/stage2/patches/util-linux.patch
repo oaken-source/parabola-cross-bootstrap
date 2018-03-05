@@ -27,12 +27,11 @@
  
    make
  }
-@@ -78,7 +80,7 @@ package_util-linux() {
+@@ -78,7 +80,6 @@ package_util-linux() {
    install -m644 "$srcdir/pam-su" "$pkgdir/etc/pam.d/su-l"
  
    # TODO(dreisner): offer this upstream?
 -  sed -i '/ListenStream/ aRuntimeDirectory=uuidd' "$pkgdir/usr/lib/systemd/system/uuidd.socket"
-+  #sed -i '/ListenStream/ aRuntimeDirectory=uuidd' "$pkgdir/usr/lib/systemd/system/uuidd.socket"
  
    # adjust for usrmove
    # TODO(dreisner): fix configure.ac upstream so that this isn't needed

@@ -1,6 +1,3 @@
-This patch is specific to riscv64, and should probably be unified / merged to
-the upstream pkgbuild.
-
 --- a/PKGBUILD	2018-02-22 14:14:29.100909778 +0100
 +++ b/PKGBUILD	2018-02-22 14:16:13.593060069 +0100
 @@ -45,6 +45,7 @@ sha256sums=('dfd36086ad68564bcd977f4a1fa
@@ -25,10 +22,10 @@ the upstream pkgbuild.
          mychost="armv7l-unknown-linux-gnueabihf"
          myflags="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -O2 -pipe -fstack-protector-strong -fno-plt"
          ;;
-+      riscv64)
-+        mycarch="riscv64"
-+        mychost="riscv64-pc-linux-gnu"
-+        myflags="-march=rv64gc -mabi=lp64d -O2 -pipe -fstack-protector-strong  -fno-plt"
++      @CARCH@)
++        mycarch="@CARCH@"
++        mychost="@CHOST@"
++        myflags="-march=@GCC_MARCH@ -mabi=@GCC_MABI@ -O2 -pipe -fstack-protector-strong  -fno-plt"
 +        ;;
      esac
      myldflags="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"

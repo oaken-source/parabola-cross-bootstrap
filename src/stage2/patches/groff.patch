@@ -1,11 +1,11 @@
---- a/PKGBUILD	2018-02-20 18:09:59.571155866 +0100
-+++ b/PKGBUILD	2018-02-20 18:10:16.387318315 +0100
+--- a/PKGBUILD	2018-03-05 11:47:50.860371967 +0100
++++ b/PKGBUILD	2018-03-05 11:47:50.859371959 +0100
 @@ -24,7 +24,7 @@ validpgpkeys=('58E0C111E39F5408C5D3EC76C
  
  build() {
    cd $srcdir/$pkgname-$pkgver
 -  ./configure --prefix=/usr --with-x --with-appresdir=/usr/share/X11/app-defaults
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --with-x --with-appresdir=/usr/share/X11/app-defaults
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --with-x --with-appresdir=/usr/share/X11/app-defaults --with-doc=no
    make
  }
  

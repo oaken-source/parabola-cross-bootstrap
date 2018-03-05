@@ -1,11 +1,10 @@
 --- a/PKGBUILD	2018-02-18 22:28:52.553679169 +0100
 +++ b/PKGBUILD	2018-02-18 22:34:00.404428869 +0100
-@@ -34,6 +34,9 @@ fi
+@@ -34,6 +34,8 @@ fi
  prepare() {
    cd $pkgname-$_basever
  
-+  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
-+    > support/config.sub
++  @CONFIG_SUB@ > support/config.sub
 +
    for (( _p=1; _p<=$((10#${_patchlevel})); _p++ )); do
      msg "applying patch bash${_basever//.}-$(printf "%03d" $_p)"

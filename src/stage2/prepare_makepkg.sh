@@ -53,6 +53,7 @@ CFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fn
 CXXFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
 PKGDEST="$_pkgdest"
 LOGDEST="$_logdest"
+MAKEFLAGS="-j$(($(nproc) + 1))"
 EOF
 
 _srcdest="$(source /etc/makepkg.conf && echo $SRCDEST || true)"

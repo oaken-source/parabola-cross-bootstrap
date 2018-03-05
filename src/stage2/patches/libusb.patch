@@ -1,12 +1,11 @@
 --- a/PKGBUILD	2018-02-22 10:23:59.164686376 +0100
 +++ b/PKGBUILD	2018-02-22 10:24:42.587803720 +0100
-@@ -19,7 +19,9 @@ md5sums=('1da9ea3c27b3858fa85c5f4466003e
+@@ -19,7 +19,8 @@ md5sums=('1da9ea3c27b3858fa85c5f4466003e
  
  build() {
    cd $pkgname-$pkgver
 -  ./configure --prefix=/usr
-+  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
-+    > config.sub
++  @CONFIG_SUB@ > config.sub
 +  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
    make -j1
  }

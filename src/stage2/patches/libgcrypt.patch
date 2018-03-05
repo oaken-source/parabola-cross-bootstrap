@@ -4,7 +4,7 @@
  build() {
    cd ${pkgname}-${pkgver}
    ./configure --prefix=/usr \
-+  --host=@TARGET@ --build=@BUILDHOST@ \
++	--host=@TARGET@ --build=@BUILDHOST@ \
  	--disable-static \
  	--disable-padlock-support
    make

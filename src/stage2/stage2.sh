@@ -37,12 +37,16 @@ _logdest="$_builddir"/makepkglogs
 # check for required programs
 check_exe awk
 check_exe bsdtar
+check_exe git
 check_exe pacman
 check_exe sed
 check_exe tar
 
 # required for dbus
 check_file /usr/share/aclocal/ax_append_flag.m4
+
+# make sure that binfmt is *disabled* for stage2 build
+echo 0 > /proc/sys/fs/binfmt_misc/status
 
 # prepare for the build
 . "$_srcdir"/prepare_makepkg.sh
@@ -125,13 +129,25 @@ EOF
         fi
       done
 
+      # import keys
+      keys="$(source PKGBUILD && echo "${validpgpkeys[@]}")"
+      [ -z "$keys" ] || sudo -u $SUDO_USER gpg --recv-keys $keys
+
       # patch for cross-compiling
       [ -f "$_srcdir"/patches/$_pkgname.patch ] || die "missing package patch"
       cp PKGBUILD{,.old}
       patch -Np1 -i "$_srcdir"/patches/$_pkgname.patch
+      cp PKGBUILD{,.in}
 
       # substitute common variables
-      sed -i "s#@TARGET@#$CHOST#g; \
+      _config="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
+      _config_sub="$_config;f=config.sub;hb=HEAD"
+      _config_guess="$_config;f=config.guess;hb=HEAD"
+      sed -i "s#@CONFIG_SUB@#curl \"$_config_sub\"#g; \
+              s#@CONFIG_GUESS@#curl \"$_config_guess\"#g; \
+              s#@CARCH@#$CARCH#; \
+              s#@CHOST@#$CHOST#; \
+              s#@TARGET@#$CHOST#g; \
               s#@GCC_MARCH@#$GCC_MARCH#g; \
               s#@GCC_MABI@#$GCC_MABI#g; \
               s#@BUILDHOST@#$_buildhost#g; \
@@ -151,7 +167,7 @@ EOF
       chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
       sudo -u $SUDO_USER \
       "$_builddir"/makepkg-$CARCH.sh -fLC --config "$_builddir"/makepkg-$CARCH.conf \
-        --nocheck --nodeps
+        --nocheck --nodeps || die "error building $_pkgname"
     fi
 
     popd >/dev/null

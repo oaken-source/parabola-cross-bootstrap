@@ -1,11 +1,10 @@
 --- a/PKGBUILD	2018-02-22 10:27:36.222401768 +0100
 +++ b/PKGBUILD	2018-02-22 10:33:51.959185267 +0100
-@@ -27,6 +27,9 @@ sha256sums=('4025a23ec9b15c2cb7486d151c2
+@@ -27,6 +27,8 @@ sha256sums=('4025a23ec9b15c2cb7486d151c2
  prepare() {
    cd LVM2.${pkgver}
  
-+  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
-+    > autoconf/config.sub
++  @CONFIG_SUB@ > autoconf/config.sub
 +
    # enable lvmetad
    sed -i 's|use_lvmetad = 0|use_lvmetad = 1|' conf/example.conf.in

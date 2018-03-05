@@ -1,12 +1,11 @@
 --- a/PKGBUILD	2018-02-16 08:07:12.100498831 +0100
 +++ b/PKGBUILD	2018-02-16 08:10:02.378659844 +0100
-@@ -18,7 +18,9 @@ validpgpkeys=('1F42418905D8206AA754CCDC2
+@@ -18,7 +18,8 @@ validpgpkeys=('1F42418905D8206AA754CCDC2
  
  build() {
    cd ${pkgname}-${pkgver}
 -  ./configure --prefix=/usr \
-+  curl "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
-+    > build-aux/config.sub
++  @CONFIG_SUB@ > build-aux/config.sub
 +  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr \
        --with-packager=Archlinux \
        --with-packager-bug-reports="http://bugs.archlinux.org/" \

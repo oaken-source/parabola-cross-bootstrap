@@ -1,6 +1,6 @@
 --- a/PKGBUILD	2018-02-21 21:52:04.800201713 +0100
 +++ b/PKGBUILD	2018-02-21 21:53:10.410318949 +0100
-@@ -31,14 +31,15 @@ build() {
+@@ -31,14 +31,13 @@ build() {
    cd $pkgname-$pkgver
  
    ./configure --prefix=/usr \
@@ -13,8 +13,6 @@
  
 -  cd doc
 -  po4a -k 0 --rm-backups --variable 'srcdir=../doc/' po4a/po4a.cfg
-+  #cd doc
-+  #po4a -k 0 --rm-backups --variable 'srcdir=../doc/' po4a/po4a.cfg
  }
  
  check() {

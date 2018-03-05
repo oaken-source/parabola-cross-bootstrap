@@ -4,11 +4,11 @@
  		openssltarget='linux-elf'
  		optflags=''
  	fi
-+  openssltarget='linux-elf'
++	openssltarget='linux-elf'
  
  	# mark stack as non-executable: http://bugs.archlinux.org/task/12434
  	./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib \
-+    --cross-compile-prefix=@TARGET@- no-asm \
++		--cross-compile-prefix=@TARGET@- no-asm \
  		shared no-ssl3-method ${optflags} \
  		"${openssltarget}" \
  		"-Wa,--noexecstack ${CPPFLAGS} ${CFLAGS} ${LDFLAGS}"

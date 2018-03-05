@@ -1,6 +1,19 @@
---- a/PKGBUILD	2018-02-22 11:41:34.950204245 +0100
-+++ b/PKGBUILD	2018-02-22 12:09:48.185617250 +0100
-@@ -91,6 +91,7 @@ build() {
+--- a/PKGBUILD	2018-03-05 09:37:25.042537462 +0100
++++ b/PKGBUILD	2018-03-05 09:37:25.042537462 +0100
+@@ -70,6 +70,12 @@ build() {
+   export CFLAGS="$CFLAGS -fPIC"
+   cd cyrus-sasl-$pkgver
+ 
++  sed -i '/^AC_PROG_CC/aAC_PROG_CC_FOR_BUILD' configure.in
++  cat >> include/Makefile.am << 'EOF'
++makemd5: $(makemd5_SOURCES)
++	$(CC_FOR_BUILD) -o $@ $^
++EOF
++
+   rm -f config/config.guess config/config.sub 
+   rm -f config/ltconfig config/ltmain.sh config/libtool.m4
+   rm -fr autom4te.cache
+@@ -91,6 +97,7 @@ build() {
    popd
  
    ./configure --prefix=/usr \
@@ -8,7 +21,7 @@
        --sbin=/usr/bin \
        --mandir=/usr/share/man \
        --infodir=/usr/share/info \
-@@ -112,18 +113,19 @@ build() {
+@@ -112,18 +119,19 @@ build() {
        --enable-ntlm \
        --disable-passdss \
        --enable-sql \

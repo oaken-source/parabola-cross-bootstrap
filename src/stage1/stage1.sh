@@ -60,7 +60,6 @@ function check_toolchain() {
 if check_toolchain; then exit 0; fi
 
 # check for required programs in $PATH to build the toolchain
-check_exe gnatmake
 check_exe makepkg
 check_exe pacman
 check_exe sed
@@ -81,6 +80,7 @@ CXXFLAGS="$(source /etc/makepkg.conf && echo $CXXFLAGS)"
 LDFLAGS="$(source /etc/makepkg.conf && echo $LDFLAGS)"
 LOGDEST="$_logdest"
 PKGDEST="$_pkgdest"
+MAKEFLAGS="-j$(($(nproc) + 1))"
 EOF
 
 _srcdest="$(source /etc/makepkg.conf && echo $SRCDEST || true)"
@@ -99,6 +99,10 @@ for pkg in binutils linux-libre-api-headers gcc-bootstrap glibc gcc; do
     mkdir -p "$_builddir"/$CHOST-$pkg
     cp "$_srcdir"/toolchain-pkgbuilds/$pkg/PKGBUILD.in "$_builddir"/$CHOST-$pkg/PKGBUILD
     pushd "$_builddir"/$CHOST-$pkg >/dev/null
+
+    # import keys
+    keys="$(source PKGBUILD && echo "${validpgpkeys[@]}")"
+    [ -z "$keys" ] || sudo -u $SUDO_USER gpg --recv-keys $keys
 
     # substitute architecture variables
     sed -i "s#@CHOST@#$CHOST#; \

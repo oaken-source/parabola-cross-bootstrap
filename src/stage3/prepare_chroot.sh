@@ -55,6 +55,7 @@ CARCH="$CARCH"
 CHOST="$CHOST"
 CFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
 CXXFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
+MAKEFLAGS="-j$(($(nproc) + 1))"
 EOF
 
 # initialize the chroot using the cross-compiled packages
