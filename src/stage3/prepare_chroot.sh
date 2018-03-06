@@ -65,3 +65,26 @@ librechroot \
     -C "$_builddir"/config/pacman.conf \
     -M "$_builddir"/config/makepkg.conf \
   make
+
+set +o pipefail
+export _chrootdir="$(librechroot -n "$CHOST-stage3" 2>&1 | grep copydir.*: | awk '{print $3}')"
+set -o pipefail
+
+mkdir -p "$_chrootdir"/native/$CARCH
+if mount | grep -q "$_chrootdir"/native/$CARCH; then umount "$_chrootdir"/native/$CARCH; fi
+mount -o bind "$_pkgdest" "$_chrootdir"/native/$CARCH
+
+cat > "$_builddir"/config/pacman.conf << EOF
+[options]
+Architecture = $CARCH
+[native]
+Server = file:///native/\$arch
+[cross]
+Server = file://$topbuilddir/stage2/packages/\$arch
+EOF
+
+librechroot \
+    -n "$CHOST-stage3" \
+    -C "$_builddir"/config/pacman.conf \
+    -M "$_builddir"/config/makepkg.conf \
+  update

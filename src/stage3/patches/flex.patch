@@ -1,0 +1,19 @@
+--- a/PKGBUILD	2018-03-06 15:25:03.243977236 +0100
++++ b/PKGBUILD	2018-03-06 15:31:41.098560457 +0100
+@@ -11,10 +11,15 @@ url="https://github.com/westes/flex"
+ license=('custom')
+ groups=('base-devel')
+ depends=('glibc' 'm4' 'sh')
+-makedepends=('help2man')
+ source=("https://github.com/westes/flex/releases/download/v$pkgver/flex-$pkgver.tar.gz")
+ md5sums=('2882e3179748cc9f9c23ec593d6adc8d')
+ 
++prepare() {
++  cd "$pkgname-$pkgver"
++  @CONFIG_SUB@ > build-aux/config.sub
++  @CONFIG_GUESS@ > build-aux/config.guess
++}
++
+ build() {
+   cd "$pkgname-$pkgver"
+   ./configure --prefix=/usr

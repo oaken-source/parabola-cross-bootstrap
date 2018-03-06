@@ -46,22 +46,44 @@ if [ "x$_have_deptree" == "xno" ]; then
     # add some additional build-time dependencies
     _extra_deps=""
     case $_pkgname in
+      binutils)
+        _extra_deps="git dejagnu bc" ;;
       gcc-libs)
-        _extra_deps="dejagnu inetutils doxygen" ;;
+        _extra_deps="dejagnu libmpc mpfr gmp" ;;
+      libatomic_ops)
+        _extra_deps="git" ;;
       libffi)
-        _extra_deps="dejagnu" ;;
+        _extra_deps="dejagnu git" ;;
+      libpsl)
+        _extra_deps="libxslt" ;;
+      libtool)
+        _extra_deps="git" ;;
+      libseccomp)
+        _extra_deps="git" ;;
+      lz4)
+        _extra_deps="git" ;;
+      nss-*|libudev|libsystemd*)
+        _extra_deps="libutil-linux pcre2 git meson" ;;
+      patch)
+        _extra_deps="ed" ;;
     esac
 
     # iterate dependencies for pkg
     for _dep in $_pkgdeps $_extra_deps; do
       # translate dependency string to actual package
-      realdep=$(pacman --noconfirm -Sw "$_dep" | grep '^Packages' | awk '{print $3}')
+      realdep=$(pacman --noconfirm -Sddw "$_dep" | grep '^Packages' | awk '{print $3}')
       realdep=${realdep%-*-*}
       # add dependency to tree and frontier
       _tree[$_pkgname]="${_tree[$_pkgname]} $realdep"
       _frontier+=($realdep)
     done
   done
+
+  # following is a bit of magic to untangle the build dependencies
+  for i in "${!_tree[@]}"; do
+    _tree[$i]="${_tree[$i]/bash}"
+  done
+  _tree[gmp]="${_tree[gmp]/gcc-libs}"
 
   # write package dependency tree
   truncate -s0 "$_deptree".FULL
@@ -71,6 +93,7 @@ if [ "x$_have_deptree" == "xno" ]; then
 fi
 
 [ -f "$_deptree" ] || cp "$_deptree"{.FULL,}
+chown $SUDO_USER "$_deptree"
 
 echo "  total pkges:      $(cat "$_deptree".FULL | wc -l)"
 echo "  remaining pkges:  $(cat "$_deptree" | wc -l)"

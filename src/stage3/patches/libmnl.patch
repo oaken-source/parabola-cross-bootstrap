@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-03-06 10:39:57.413662810 +0100
++++ b/PKGBUILD	2018-03-06 10:41:11.510408486 +0100
+@@ -16,6 +16,12 @@ source=("http://www.netfilter.org/projec
+ sha1sums=('2db40dea612e88c62fd321906be40ab5f8f1685a'
+           'SKIP')
+ 
++prepare() {
++  cd $pkgname-$pkgver
++  @CONFIG_SUB@ > build-aux/config.sub
++  @CONFIG_GUESS@ > build-aux/config.guess
++}
++
+ build() {
+   cd $pkgname-$pkgver
+   ./configure --prefix=/usr

@@ -1,0 +1,16 @@
+--- a/PKGBUILD	2018-03-06 17:34:47.855351361 +0100
++++ b/PKGBUILD	2018-03-06 17:38:07.833425293 +0100
+@@ -14,6 +14,13 @@ md5sums=('4125404e41e482ec68282a2e687f6c
+          'SKIP')
+ validpgpkeys=('AD17A21EF8AED8F1CC02DBD9F7D5C9BF765C61E3')  # Andreas Enge
+ 
++prepare() {
++  cd "${srcdir}/mpc-${pkgver}"
++  chmod +w config.{sub,guess}
++  @CONFIG_SUB@ > config.sub
++  @CONFIG_GUESS@ > config.guess
++}
++
+ build() {
+   cd "${srcdir}/mpc-${pkgver}"
+   ./configure --prefix=/usr

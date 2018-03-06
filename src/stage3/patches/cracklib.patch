@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-03-06 10:09:14.006412402 +0100
++++ b/PKGBUILD	2018-03-06 10:10:24.486052160 +0100
+@@ -13,6 +13,12 @@ depends=('glibc' 'zlib')
+ source=(https://github.com/cracklib/cracklib/releases/download/$pkgname-$pkgver/$pkgname-$pkgver.tar.gz)
+ md5sums=('c52f463585d85924b28cdc1e373ae06d')
+ 
++prepare() {
++  cd $srcdir/$pkgname-$pkgver
++  @CONFIG_SUB@ > config.sub
++  @CONFIG_GUESS@ > config.guess
++}
++
+ build() {
+   cd $srcdir/$pkgname-$pkgver
+   ./configure --prefix=/usr --sbindir=/usr/bin --without-python

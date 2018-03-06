@@ -137,7 +137,8 @@ EOF
       _config_sub="$_config;f=config.sub;hb=HEAD"
       _config_guess="$_config;f=config.guess;hb=HEAD"
       sed -i "s#@CONFIG_SUB@#curl \"$_config_sub\"#g; \
-              s#@CONFIG_GUESS@#curl \"$_config_guess\"#g" \
+              s#@CONFIG_GUESS@#curl \"$_config_guess\"#g; \
+              s#@MULTILIB@#${MULTILIB:-disable}#g" \
         PKGBUILD
 
       # enable the target CARCH in arch array
@@ -169,5 +170,8 @@ EOF
   # remove pkg from deptree
   sed -i "/^$_pkgname :/d; s/ $_pkgname\b//g" "$_deptree"
 done
+
+# unmount
+umount "$_chrootdir"/native/$CARCH
 
 echo "all packages built."

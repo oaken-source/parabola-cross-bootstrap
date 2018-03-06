@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-03-06 09:47:48.052719447 +0100
++++ b/PKGBUILD	2018-03-06 09:49:41.834839454 +0100
+@@ -10,7 +10,6 @@ arch=('x86_64')
+ url="https://www.gnu.org/software/libidn/#libidn2"
+ license=('GPL2' 'LGPL3')
+ depends=('libunistring')
+-makedepends=('gtk-doc' 'ruby-ronn')
+ source=(https://ftp.gnu.org/gnu/libidn/$pkgname-$pkgver.tar.gz{,.sig})
+ sha256sums=('644b6b03b285fb0ace02d241d59483d98bc462729d8bb3608d5cad5532f3d2f0'
+             'SKIP')

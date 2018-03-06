@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-03-06 08:11:28.063652503 +0100
++++ b/PKGBUILD	2018-03-06 08:16:45.926737370 +0100
+@@ -18,6 +18,12 @@ sha256sums=('25772f653ac5b2e3ceeb89df50e
+             'SKIP')
+ validpgpkeys=('600CD204FBCEA418BD2CA74F154343260542DF34') # Brandon Philips
+ 
++prepare() {
++  cd $pkgname-$pkgver
++  @CONFIG_SUB@ > config.sub
++  @CONFIG_GUESS@ > config.guess
++}
++
+ build() {
+   cd $pkgname-$pkgver
+ 

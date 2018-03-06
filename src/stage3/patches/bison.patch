@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-06 12:10:00.276114701 +0100
++++ b/PKGBUILD	2018-03-06 12:24:22.183712045 +0100
+@@ -19,6 +19,8 @@ validpgpkeys=('7DF84374B1EE1F9764BBE25D0
+ 
+ prepare() {
+   cd $pkgname-$pkgver
++  @CONFIG_SUB@ > build-aux/config.sub
++  @CONFIG_GUESS@ > build-aux/config.guess
+   # Fix test failures with GCC 7
+   patch -p1 -i ../bison-test-gcc7.patch
+ }

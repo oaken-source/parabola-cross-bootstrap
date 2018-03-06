@@ -145,19 +145,19 @@ EOF
       _config_guess="$_config;f=config.guess;hb=HEAD"
       sed -i "s#@CONFIG_SUB@#curl \"$_config_sub\"#g; \
               s#@CONFIG_GUESS@#curl \"$_config_guess\"#g; \
-              s#@CARCH@#$CARCH#; \
-              s#@CHOST@#$CHOST#; \
+              s#@CARCH@#$CARCH#g; \
+              s#@CHOST@#$CHOST#g; \
               s#@TARGET@#$CHOST#g; \
               s#@GCC_MARCH@#$GCC_MARCH#g; \
               s#@GCC_MABI@#$GCC_MABI#g; \
               s#@BUILDHOST@#$_buildhost#g; \
               s#@SYSROOT@#$_sysroot#g; \
               s#@LINUX_ARCH@#$LINUX_ARCH#g; \
-              s#@MULTILIB@#${MULTILIB:-disable}#; \
-              s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#; \
-              s#@GCC_32_MABI@#${GCC_32_MABI:-}#; \
-              s#@CARCH32@#${CARCH32:-}#; \
-              s#@CHOST32@#${CHOST32:-}#" \
+              s#@MULTILIB@#${MULTILIB:-disable}#g; \
+              s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#g; \
+              s#@GCC_32_MABI@#${GCC_32_MABI:-}#g; \
+              s#@CARCH32@#${CARCH32:-}#g; \
+              s#@CHOST32@#${CHOST32:-}#g" \
         PKGBUILD
 
       # enable the target CARCH in arch array

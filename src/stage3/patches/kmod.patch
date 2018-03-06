@@ -1,0 +1,56 @@
+--- a/PKGBUILD	2018-03-06 14:28:22.107022821 +0100
++++ b/PKGBUILD	2018-03-06 14:36:59.958593384 +0100
+@@ -9,8 +9,6 @@ arch=('x86_64')
+ url='http://git.kernel.org/?p=utils/kernel/kmod/kmod.git;a=summary'
+ license=('GPL2')
+ depends=('glibc' 'zlib' 'xz')
+-makedepends=('gtk-doc')
+-checkdepends=('linux-headers' 'libelf')
+ options=('strip' 'debug')
+ provides=('module-init-tools=3.16' 'libkmod.so')
+ conflicts=('module-init-tools')
+@@ -22,38 +20,24 @@ md5sums=('08297dfb6f2b3f625f928ca3278528
+          'SKIP'
+          'dd62cbf62bd8f212f51ef8c43bec9a77')
+ 
++prepare() {
++  cd "$pkgname-$pkgver"
++  @CONFIG_SUB@ > build-aux/config.sub
++  @CONFIG_GUESS@ > build-aux/config.guess
++}
+ 
+ build() {
+   cd "$pkgname-$pkgver"
+ 
+   ./configure \
+     --sysconfdir=/etc \
+-    --enable-gtk-doc \
++    --disable-gtk-doc \
+     --with-xz \
+     --with-zlib
+ 
+   make
+ }
+ 
+-check() {
+-  # As of kmod v20, the test suite needs to build some kernel modules, and thus
+-  # needs headers available in order to run. We depend on linux-headers, but
+-  # this is really only to try and make sure that *some* useable tree of kernel
+-  # headers exist. The first useable tree we find is good enough, as these
+-  # modules will never be loaded by tests.
+-
+-  local kdirs=(/usr/lib/modules/*/build/Makefile)
+-  if [[ ! -f ${kdirs[0]} ]]; then
+-    printf '==> Unable to find kernel headers to build modules for tests\n' >&2
+-    return 1
+-  fi
+-
+-  local kver kdir=${kdirs[0]%/Makefile}
+-  IFS=/ read _ _ _ kver _ <<<"$kdir"
+-
+-  make -C "$pkgname-$pkgver" check KDIR="$kdir" KVER="$kver"
+-}
+-
+ package() {
+   make -C "$pkgname-$pkgver" DESTDIR="$pkgdir" install
+ 

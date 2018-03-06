@@ -1,0 +1,22 @@
+--- a/PKGBUILD	2018-03-06 11:20:55.826629242 +0100
++++ b/PKGBUILD	2018-03-06 11:53:47.263709120 +0100
+@@ -15,12 +15,18 @@ md5sums=('ef68674fb47a8b8e741b34e429d86e
+          'SKIP')
+ validpgpkeys=('3690C240CE51B4670D30AD1C38EE757D69184620')
+ 
++prepare() {
++	cd ${srcdir}/${pkgname}-${pkgver}
++  @CONFIG_SUB@ > build-aux/config.sub
++  @CONFIG_GUESS@ > build-aux/config.guess
++}
++
+ build() {
+ 	cd ${srcdir}/${pkgname}-${pkgver}
+ 
+ 	./configure --prefix=/usr \
+ 		--disable-rpath \
+-		--enable-werror
++		--disable-werror
+ 	make
+ }
+ 

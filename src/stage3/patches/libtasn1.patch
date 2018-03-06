@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-03-06 07:14:22.926718733 +0100
++++ b/PKGBUILD	2018-03-06 07:17:53.539642055 +0100
+@@ -16,6 +16,12 @@ sha256sums=('7e528e8c317ddd156230c4e31d0
+             'SKIP')
+ validpgpkeys=('1F42418905D8206AA754CCDC29EE58B996865171') #Nikos Mavrogiannopoulos <nmav@gnutls.org>
+ 
++prepare() {
++  cd ${pkgname}-${pkgver}
++  @CONFIG_SUB@ > build-aux/config.sub
++  @CONFIG_GUESS@ > build-aux/config.guess
++}
++
+ build() {
+   cd ${pkgname}-${pkgver}
+   ./configure --prefix=/usr \

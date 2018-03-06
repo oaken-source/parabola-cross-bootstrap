@@ -103,6 +103,7 @@ if [ "x$_have_deptree" == "xno" ]; then
 fi
 
 [ -f "$_deptree" ] || cp "$_deptree"{.FULL,}
+chown $SUDO_USER "$_deptree"
 
 echo "  total pkges:      $(cat "$_deptree".FULL | wc -l)"
 echo "  remaining pkges:  $(cat "$_deptree" | wc -l)"

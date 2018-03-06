@@ -105,16 +105,16 @@ for pkg in binutils linux-libre-api-headers gcc-bootstrap glibc gcc; do
     [ -z "$keys" ] || sudo -u $SUDO_USER gpg --recv-keys $keys
 
     # substitute architecture variables
-    sed -i "s#@CHOST@#$CHOST#; \
-            s#@CARCH@#$CARCH#; \
-            s#@LINUX_ARCH@#$LINUX_ARCH#; \
-            s#@GCC_MARCH@#${GCC_MARCH:-}#; \
-            s#@GCC_MABI@#${GCC_MABI:-}#; \
-            s#@MULTILIB@#${MULTILIB:-disable}#; \
-            s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#; \
-            s#@GCC_32_MABI@#${GCC_32_MABI:-}#; \
-            s#@CARCH32@#${CARCH32:-}#; \
-            s#@CHOST32@#${CHOST32:-}#" \
+    sed -i "s#@CHOST@#$CHOST#g; \
+            s#@CARCH@#$CARCH#g; \
+            s#@LINUX_ARCH@#$LINUX_ARCH#g; \
+            s#@GCC_MARCH@#${GCC_MARCH:-}#g; \
+            s#@GCC_MABI@#${GCC_MABI:-}#g; \
+            s#@MULTILIB@#${MULTILIB:-disable}#g; \
+            s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#g; \
+            s#@GCC_32_MABI@#${GCC_32_MABI:-}#g; \
+            s#@CARCH32@#${CARCH32:-}#g; \
+            s#@CHOST32@#${CHOST32:-}#g" \
       PKGBUILD
 
     # build the package

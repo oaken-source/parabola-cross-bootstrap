@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-03-06 11:03:32.726567869 +0100
++++ b/PKGBUILD	2018-03-06 11:05:06.643463818 +0100
+@@ -13,6 +13,12 @@ url="http://www.gnu.org/software/finduti
+ source=(ftp://ftp.gnu.org/pub/gnu/findutils/${pkgname}-${pkgver}.tar.gz)
+ sha1sums=('f18e8aaee3f3d4173a1f598001003be8706d28b0')
+ #validpgpkeys=('A15B725964A95EE5') # James Youngman <james@youngman.org>
++prepare() {
++  cd "${srcdir}/${pkgname}-${pkgver}"
++  @CONFIG_SUB@ > build-aux/config.sub
++  @CONFIG_GUESS@ > build-aux/config.guess
++}
++
+ build() {
+   cd "${srcdir}/${pkgname}-${pkgver}"
+ 

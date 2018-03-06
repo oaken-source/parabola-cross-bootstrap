@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-03-06 15:50:19.389275856 +0100
++++ b/PKGBUILD	2018-03-06 15:52:57.473816867 +0100
+@@ -15,6 +15,12 @@ source=("https://gnupg.org/ftp/gcrypt/${
+ sha256sums=('47f96c37b4f2aac289f0bc1bacfa8bd8b4b209a488d3d15e2229cb6cc9b26449'
+             'SKIP')
+ 
++prepare() {
++	cd "${srcdir}/${pkgname}-${pkgver}"
++  @CONFIG_SUB@ > build-aux/config.sub
++  @CONFIG_GUESS@ > build-aux/config.guess
++}
++
+ build() {
+ 	cd "${srcdir}/${pkgname}-${pkgver}"
+ 	./configure --prefix=/usr
