@@ -33,11 +33,12 @@
      -Dprefix=/usr -Dvendorprefix=/usr \
      -Dprivlib=/usr/share/perl5/core_perl \
      -Darchlib=/usr/lib/perl5/$_baseversion/core_perl \
-@@ -180,7 +183,7 @@ build() {
+@@ -180,7 +183,8 @@ build() {
      -Dinc_version_list=none \
      -Dman1ext=1perl -Dman3ext=3perl ${arch_opts} \
      -Dlddlflags="-shared ${LDFLAGS}" -Dldflags="${LDFLAGS}"
 -  make
++  MAKEFLAGS=""
 +  make miniperl; make
  }
  

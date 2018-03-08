@@ -36,7 +36,7 @@
 +  cd $pkgname
 +  autoreconf --install
 +  sed -i 's/(EM_RISCV64|/(EM_RISCV|/' tools/util.c
-+  ./configure --host=riscv64-linux-gnu --build=x86_64-pc-linux-gnu --prefix=/usr
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
    make
  }
  

@@ -28,17 +28,47 @@ export GR=$(tput setf 2)
 export WH=$(tput setf 7)
 
 # messaging functions
-die() { echo "$BO$RE==> ERROR:$WH $*$NO" 1>&2 ; exit 1; }
-msg() { echo "$BO$GR==>$WH $*$NO"; }
-export -f die msg
+notify() {
+  local recipient=-274411993
+  if type -p telegram-notify >/dev/null; then
+    telegram-notify --user "$recipient" "$@" >/dev/null
+  fi
+}
+
+die() {
+  echo "$BO$RE==> ERROR:$WH $*$NO" 1>&2
+  notify --error --title Error --text "$(caller): $*" >/dev/null
+  trap - ERR
+  exit 1;
+}
+
+msg() {
+  echo "$BO$GR==>$WH $*$NO";
+}
+
+trap "die unknown error" ERR
 
 # host system check helpers
 check_exe() {
   echo -n "checking for $1 ... "
   type -p $1 >/dev/null && echo yes || (echo no && die "missing ${2:-$1} in \$PATH")
 }
+
 check_file() {
   echo -n "checking for $1 ... "
   [ -f "$1" ] && echo yes || (echo no && die "missing ${2:-$1} in filesystem")
 }
-export -f check_exe check_file
+
+# build feedback helpers
+failed_build() {
+  _log=$(find "$_logdest" -type f -printf "%T@ %p\n" | sort -n | tail -n1 | cut -d' ' -f2-)
+  set +o pipefail
+  _phase=$(cat $_log | grep '==>.*occurred in' | awk '{print $7}' | sed 's/().*//')
+  set -o pipefail
+  if [ -n ${_phase:-} ]; then
+    notify --error --text "$_pkgname: error in $_phase()" --document "$_log"
+  else
+    notify --error --text "$_pkgname: error in makepkg"
+  fi
+  die "error building $_pkgname"
+}

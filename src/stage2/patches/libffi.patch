@@ -14,7 +14,7 @@
 -  ./configure --prefix=/usr --disable-static \
 +  cd libffi-riscv
 +  autoreconf --install
-+  ./configure --host=riscv64-linux-gnu --build=x86_64-pc-linux-gnu --prefix=/usr --disable-static \
++  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --disable-static \
      --enable-pax_emutramp
    make
  }

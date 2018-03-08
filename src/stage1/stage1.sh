@@ -21,6 +21,7 @@
 set -euo pipefail
 
 msg "Entering Stage 1"
+notify --text "*Bootstrap Entering Stage 1*"
 
 # set a bunch of convenience variables
 _builddir="$topbuilddir"/stage1
@@ -57,7 +58,7 @@ function check_toolchain() {
 }
 
 # simply return if the toolchain is already there
-if check_toolchain; then exit 0; fi
+if check_toolchain; then return 0; fi
 
 # check for required programs in $PATH to build the toolchain
 check_exe makepkg
@@ -88,21 +89,20 @@ _srcdest="$(source /etc/makepkg.conf && echo $SRCDEST || true)"
 
 # build and install the toolchain packages
 for pkg in binutils linux-libre-api-headers gcc-bootstrap glibc gcc; do
-  echo -n "checking for $CHOST-$pkg ... "
-  _pkgfile=$(find $_pkgdest -regex "^.*/$CHOST-$pkg-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$")
+  _pkgname=$CHOST-$pkg
+  echo -n "checking for $_pkgname ... "
+  _pkgfile=$(find $_pkgdest -regex "^.*/$_pkgname-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$")
   [ -n "$_pkgfile" ] && _have_pkg=yes || _have_pkg=no
   echo $_have_pkg
 
   if [ "x$_have_pkg" == "xno" ]; then
-    msg "makepkg: $CHOST-$pkg"
-    rm -rf "$_builddir"/$CHOST-$pkg
-    mkdir -p "$_builddir"/$CHOST-$pkg
-    cp "$_srcdir"/toolchain-pkgbuilds/$pkg/PKGBUILD.in "$_builddir"/$CHOST-$pkg/PKGBUILD
-    pushd "$_builddir"/$CHOST-$pkg >/dev/null
+    msg "makepkg: $_pkgname"
+    rm -rf "$_builddir"/$_pkgname
+    mkdir -p "$_builddir"/$_pkgname
+    cp "$_srcdir"/toolchain-pkgbuilds/$pkg/PKGBUILD.in "$_builddir"/$_pkgname/PKGBUILD
+    pushd "$_builddir"/$_pkgname >/dev/null
 
-    # import keys
-    keys="$(source PKGBUILD && echo "${validpgpkeys[@]}")"
-    [ -z "$keys" ] || sudo -u $SUDO_USER gpg --recv-keys $keys
+    import_keys
 
     # substitute architecture variables
     sed -i "s#@CHOST@#$CHOST#g; \
@@ -119,14 +119,15 @@ for pkg in binutils linux-libre-api-headers gcc-bootstrap glibc gcc; do
 
     # build the package
     chown -R $SUDO_USER .
-    sudo -u $SUDO_USER makepkg -LC --config "$_builddir"/makepkg.conf
+    sudo -u $SUDO_USER makepkg -LC --config "$_builddir"/makepkg.conf || failed_build
 
     popd >/dev/null
+    notify --success --text "$_pkgname"
   fi
 
   # install the package
   set +o pipefail
-  _pkgfile=$(find $_pkgdest -regex "^.*/$CHOST-$pkg-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$" | head -n1)
+  _pkgfile=$(find $_pkgdest -regex "^.*/$_pkgname-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$" | head -n1)
   yes | pacman -U "$_pkgfile"
   set -o pipefail
 done

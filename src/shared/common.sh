@@ -20,41 +20,34 @@
 
 set -euo pipefail
 
-# target options
-export CARCH=riscv64
-export CHOST=riscv64-unknown-linux-gnu
-export LINUX_ARCH=riscv
-export GCC_MARCH=rv64gc
-export GCC_MABI=lp64d
-# no riscv32 support as of glibc-2.27
-#export MULTILIB=enable
-#export GCC_32_MARCH=rv32gc
-#export GCC_32_MABI=ilp32d
-#export CARCH32=riscv32
-#export CHOST32=riscv32-linux-gnu
+retry() {
+  for i in $(seq $(expr $1 - 1)); do
+    "${@:2}" && return 0 || sleep 20;
+  done
+  "${@:2}" || return;
+}
 
-# common directories
-export startdir="$(pwd)"
-export topbuilddir="$startdir"/build
-export topsrcdir="$startdir"/src
+import_keys() {
+  local keys="$(source ${1:-PKGBUILD} && echo "${validpgpkeys[@]}")"
+  [ -z "$keys" ] || retry 3 sudo -u $SUDO_USER gpg --recv-keys $keys || return
+}
 
-. "$topsrcdir"/shared/feedback.sh
-. "$topsrcdir"/shared/common.sh
-
-[ $(id -u) -ne 0 ] && die "must be root"
-[ -z "${SUDO_USER:-}" ] && die "SUDO_USER must be set in environment"
-
-mkdir -p "$topbuilddir"
-chown $SUDO_USER "$topbuilddir"
-
-# Stage 1: prepare cross toolchain
-. "$topsrcdir"/stage1/stage1.sh
-
-# Stage 2: cross-compile base-devel
-. "$topsrcdir"/stage2/stage2.sh
-
-# Stage 3: libremakepkg native base-devel
-. "$topsrcdir"/stage3/stage3.sh
-
-msg "all done."
-notify --text "*Bootstrap Finished*"
+fetch_pkgfiles() {
+  # acquire the pkgbuild and auxiliary files
+  local libre=https://www.parabola.nu/packages/libre/x86_64/$1/
+  local core=https://www.archlinux.org/packages/core/x86_64/$1/
+  local extra=https://www.archlinux.org/packages/extra/x86_64/$1/
+  local community=https://www.archlinux.org/packages/community/x86_64/$1/
+  local url
+  for url in $libre $core $extra $community; do
+    if ! curl -s $url | grep -iq 'not found'; then
+      local src=$(curl -s $url | grep -i 'source files' | cut -d'"' -f2 | sed 's#/tree/#/plain/#')
+      for link in $(curl -sL $src | grep '^  <li><a href' | cut -d"'" -f2 \
+          | sed "s#^#$(echo $src | awk -F/ '{print $3}')#"); do
+        wget -q $link -O $(basename ${link%\?*});
+      done
+      break
+    fi
+  done
+  [ -f PKGBUILD ] || return
+}

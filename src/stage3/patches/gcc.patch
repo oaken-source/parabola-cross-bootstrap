@@ -1,5 +1,5 @@
---- a/PKGBUILD	2018-03-05 14:47:11.525693335 +0100
-+++ b/PKGBUILD	2018-03-07 05:34:24.951028232 +0100
+--- a/PKGBUILD	2018-03-06 19:28:00.569615387 +0100
++++ b/PKGBUILD	2018-03-07 05:34:08.324893467 +0100
 @@ -5,8 +5,9 @@
  # toolchain build order: linux-api-headers->glibc->binutils->gcc->binutils->glibc
  # NOTE: libtool requires rebuilt with each new gcc version
@@ -12,9 +12,15 @@
  _majorver=${pkgver:0:1}
  _islver=0.18
  pkgrel=1
-@@ -17,14 +18,14 @@ url='http://gcc.gnu.org'
- makedepends=(binutils libmpc gcc-ada doxygen lib32-glibc lib32-gcc-libs)
- checkdepends=(dejagnu inetutils)
+@@ -14,17 +15,18 @@ pkgdesc='The GNU Compiler Collection'
+ arch=(x86_64)
+ license=(GPL LGPL FDL custom)
+ url='http://gcc.gnu.org'
+-makedepends=(binutils libmpc gcc-ada doxygen lib32-glibc lib32-gcc-libs)
+-checkdepends=(dejagnu inetutils)
++makedepends=(binutils libmpc)
++[ "x@MULTILIB@" == "xdisable" ] || makedepends+=(lib32-glibc lib32-gcc-libs)
++checkdepends=(dejagnu)
  options=(!emptydirs)
 +_snapshot=7-20180215
  #source=(https://sources.archlinux.org/other/gcc/gcc-${pkgver/+/-}.tar.xz{,.sig}
@@ -30,7 +36,7 @@
              '6b8b0fd7f81d0a957beb3679c81bbb34ccc7568d5682844d8924424a0dadcb1b'
              'de48736f6e4153f03d0a5d38ceb6c6fdb7f054e8f47ddd6af0a3dbf14f27b931'
              '2513c6d9984dd0a2058557bf00f06d8d5181734e41dcfe07be7ed86f2959622a')
-@@ -51,7 +52,7 @@ snapshot() {
+@@ -51,7 +53,7 @@ snapshot() {
  }
  
  prepare() {
@@ -39,22 +45,7 @@
    cd gcc
  
    # link isl for in-tree build
-@@ -77,16 +78,24 @@ build() {
-   CFLAGS=${CFLAGS/-pipe/}
-   CXXFLAGS=${CXXFLAGS/-pipe/}
- 
--  "$srcdir/gcc/configure" --prefix=/usr \
-+  CFLAGS=${CFLAGS/-march=@GCC_MARCH@}
-+  CFLAGS=${CFLAGS/-mabi=@GCC_MABI@}
-+  CXXFLAGS=${CXXFLAGS/-march=@GCC_MARCH@}
-+  CXXFLAGS=${CXXFLAGS/-mabi=@GCC_MABI@}
-+
-+  sed -i 's/gcc_cv_objdump/ac_cv_prog_OBJDUMP/' $srcdir/gcc/libcc1/configure
-+  "$srcdir/gcc/configure" --host=@TARGET@ --build=@BUILDHOST@ --target=@TARGET@ --prefix=/usr \
-+      --with-arch=@GCC_MARCH@ --with-api=@GCC_MABI@ \
-+      --disable-bootstrap \
-       --libdir=/usr/lib \
-       --libexecdir=/usr/lib \
+@@ -83,10 +85,10 @@ build() {
        --mandir=/usr/share/man \
        --infodir=/usr/share/info \
        --with-bugurl=https://bugs.archlinux.org/ \
@@ -67,7 +58,7 @@
        --with-system-zlib \
        --with-isl \
        --enable-__cxa_atexit \
-@@ -101,16 +110,13 @@ build() {
+@@ -101,16 +103,13 @@ build() {
        --enable-install-libiberty \
        --with-linker-hash-style=gnu \
        --enable-gnu-indirect-function \
@@ -85,7 +76,7 @@
  }
  
  check() {
-@@ -134,25 +140,17 @@ package_gcc-libs() {
+@@ -134,25 +133,17 @@ package_gcc-libs() {
    rm -f "$pkgdir/$_libdir/libgcc_eh.a"
  
    for lib in libatomic \
@@ -112,7 +103,7 @@
               libquadmath; do
      make -C $CHOST/$lib DESTDIR="$pkgdir" install-info
    done
-@@ -183,22 +181,22 @@ package_gcc() {
+@@ -183,22 +174,22 @@ package_gcc() {
    install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
@@ -140,7 +131,7 @@
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -208,26 +206,16 @@ package_gcc() {
+@@ -208,26 +199,16 @@ package_gcc() {
    ln -s /${_libdir}/liblto_plugin.so \
      "$pkgdir/usr/lib/bfd-plugins/"
  
@@ -170,7 +161,7 @@
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -239,9 +227,6 @@ package_gcc() {
+@@ -239,9 +220,6 @@ package_gcc() {
    install -Dm755 "$srcdir/c89" "$pkgdir/usr/bin/c89"
    install -Dm755 "$srcdir/c99" "$pkgdir/usr/bin/c99"
  
@@ -180,7 +171,7 @@
    # remove files provided by lib32-gcc-libs
    rm -f "$pkgdir"/usr/lib32/lib{stdc++,gcc_s}.so
  
-@@ -260,7 +245,7 @@ package_gcc-fortran() {
+@@ -260,7 +238,7 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS}

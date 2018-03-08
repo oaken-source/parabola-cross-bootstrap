@@ -21,6 +21,7 @@
 set -euo pipefail
 
 msg "Entering Stage 3"
+notify --text "*Bootstrap Entering Stage 3*"
 
 # set a bunch of convenience variables
 _builddir="$topbuilddir"/stage3
@@ -106,25 +107,8 @@ EOF
       ln -s "$_pkgdest"/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz \
         "$_makepkgdir"/$_pkgname/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz
     else
-      # acquire the pkgbuild and auxiliary files
-      _libre=https://www.parabola.nu/packages/libre/x86_64/$_pkgname/
-      _core=https://www.archlinux.org/packages/core/x86_64/$_pkgname/
-      _extra=https://www.archlinux.org/packages/extra/x86_64/$_pkgname/
-      _community=https://www.archlinux.org/packages/community/x86_64/$_pkgname/
-      for url in $_libre $_core $_extra $_community; do
-        if ! curl -s $url | grep -iq 'not found'; then
-          src=$(curl -s $url | grep -i 'source files' | cut -d'"' -f2 | sed 's#/tree/#/plain/#')
-          for link in $(curl -sL $src | grep '^  <li><a href' | cut -d"'" -f2 \
-              | sed "s#^#$(echo $src | awk -F/ '{print $3}')#"); do
-            wget -q $link -O $(basename ${link%\?*});
-          done
-          break
-        fi
-      done
-
-      # import keys
-      keys="$(source PKGBUILD && echo "${validpgpkeys[@]}")"
-      [ -z "$keys" ] || sudo -u $SUDO_USER gpg --recv-keys $keys
+      fetch_pkgfiles $_pkgname
+      import_keys
 
       # patch if necessary
       cp PKGBUILD{,.old}
@@ -146,7 +130,7 @@ EOF
 
       # build the package
       chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
-      libremakepkg -n $CHOST-stage3 || die "error building $_pkgname"
+      libremakepkg -n $CHOST-stage3 || failed_build
     fi
 
     popd >/dev/null
@@ -164,11 +148,15 @@ EOF
       -n "$CHOST-stage3" \
       -C "$_builddir"/config/pacman.conf \
       -M "$_builddir"/config/makepkg.conf \
-    install-file "$_pkgfile"
+    run pacman -Udd /native/$CARCH/"$(basename "$_pkgfile")"
   set -o pipefail
 
   # remove pkg from deptree
   sed -i "/^$_pkgname :/d; s/ $_pkgname\b//g" "$_deptree"
+
+  full=$(cat "$_deptree".FULL | wc -l)
+  curr=$(expr $full - $(cat "$_deptree" | wc -l))
+  notify --success --text "*$curr/$full* $_pkgname"
 done
 
 # unmount
