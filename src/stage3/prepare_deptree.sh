@@ -60,6 +60,8 @@ if [ "x$_have_deptree" == "xno" ]; then
         _extra_deps="git" ;;
       libseccomp)
         _extra_deps="git" ;;
+      libxml2)
+        _extra_deps="git python python2" ;;
       lz4)
         _extra_deps="git" ;;
       nss-*|libudev|libsystemd*)

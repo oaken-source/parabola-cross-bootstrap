@@ -1,0 +1,12 @@
+--- a/PKGBUILD	2018-03-09 18:22:05.862795132 +0100
++++ b/PKGBUILD	2018-03-09 18:32:34.482624212 +0100
+@@ -33,6 +33,9 @@ prepare() {
+     patch -p0 -i ../readline${_basever//.}-$(printf "%03d" $_p)
+   done
+ 
++  @CONFIG_SUB@ > support/config.sub
++  @CONFIG_GUESS@ > support/config.guess
++
+   # remove RPATH from shared objects (FS#14366)
+   sed -i 's|-Wl,-rpath,$(libdir) ||g' support/shobj-conf
+ }

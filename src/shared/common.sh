@@ -51,3 +51,22 @@ fetch_pkgfiles() {
   done
   [ -f PKGBUILD ] || return
 }
+
+prepare_makepkgdir() {
+  rm -rf "$_makepkgdir"/$_pkgname
+  mkdir -p "$_makepkgdir"/$_pkgname
+  pushd "$_makepkgdir"/$_pkgname >/dev/null
+}
+
+failed_build() {
+  _log=$(find "$_logdest" -type f -printf "%T@ %p\n" | sort -n | tail -n1 | cut -d' ' -f2-)
+  set +o pipefail
+  _phase=$(cat $_log | grep '==>.*occurred in' | awk '{print $7}' | sed 's/().*//')
+  set -o pipefail
+  if [ -n ${_phase:-} ]; then
+    notify -c error "$_pkgname: error in $_phase()" -h string:document:"$_log"
+  else
+    notify -c error "$_pkgname: error in makepkg"
+  fi
+  die "error building $_pkgname"
+}

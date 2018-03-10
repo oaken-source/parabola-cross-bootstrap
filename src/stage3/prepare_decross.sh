@@ -29,7 +29,7 @@ _decross="bash make"
 
 for _pkgname in $_decross; do
   echo -n "checking for $CARCH $_pkgname ... "
-  [ -f "$_makepkgdir"/$_pkgname/$_pkgname-*.pkg.tar.xz ] && _have_pkg=yes || _have_pkg=no
+  [ -f "$_makepkgdir"/$_pkgname-decross/$_pkgname-*.pkg.tar.xz ] && _have_pkg=yes || _have_pkg=no
   echo $_have_pkg
 
   if [ "x$_have_pkg" == "xno" ]; then
@@ -40,30 +40,18 @@ for _pkgname in $_decross; do
 
     msg "makepkg: $_pkgname"
 
-    # prepare directories
-    _pkgdir="$_makepkgdir"/$_pkgname/pkg/$_pkgname
-    rm -rf "$_makepkgdir"/$_pkgname
-    mkdir -pv "$_makepkgdir"/$_pkgname
-    pushd "$_makepkgdir"/$_pkgname >/dev/null
+    rm -rf "$_makepkgdir"/$_pkgname-decross
+    mkdir -p "$_makepkgdir"/$_pkgname-decross
+    pushd "$_makepkgdir"/$_pkgname-decross >/dev/null
 
-    # acquire the pkgbuild and auxiliary files
-    _libre=https://www.parabola.nu/packages/libre/x86_64/$_pkgname/
-    _core=https://www.archlinux.org/packages/core/x86_64/$_pkgname/
-    _extra=https://www.archlinux.org/packages/extra/x86_64/$_pkgname/
-    _community=https://www.archlinux.org/packages/community/x86_64/$_pkgname/
-    for url in $_libre $_core $_extra $_community; do
-      if ! curl -s $url | grep -iq 'not found'; then
-        src=$(curl -s $url | grep -i 'source files' | cut -d'"' -f2 | sed 's#/tree/#/plain/#')
-        for link in $(curl -sL $src | grep '^  <li><a href' | cut -d"'" -f2 \
-            | sed "s#^#$(echo $src | awk -F/ '{print $3}')#"); do
-          wget -q $link -O $(basename ${link%\?*});
-        done
-       break
-      fi
-    done
+    _pkgdir="$_makepkgdir"/$_pkgname-decross/pkg/$_pkgname
+
+    fetch_pkgfiles $_pkgname
+    import_keys
 
     cp PKGBUILD{,.old}
     patch -Np1 -i "$_srcdir"/patches/$_pkgname-decross.patch
+    cp PKGBUILD{,.in}
 
     # substitute common variables
     _config="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
@@ -77,8 +65,8 @@ for _pkgname in $_decross; do
     sed -i "s/arch=([^)]*/& $CARCH/" PKGBUILD
 
     # build the package
-    chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
-    PKGDEST=. libremakepkg -n $CHOST-stage3
+    chown -R $SUDO_USER "$_makepkgdir"/$_pkgname-decross
+    PKGDEST=. libremakepkg -n $CHOST-stage3 || failed_build
 
     # install the package
     set +o pipefail
@@ -88,5 +76,7 @@ for _pkgname in $_decross; do
         -M "$_builddir"/config/makepkg.conf \
       install-file $_pkgname-*.pkg.tar.xz
     set -o pipefail
+
+    notify -c success -u low "*decross* $_pkgname"
   fi
 done

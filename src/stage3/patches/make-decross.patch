@@ -1,5 +1,5 @@
---- a/PKGBUILD	2018-02-28 11:35:48.000000000 +0100
-+++ b/PKGBUILD	2018-02-28 11:36:16.214443244 +0100
+--- a/PKGBUILD	2018-03-09 20:30:36.666941657 +0100
++++ b/PKGBUILD	2018-03-10 06:57:05.264886712 +0100
 @@ -10,7 +10,8 @@ arch=('x86_64')
  url="http://www.gnu.org/software/make"
  license=('GPL3')
@@ -10,7 +10,7 @@
  source=(ftp://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.bz2{,.sig}
          guile-2.2.patch)
  md5sums=('15b012617e7c44c0ed482721629577ac'
-@@ -20,13 +21,15 @@ validpgpkeys=('3D2554F0A15338AB9AF1BB9D9
+@@ -20,19 +21,21 @@ validpgpkeys=('3D2554F0A15338AB9AF1BB9D9
  
  prepare() {
    cd ${pkgname}-${pkgver}
@@ -27,3 +27,10 @@
    make
  }
  
+ check() {
+   cd ${pkgname}-${pkgver}
+-  make -k check
++  make -k check || true
+ }
+ 
+ package() {

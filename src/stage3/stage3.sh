@@ -21,7 +21,7 @@
 set -euo pipefail
 
 msg "Entering Stage 3"
-notify --text "*Bootstrap Entering Stage 3*"
+notify "*Bootstrap Entering Stage 3*"
 
 # set a bunch of convenience variables
 _builddir="$topbuilddir"/stage3
@@ -69,18 +69,14 @@ while [ -s "$_deptree" ]; do
   echo $_have_pkg
 
   if [ "x$_have_pkg" == "xno" ]; then
-    # prepare directories
+    prepare_makepkgdir
+
     _pkgdir="$_makepkgdir"/$_pkgname/pkg/$_pkgname
-    rm -rf "$_makepkgdir"/$_pkgname
-    mkdir -pv "$_makepkgdir"/$_pkgname
-    pushd "$_makepkgdir"/$_pkgname >/dev/null
 
     if [ "x$_pkgarch" == "xany" ]; then
       # repackage arch=(any) packages
       _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
       pacman -Sw --noconfirm --cachedir "$_pkgdest" $_pkgname
-      ln -s "$_pkgdest"/$_pkgname-$_pkgver-any.pkg.tar.xz \
-        "$_makepkgdir"/$_pkgname/$_pkgname-$_pkgver-any.pkg.tar.xz
     elif [ "x$_pkgname" == "xca-certificates-mozilla" ]; then
       # repackage ca-certificates-mozilla to avoid building nss
       _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
@@ -104,8 +100,6 @@ EOF
         .PKGINFO *
       env LANG=C bsdtar -cf - .MTREE .PKGINFO * | xz -c -z - > \
         "$_pkgdest"/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz
-      ln -s "$_pkgdest"/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz \
-        "$_makepkgdir"/$_pkgname/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz
     else
       fetch_pkgfiles $_pkgname
       import_keys
@@ -149,6 +143,11 @@ EOF
       -C "$_builddir"/config/pacman.conf \
       -M "$_builddir"/config/makepkg.conf \
     run pacman -Udd /native/$CARCH/"$(basename "$_pkgfile")"
+  yes | librechroot \
+      -n "$CHOST-stage3" \
+      -C "$_builddir"/config/pacman.conf \
+      -M "$_builddir"/config/makepkg.conf \
+    run pacman -Syyuu
   set -o pipefail
 
   # remove pkg from deptree
@@ -156,10 +155,11 @@ EOF
 
   full=$(cat "$_deptree".FULL | wc -l)
   curr=$(expr $full - $(cat "$_deptree" | wc -l))
-  notify --success --text "*$curr/$full* $_pkgname"
+  notify -c success -u low "*$curr/$full* $_pkgname"
 done
 
 # unmount
 umount "$_chrootdir"/native/$CARCH
+umount "$_chrootdir"/cross/$CARCH
 
 echo "all packages built."

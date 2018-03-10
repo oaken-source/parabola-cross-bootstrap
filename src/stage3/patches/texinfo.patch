@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-03-09 19:17:11.280782814 +0100
++++ b/PKGBUILD	2018-03-09 19:22:42.182761210 +0100
+@@ -21,6 +21,12 @@ md5sums=('3715197e62e0e07f85860b3d7aab55
+          '5590fb3ef9ec309c98f5a4d85eca49da')
+ validpgpkeys=('EAF669B31E31E1DECBD11513DDBC579DAB37FBA9') # Gavin Smith
+ 
++prepare() {
++  cd $pkgname-$pkgver
++  @CONFIG_SUB@ > build-aux/config.sub
++  @CONFIG_GUESS@ > build-aux/config.guess
++}
++
+ build() {
+   cd $pkgname-$pkgver
+   ./configure --prefix=/usr

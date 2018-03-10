@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-03-09 14:06:28.095625154 +0100
++++ b/PKGBUILD	2018-03-09 14:10:02.778614809 +0100
+@@ -14,6 +14,12 @@ depends=('gcc-libs' 'sh')
+ source=(http://download.oracle.com/berkeley-db/db-${pkgver}.tar.gz)
+ sha1sums=('fa3f8a41ad5101f43d08bc0efb6241c9b6fc1ae9')
+ 
++prepare() {
++  cd "${srcdir}"/$pkgname-${pkgver}
++  @CONFIG_SUB@ > dist/config.sub
++  @CONFIG_GUESS@ > dist/config.guess
++}
++
+ build() {
+   cd "${srcdir}"/$pkgname-${pkgver}/build_unix
+   ../dist/configure --prefix=/usr --enable-compat185 \

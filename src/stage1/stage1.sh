@@ -21,13 +21,14 @@
 set -euo pipefail
 
 msg "Entering Stage 1"
-notify --text "*Bootstrap Entering Stage 1*"
+notify "*Bootstrap Entering Stage 1*"
 
 # set a bunch of convenience variables
 _builddir="$topbuilddir"/stage1
 _srcdir="$topsrcdir"/stage1
 _pkgdest="$_builddir"/packages
 _logdest="$_builddir"/makepkglogs
+_makepkgdir="$_builddir"
 
 function check_toolchain() {
   echo -n "checking for $CHOST binutils ... "
@@ -97,10 +98,9 @@ for pkg in binutils linux-libre-api-headers gcc-bootstrap glibc gcc; do
 
   if [ "x$_have_pkg" == "xno" ]; then
     msg "makepkg: $_pkgname"
-    rm -rf "$_builddir"/$_pkgname
-    mkdir -p "$_builddir"/$_pkgname
-    cp "$_srcdir"/toolchain-pkgbuilds/$pkg/PKGBUILD.in "$_builddir"/$_pkgname/PKGBUILD
-    pushd "$_builddir"/$_pkgname >/dev/null
+    prepare_makepkgdir
+
+    cp "$_srcdir"/toolchain-pkgbuilds/$pkg/PKGBUILD.in .
 
     import_keys
 
@@ -122,7 +122,7 @@ for pkg in binutils linux-libre-api-headers gcc-bootstrap glibc gcc; do
     sudo -u $SUDO_USER makepkg -LC --config "$_builddir"/makepkg.conf || failed_build
 
     popd >/dev/null
-    notify --success --text "$_pkgname"
+    notify -c success -u low "$_pkgname"
   fi
 
   # install the package

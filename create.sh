@@ -57,4 +57,4 @@ chown $SUDO_USER "$topbuilddir"
 . "$topsrcdir"/stage3/stage3.sh
 
 msg "all done."
-notify --text "*Bootstrap Finished*"
+notify "*Bootstrap Finished*"

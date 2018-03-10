@@ -29,15 +29,17 @@ export WH=$(tput setf 7)
 
 # messaging functions
 notify() {
+  # useful if running notify_telegram
   local recipient=-274411993
-  if type -p telegram-notify >/dev/null; then
-    telegram-notify --user "$recipient" "$@" >/dev/null
+  if type -p notify-send >/dev/null; then
+    machinectl -q shell --uid=$SUDO_USER .host \
+      $(which notify-send) -h string:recipient:$recipient "$@" >/dev/null
   fi
 }
 
 die() {
   echo "$BO$RE==> ERROR:$WH $*$NO" 1>&2
-  notify --error --title Error --text "$(caller): $*" >/dev/null
+  notify -c error *Error:* "$(caller): $*"
   trap - ERR
   exit 1;
 }
@@ -57,18 +59,4 @@ check_exe() {
 check_file() {
   echo -n "checking for $1 ... "
   [ -f "$1" ] && echo yes || (echo no && die "missing ${2:-$1} in filesystem")
-}
-
-# build feedback helpers
-failed_build() {
-  _log=$(find "$_logdest" -type f -printf "%T@ %p\n" | sort -n | tail -n1 | cut -d' ' -f2-)
-  set +o pipefail
-  _phase=$(cat $_log | grep '==>.*occurred in' | awk '{print $7}' | sed 's/().*//')
-  set -o pipefail
-  if [ -n ${_phase:-} ]; then
-    notify --error --text "$_pkgname: error in $_phase()" --document "$_log"
-  else
-    notify --error --text "$_pkgname: error in makepkg"
-  fi
-  die "error building $_pkgname"
 }

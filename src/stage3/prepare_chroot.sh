@@ -44,7 +44,7 @@ cat > "$_builddir"/config/pacman.conf << EOF
 [options]
 Architecture = $CARCH
 [native]
-Server = file://${_pkgdest%/$CARCH}/\$arch
+Server = file://$topbuilddir/stage3/packages/\$arch
 [cross]
 Server = file://$topbuilddir/stage2/packages/\$arch
 EOF
@@ -70,9 +70,12 @@ set +o pipefail
 export _chrootdir="$(librechroot -n "$CHOST-stage3" 2>&1 | grep copydir.*: | awk '{print $3}')"
 set -o pipefail
 
-mkdir -p "$_chrootdir"/native/$CARCH
-if mount | grep -q "$_chrootdir"/native/$CARCH; then umount "$_chrootdir"/native/$CARCH; fi
+for repo in native cross; do
+  mkdir -p "$_chrootdir"/$repo/$CARCH
+  if mount | grep -q "$_chrootdir"/$repo/$CARCH; then umount "$_chrootdir"/$repo/$CARCH; fi
+done
 mount -o bind "$_pkgdest" "$_chrootdir"/native/$CARCH
+mount -o bind "${_pkgdest//stage3/stage2}" "$_chrootdir"/cross/$CARCH
 
 cat > "$_builddir"/config/pacman.conf << EOF
 [options]
@@ -80,7 +83,7 @@ Architecture = $CARCH
 [native]
 Server = file:///native/\$arch
 [cross]
-Server = file://$topbuilddir/stage2/packages/\$arch
+Server = file:///cross/\$arch
 EOF
 
 librechroot \
