@@ -22,14 +22,25 @@ set -euo pipefail
 
 retry() {
   for i in $(seq $(expr $1 - 1)); do
-    "${@:2}" && return 0 || sleep 20;
+    "${@:3}" && return 0 || sleep $2;
   done
-  "${@:2}" || return;
+  "${@:3}" || return;
 }
 
 import_keys() {
   local keys="$(source ${1:-PKGBUILD} && echo "${validpgpkeys[@]}")"
-  [ -z "$keys" ] || retry 3 sudo -u $SUDO_USER gpg --recv-keys $keys || return
+  if [ -n "$keys" ]; then
+    local key
+    for key in $keys; do
+      echo -n "checking for key $key ... "
+      sudo -u $SUDO_USER gpg --list-keys $key >/dev/null && _have_key=yes || _have_key=no
+      echo $_have_key
+      if [ "x$_have_key" == "xno" ]; then
+        retry 5 60 sudo -u $SUDO_USER gpg --recv-keys $key \
+          || die "failed to import key $key"
+      fi
+    done
+  fi
 }
 
 fetch_pkgfiles() {
@@ -63,7 +74,7 @@ failed_build() {
   set +o pipefail
   _phase=$(cat $_log | grep '==>.*occurred in' | awk '{print $7}' | sed 's/().*//')
   set -o pipefail
-  if [ -n ${_phase:-} ]; then
+  if [ -n "${_phase:-}" ]; then
     notify -c error "$_pkgname: error in $_phase()" -h string:document:"$_log"
   else
     notify -c error "$_pkgname: error in makepkg"

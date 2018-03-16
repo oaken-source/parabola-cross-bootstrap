@@ -1,0 +1,26 @@
+--- a/PKGBUILD	2018-03-11 08:38:59.475960150 +0100
++++ b/PKGBUILD	2018-03-11 08:40:07.431771594 +0100
+@@ -9,10 +9,15 @@ arch=('x86_64')
+ url="https://www.openprinting.org/download/ijs/"
+ license=('GPL')
+ depends=('glibc' 'sh')
+-makedepends=('docbook-utils' 'ghostscript')
+ source=("https://www.openprinting.org/download/ijs/download/ijs-$pkgver.tar.bz2")
+ md5sums=('896fdcb7a01c586ba6eb81398ea3f6e9')
+ 
++prepare() {
++	cd "$pkgname-$pkgver"
++  @CONFIG_SUB@ > config.sub
++  @CONFIG_GUESS@ > config.guess
++}
++
+ build() {
+ 	cd "$pkgname-$pkgver"
+ 	./configure --prefix=/usr \
+@@ -25,6 +30,4 @@ build() {
+ package() {
+ 	cd "$pkgname-$pkgver"
+ 	make DESTDIR="$pkgdir/" install
+-        # install doc
+-        install -Dm644 ijs_spec.pdf ${pkgdir}/usr/share/doc/$pkgname/ijs_spec.pdf
+ }

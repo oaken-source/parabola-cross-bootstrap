@@ -6,7 +6,7 @@
  pkgbase=glib2
 -pkgname=(glib2 glib2-docs)
 +pkgname=(glib2)
- pkgver=2.54.3+2+g94b38beff
+ pkgver=2.55.1+240+g5d93dd63e
  pkgrel=1
  pkgdesc="Low level core library"
 @@ -40,13 +40,18 @@ prepare() {

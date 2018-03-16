@@ -1,0 +1,28 @@
+--- a/PKGBUILD	2018-03-12 18:57:35.511430226 +0100
++++ b/PKGBUILD	2018-03-12 19:00:59.926712159 +0100
+@@ -13,8 +13,6 @@ arch=('x86_64')
+ license=('PSF')
+ url="http://www.python.org/"
+ depends=('bzip2' 'gdbm' 'openssl' 'zlib' 'expat' 'sqlite' 'libffi')
+-makedepends=('tk' 'bluez-libs')
+-checkdepends=('gdb' 'file' 'xorg-server-xvfb')
+ optdepends=('tk: for IDLE'
+             'python2-setuptools'
+             'python2-pip')
+@@ -83,16 +81,6 @@ build() {
+   make
+ }
+ 
+-check() {
+-  # Since 2.7.13,
+-  # test_replace_overflow (present in test_bytes, test_str, test_string, test_unicode, test_userstring) segfault on i686
+-  # test_bigrepeat (present in test_tuple) segfault on i686
+-
+-  cd Python-${pkgver}
+-  LD_LIBRARY_PATH="${srcdir}/Python-${pkgver}":${LD_LIBRARY_PATH} \
+-    xvfb-run "${srcdir}/Python-${pkgver}/python" -m test.regrtest -v -uall -x test_bytes test_str test_string test_tuple test_unicode test_userstring
+-}
+-
+ package() {
+   cd Python-${pkgver}
+ 

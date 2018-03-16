@@ -1,0 +1,43 @@
+--- a/PKGBUILD	2018-03-15 18:28:02.907566766 +0100
++++ b/PKGBUILD	2018-03-15 18:30:17.106683685 +0100
+@@ -10,8 +10,7 @@ url="https://wiki.gnome.org/Projects/GLi
+ license=(LGPL2.1)
+ arch=(x86_64)
+ depends=(pcre libffi libutil-linux zlib)
+-makedepends=(gettext gtk-doc shared-mime-info python libelf git util-linux dbus)
+-checkdepends=(desktop-file-utils)
++makedepends=(gettext python libelf git util-linux dbus)
+ optdepends=('python: gdbus-codegen, glib-genmarshal, glib-mkenums, gtester-report'
+             'libelf: gresource inspection tool')
+ options=(!emptydirs)
+@@ -49,21 +48,15 @@ build() {
+     --sysconfdir=/etc \
+     --with-pcre=system \
+     --enable-debug=$debug \
+-    --enable-gtk-doc \
++    --disable-gtk-doc \
+     --disable-fam
+   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+   make
+ }
+ 
+-check() {
+-  cd glib
+-  make check
+-}
+-
+ package_glib2() {
+   cd glib
+   make DESTDIR="$pkgdir" install
+-  mv "$pkgdir/usr/share/gtk-doc" "$srcdir"
+ 
+   install -Dt "$pkgdir/usr/share/libalpm/hooks" -m644 ../*.hook
+ }
+@@ -75,7 +68,6 @@ package_glib2-docs() {
+   license+=(custom)
+ 
+   mkdir -p "$pkgdir/usr/share"
+-  mv gtk-doc "$pkgdir/usr/share"
+ 
+   install -Dt "$pkgdir/usr/share/licenses/glib2-docs" -m644 glib/docs/reference/COPYING
+ }

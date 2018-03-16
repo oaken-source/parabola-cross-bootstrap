@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-03-15 15:37:08.502404225 +0100
++++ b/PKGBUILD	2018-03-15 15:38:33.212927538 +0100
+@@ -10,7 +10,7 @@ url="https://wiki.gnome.org/Projects/GOb
+ arch=(x86_64)
+ license=(LGPL GPL)
+ depends=(python python-mako)
+-makedepends=(cairo git gtk-doc)
++makedepends=(git)
+ options=(!emptydirs)
+ _commit=dc5d8dbedc0f3d16344f1a3648970c9783c08370  # tags/1.56.0^0
+ source=("git+https://gitlab.gnome.org/GNOME/gobject-introspection.git#commit=$_commit")
+@@ -28,7 +28,7 @@ prepare() {
+   
+ build() {
+   cd $pkgbase
+-  ./configure --prefix=/usr --disable-static --enable-doctool --enable-gtk-doc
++  ./configure --prefix=/usr --disable-static --disable-doctool --disable-gtk-doc
+   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+   make
+ }

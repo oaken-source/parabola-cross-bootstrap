@@ -1,11 +1,12 @@
---- a/PKGBUILD	2018-03-06 09:21:48.085930238 +0100
-+++ b/PKGBUILD	2018-03-06 09:31:00.936949257 +0100
-@@ -14,26 +14,27 @@ url='https://github.com/ivmai/libatomic_
+--- a/PKGBUILD	2018-03-12 17:32:57.049007339 +0100
++++ b/PKGBUILD	2018-03-12 17:45:14.783595573 +0100
+@@ -14,26 +14,23 @@ url='https://github.com/ivmai/libatomic_
  depends=(glibc)
  license=(GPL2 MIT)
  options=(!docs)
 -source=($url/releases/download/v$pkgver/${pkgname}-${pkgver}.tar.gz)
 -sha256sums=('219724edad3d580d4d37b22e1d7cb52f0006d282d26a9b8681b560a625142ee6')
++makedepends=(git)
 +source=(git+https://github.com/ivmai/libatomic_ops.git)
 +sha256sums=('SKIP')
  
@@ -22,12 +23,11 @@
    make
  }
  
- check() {
+-check() {
 -  cd $pkgname-$pkgver
-+  cd $pkgname
-   make check
- }
- 
+-  make check
+-}
+-
  package() {
 -  cd $pkgname-$pkgver
 +  cd $pkgname

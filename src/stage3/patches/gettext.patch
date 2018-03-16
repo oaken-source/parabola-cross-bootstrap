@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-03-15 07:37:17.062156420 +0100
++++ b/PKGBUILD	2018-03-15 08:00:46.877456517 +0100
+@@ -15,6 +15,12 @@ options=(!docs)
+ source=(ftp://ftp.gnu.org/pub/gnu/gettext/${pkgname}-${pkgver}.tar.gz{,.sig})
+ validpgpkeys=('462225C3B46F34879FC8496CD605848ED7E69871') # Daiki Ueno
+ 
++prepare() {
++  cd "${srcdir}/${pkgname}-${pkgver}"
++  @CONFIG_SUB@ > build-aux/config.sub
++  @CONFIG_GUESS@ > build-aux/config.guess
++}
++
+ build() {
+   cd "${srcdir}/${pkgname}-${pkgver}"
+   ./configure --prefix=/usr

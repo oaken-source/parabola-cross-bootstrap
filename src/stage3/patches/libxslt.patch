@@ -1,0 +1,22 @@
+--- a/PKGBUILD	2018-03-14 20:54:54.175271060 +0100
++++ b/PKGBUILD	2018-03-14 20:56:09.654946102 +0100
+@@ -11,7 +11,6 @@ arch=(x86_64)
+ license=(custom)
+ depends=(libxml2 libgcrypt)
+ makedepends=(python2 git)
+-checkdepends=(docbook-xml python)
+ _commit=32c88216ddbaa0f3491f45bc84ee89285c6a1129  # master
+ source=("git+https://git.gnome.org/browse/libxslt#commit=$_commit")
+ sha256sums=('SKIP')
+@@ -38,11 +37,6 @@ build() {
+   make
+ }
+ 
+-check() {
+-  cd $pkgname
+-  make check
+-}
+-
+ package() {
+   cd $pkgname
+   make DESTDIR="$pkgdir" install

@@ -1,0 +1,40 @@
+--- a/PKGBUILD	2018-03-15 22:28:13.742085702 +0100
++++ b/PKGBUILD	2018-03-16 08:33:19.888281296 +0100
+@@ -3,16 +3,14 @@
+ # Maintainer: Felix Yan <felixonmars@archlinux.org>
+ 
+ pkgbase=python-lxml
+-pkgname=('python-lxml' 'python2-lxml' 'python-lxml-docs')
++pkgname=('python-lxml' 'python2-lxml')
+ pkgver=4.1.1
+ pkgrel=1
+ arch=('x86_64')
+ license=('BSD' 'custom')
+ url="http://lxml.de/"
+-makedepends=('libxslt' 'python-setuptools' 'python2-setuptools' 'epydoc' 'python2-pygments'
+-             'python2-docutils' 'cython' 'cython2')
+-checkdepends=('python-cssselect' 'python2-cssselect' 'python-html5lib' 'python2-html5lib'
+-              'python-beautifulsoup4' 'python2-beautifulsoup4')
++makedepends=('libxslt' 'python-setuptools' 'python2-setuptools'
++             'cython' 'cython2')
+ source=("https://github.com/lxml/lxml/archive/lxml-$pkgver.tar.gz")
+ sha512sums=('69c64fc9f34bd8250dffcc32b6dcc93490731cd32778d7257a232fc5a126e74433ce6d4351683b71872cbeccd2c4d5a970e8fc2e631bbc273125be2b7f61ef31')
+ 
+@@ -30,17 +28,6 @@ build() {
+ 
+   cd "$srcdir"/lxml-$pkgver-py2
+   python2 setup.py build
+-  make PYTHON=python2 html
+-}
+-
+-check() {
+-  # TODO: Find a sane way to skip inplace build
+-
+-  cd "$srcdir"/lxml-$pkgver
+-  make PYTHON=python test
+-
+-  cd "$srcdir"/lxml-$pkgver-py2
+-  make PYTHON=python2 test
+ }
+ 
+ package_python-lxml() {

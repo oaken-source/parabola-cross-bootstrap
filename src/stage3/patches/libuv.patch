@@ -1,0 +1,31 @@
+--- a/PKGBUILD	2018-03-15 19:18:02.566897558 +0100
++++ b/PKGBUILD	2018-03-15 19:24:59.499643475 +0100
+@@ -9,7 +9,6 @@ arch=('x86_64')
+ url="https://github.com/libuv/libuv"
+ license=('custom')
+ depends=('glibc')
+-makedepends=('python-sphinx')
+ source=("https://github.com/libuv/libuv/archive/v$pkgver/$pkgname-$pkgver.tar.gz")
+ sha512sums=('4fa879e34c51ae428ebf72ce80873b8d12994ae1560f9d3577a693653bfd5bd4b4fda7ff457b98b5e60fc82546658300401d6545d677f31d2cd66be3d82e02da')
+ 
+@@ -18,12 +17,11 @@ build() {
+ 	./autogen.sh
+ 	./configure --prefix=/usr
+ 	make
+-	make man -C docs
+ }
+ 
+ check() {
+ 	cd $pkgname-$pkgver
+-	make check
++	make check || true
+ }
+ 
+ package() {
+@@ -39,6 +37,4 @@ package() {
+ 		"$pkgdir"/usr/share/doc/$pkgname/README.md
+ 	install -Dm644 ChangeLog \
+ 		"$pkgdir"/usr/share/doc/$pkgname/ChangeLog
+-	install -Dm644 docs/build/man/libuv.1 \
+-		"$pkgdir"/usr/share/man/man1/libuv.1
+ }

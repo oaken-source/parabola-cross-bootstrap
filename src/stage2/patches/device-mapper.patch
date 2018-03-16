@@ -6,8 +6,8 @@
  
 +  @CONFIG_SUB@ > autoconf/config.sub
 +
-   # enable lvmetad
-   sed -i 's|use_lvmetad = 0|use_lvmetad = 1|' conf/example.conf.in
+   # remove install section from systemd units that are enabled by default
+   sed -i -e '/^\[Install\]$/,$d' \
  
 @@ -40,6 +43,7 @@ prepare() {
  

@@ -76,7 +76,7 @@ while [ -s "$_deptree" ]; do
     if [ "x$_pkgarch" == "xany" ]; then
       # repackage arch=(any) packages
       _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
-      pacman -Sw --noconfirm --cachedir "$_pkgdest" $_pkgname
+      pacman -Sddw --noconfirm --cachedir "$_pkgdest" $_pkgname
     elif [ "x$_pkgname" == "xca-certificates-mozilla" ]; then
       # repackage ca-certificates-mozilla to avoid building nss
       _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
@@ -133,25 +133,25 @@ EOF
     rm -rf /var/cache/pacman/pkg-$CARCH/*
     rm -rf "$_pkgdest"/native.{db,files}*
     repo-add -q -R "$_pkgdest"/{native.db.tar.gz,*.pkg.tar.xz}
+
+    # install in chroot
+    _pkgfile=$(find $_pkgdest -regex "^.*/$_pkgname-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$" | head -n1)
+    set +o pipefail
+    yes | librechroot \
+        -n "$CHOST-stage3" \
+        -C "$_builddir"/config/pacman.conf \
+        -M "$_builddir"/config/makepkg.conf \
+      run pacman -Udd /native/$CARCH/"$(basename "$_pkgfile")"
+    yes | librechroot \
+        -n "$CHOST-stage3" \
+        -C "$_builddir"/config/pacman.conf \
+        -M "$_builddir"/config/makepkg.conf \
+      run pacman -Syyuu
+    set -o pipefail
   fi
 
-  # install in chroot
-  _pkgfile=$(find $_pkgdest -regex "^.*/$_pkgname-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$" | head -n1)
-  set +o pipefail
-  yes | librechroot \
-      -n "$CHOST-stage3" \
-      -C "$_builddir"/config/pacman.conf \
-      -M "$_builddir"/config/makepkg.conf \
-    run pacman -Udd /native/$CARCH/"$(basename "$_pkgfile")"
-  yes | librechroot \
-      -n "$CHOST-stage3" \
-      -C "$_builddir"/config/pacman.conf \
-      -M "$_builddir"/config/makepkg.conf \
-    run pacman -Syyuu
-  set -o pipefail
-
   # remove pkg from deptree
-  sed -i "/^$_pkgname :/d; s/ $_pkgname\b//g" "$_deptree"
+  sed -i "/^$_pkgname :/d; s/ /  /g; s/ $_pkgname / /g; s/  */ /g" "$_deptree"
 
   full=$(cat "$_deptree".FULL | wc -l)
   curr=$(expr $full - $(cat "$_deptree" | wc -l))

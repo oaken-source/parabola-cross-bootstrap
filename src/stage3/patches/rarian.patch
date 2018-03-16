@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-16 21:08:46.056804383 +0100
++++ b/PKGBUILD	2018-03-16 21:09:56.648603235 +0100
+@@ -19,6 +19,8 @@ sha256sums=('aafe886d46e467eb3414e91fa9e
+ 
+ prepare() {
+   cd "${srcdir}/${pkgname}-${pkgver}"
++  @CONFIG_SUB@ > config.sub
++  @CONFIG_GUESS@ > config.guess
+   patch -Np0 -i ../user-segfault.patch
+ }
+ 

@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-11 21:37:13.644496399 +0100
++++ b/PKGBUILD	2018-03-11 21:38:13.052017848 +0100
+@@ -14,6 +14,8 @@ sha1sums=('60bea9875e017dd1c466e988c2ad9
+ 
+ prepare() {
+   cd $pkgname-$pkgver
++  @CONFIG_SUB@ > config.sub
++  @CONFIG_GUESS@ > config.guess
+ }
+ 
+ build() {

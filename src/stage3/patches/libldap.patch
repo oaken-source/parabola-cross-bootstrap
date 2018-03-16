@@ -1,0 +1,38 @@
+--- a/PKGBUILD	2018-03-16 12:55:07.765361033 +0100
++++ b/PKGBUILD	2018-03-16 13:42:59.760946917 +0100
+@@ -8,7 +8,7 @@ pkgrel=4
+ arch=('x86_64')
+ url="https://www.openldap.org/"
+ license=('custom')
+-makedepends=('libltdl' 'libsasl' 'e2fsprogs' 'util-linux' 'chrpath' 'unixodbc')
++makedepends=('libltdl' 'libsasl' 'e2fsprogs' 'util-linux' 'unixodbc')
+ options=('!makeflags' 'emptydirs')
+ source=(https://www.openldap.org/software/download/OpenLDAP/openldap-release/${pkgbase}-${pkgver}.tgz
+         slapd.service openldap.tmpfiles openldap.sysusers openldap-ntlm.patch)
+@@ -25,6 +25,8 @@ sha1sums=('c98437385d3eaee80c9e2c09f3f0d
+ 
+ prepare() {
+   cd ${pkgbase}-${pkgver}
++  @CONFIG_SUB@ > build/config.sub
++  @CONFIG_GUESS@ > build/config.guess
+   patch -p1 -i "${srcdir}"/openldap-ntlm.patch
+   sed -i 's|-m 644 $(LIBRARY)|-m 755 $(LIBRARY)|' libraries/{liblber,libldap,libldap_r}/Makefile.in
+   sed -i 's|#define LDAPI_SOCK LDAP_RUNDIR LDAP_DIRSEP "run" LDAP_DIRSEP "ldapi"|#define LDAPI_SOCK LDAP_DIRSEP "run" LDAP_DIRSEP "openldap" LDAP_DIRSEP "ldapi"|' include/ldap_defaults.h
+@@ -82,7 +84,7 @@ package_openldap() {
+   backup=('etc/openldap/slapd.conf' 'etc/openldap/slapd.ldif')
+ 
+   cd ${pkgbase}-${pkgver}
+-  for dir in clients servers doc/man/man{1,5,8}; do
++  for dir in libraries clients servers doc/man/man{1,5,8}; do
+     pushd ${dir}
+     make DESTDIR="${pkgdir}" install
+     popd
+@@ -99,6 +101,8 @@ package_openldap() {
+   rm "${pkgdir}"/usr/share/man/man5/ldap.conf.5
+   rm -r "${pkgdir}"/run
+ 
++  rm -rf "${pkgdir}"/usr/{lib,include,man3}
++
+ # get rid of duplicate default conf files
+   rm "${pkgdir}"/etc/openldap/*.default
+ 

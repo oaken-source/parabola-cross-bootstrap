@@ -83,7 +83,7 @@ while [ -s "$_deptree" ]; do
     if [ "x$_pkgarch" == "xany" ]; then
       # repackage arch=(any) packages
       _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
-      pacman -Sw --noconfirm --cachedir "$_pkgdest" $_pkgname
+      pacman -Sddw --noconfirm --cachedir "$_pkgdest" $_pkgname
     elif [ "x$_pkgname" == "xca-certificates-mozilla" ]; then
       # repackage ca-certificates-mozilla to avoid building nss
       _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
@@ -114,7 +114,7 @@ EOF
       # patch for cross-compiling
       [ -f "$_srcdir"/patches/$_pkgname.patch ] || die "missing package patch"
       cp PKGBUILD{,.old}
-      patch -Np1 -i "$_srcdir"/patches/$_pkgname.patch
+      patch -Np1 -i "$_srcdir"/patches/$_pkgname.patch || die "patch does not apply"
       cp PKGBUILD{,.in}
 
       # substitute common variables
@@ -163,7 +163,7 @@ EOF
   set -o pipefail
 
   # remove pkg from deptree
-  sed -i "/^$_pkgname :/d; s/ $_pkgname\b//g" "$_deptree"
+  sed -i "/^$_pkgname :/d; s/ /  /g; s/ $_pkgname / /g; s/  */ /g" "$_deptree"
 
   full=$(cat "$_deptree".FULL | wc -l)
   curr=$(expr $full - $(cat "$_deptree" | wc -l))

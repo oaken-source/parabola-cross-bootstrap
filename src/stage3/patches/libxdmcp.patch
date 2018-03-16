@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-03-11 21:12:28.281607458 +0100
++++ b/PKGBUILD	2018-03-11 21:13:55.244343142 +0100
+@@ -16,6 +16,12 @@ sha256sums=('81fe09867918fff258296e1e1e1
+             'SKIP')
+ validpgpkeys=('4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E') # Alan Coopersmith <alan.coopersmith@oracle.com>
+ 
++prepare() {
++  cd libXdmcp-${pkgver}
++  @CONFIG_SUB@ > config.sub
++  @CONFIG_GUESS@ > config.guess
++}
++
+ build() {
+   cd libXdmcp-${pkgver}
+   ./configure --prefix=/usr --sysconfdir=/etc --disable-static

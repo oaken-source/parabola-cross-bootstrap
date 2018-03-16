@@ -1,0 +1,15 @@
+--- a/PKGBUILD	2018-03-15 19:34:23.378134553 +0100
++++ b/PKGBUILD	2018-03-15 19:36:12.358273444 +0100
+@@ -13,6 +13,12 @@ source=(https://sources.archlinux.org/ot
+ md5sums=('d3bc88b7ddb9f06d60898f4816ae9127')
+ sha1sums=('0846670269824078a4eae8a977728175437b0da4')
+ 
++prepare() {
++  cd "$srcdir/$pkgname-${pkgver/_/-}"
++  @CONFIG_SUB@ > build-aux/config.sub
++  @CONFIG_GUESS@ > build-aux/config.guess
++}
++
+ build() {
+   cd "$srcdir/$pkgname-${pkgver/_/-}"
+   ./configure --prefix=/usr

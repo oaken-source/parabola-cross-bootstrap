@@ -34,7 +34,7 @@
 -  cd $pkgname-$pkgver
 +  cd $pkgname
 +  autoreconf --install
-+  #sed -i 's/(EM_RISCV64|/(EM_RISCV|/' tools/util.c
++  sed -i 's/(EM_RISCV64|/(EM_RISCV|/' tools/util.c
    ./configure --prefix=/usr
    make
  }

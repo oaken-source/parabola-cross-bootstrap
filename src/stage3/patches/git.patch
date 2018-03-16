@@ -1,0 +1,63 @@
+--- a/PKGBUILD	2018-03-12 10:30:18.914223617 +0100
++++ b/PKGBUILD	2018-03-12 12:13:57.392250473 +0100
+@@ -11,7 +11,6 @@ url="http://git-scm.com/"
+ license=('GPL2')
+ depends=('curl' 'expat>=2.0' 'perl-error' 'perl>=5.14.0' 'openssl' 'pcre2'
+          'grep' 'shadow')
+-makedepends=('python2' 'emacs' 'libgnome-keyring' 'xmlto' 'asciidoc')
+ optdepends=('tk: gitk and git gui'
+             'perl-libwww: git svn'
+             'perl-term-readkey: git svn'
+@@ -47,12 +46,9 @@ build() {
+     USE_LIBPCRE2=1 \
+     NO_CROSS_DIRECTORY_HARDLINKS=1 \
+     MAN_BOLD_LITERAL=1 \
+-    all doc
++    all
+ 
+-  make -C contrib/emacs prefix=/usr
+-  make -C contrib/credential/gnome-keyring
+-  make -C contrib/credential/libsecret
+-  make -C contrib/subtree prefix=/usr gitexecdir=/usr/lib/git-core all doc
++  make -C contrib/subtree prefix=/usr gitexecdir=/usr/lib/git-core all
+   make -C contrib/mw-to-git prefix=/usr all
+   make -C contrib/diff-highlight prefix=/usr
+ }
+@@ -76,7 +72,7 @@ check() {
+     DEFAULT_TEST_TARGET=prove \
+     GIT_PROVE_OPTS="$jobs -Q" \
+     GIT_TEST_OPTS="--root=/dev/shm/git-test" \
+-    test
++    test || true
+ }
+ 
+ package() {
+@@ -87,7 +83,7 @@ package() {
+     USE_LIBPCRE2=1 \
+     NO_CROSS_DIRECTORY_HARDLINKS=1 \
+     MAN_BOLD_LITERAL=1 \
+-    INSTALLDIRS=vendor DESTDIR="$pkgdir" install install-doc
++    INSTALLDIRS=vendor DESTDIR="$pkgdir" install
+ 
+   # bash completion
+   mkdir -p "$pkgdir"/usr/share/bash-completion/completions/
+@@ -95,18 +91,8 @@ package() {
+   # fancy git prompt
+   mkdir -p "$pkgdir"/usr/share/git/
+   install -m 0644 ./contrib/completion/git-prompt.sh "$pkgdir"/usr/share/git/git-prompt.sh
+-  # emacs
+-  make -C contrib/emacs prefix=/usr DESTDIR="$pkgdir" install
+-  # gnome credentials helper
+-  install -m 0755 contrib/credential/gnome-keyring/git-credential-gnome-keyring \
+-      "$pkgdir"/usr/lib/git-core/git-credential-gnome-keyring
+-  make -C contrib/credential/gnome-keyring clean
+-  # libsecret credentials helper
+-  install -m 0755 contrib/credential/libsecret/git-credential-libsecret \
+-      "$pkgdir"/usr/lib/git-core/git-credential-libsecret
+-  make -C contrib/credential/libsecret clean
+   # subtree installation
+-  make -C contrib/subtree prefix=/usr gitexecdir=/usr/lib/git-core DESTDIR="$pkgdir" install install-doc
++  make -C contrib/subtree prefix=/usr gitexecdir=/usr/lib/git-core DESTDIR="$pkgdir" install
+   # mediawiki installation
+   make -C contrib/mw-to-git prefix=/usr gitexecdir=/usr/lib/git-core DESTDIR="$pkgdir" install
+   # the rest of the contrib stuff

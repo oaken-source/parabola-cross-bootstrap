@@ -1,0 +1,14 @@
+--- a/PKGBUILD	2018-03-13 17:17:37.724605816 +0100
++++ b/PKGBUILD	2018-03-13 17:33:12.217435043 +0100
+@@ -25,11 +25,6 @@ build() {
+   make
+ }
+ 
+-check() {
+-  cd tcl${pkgver}/unix
+-  make test
+-}
+-
+ package() {
+   cd tcl${pkgver}/unix
+   make INSTALL_ROOT="${pkgdir}" install install-private-headers

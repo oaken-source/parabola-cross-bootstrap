@@ -1,0 +1,30 @@
+--- a/PKGBUILD	2018-03-12 16:05:29.210682618 +0100
++++ b/PKGBUILD	2018-03-12 16:29:51.449789889 +0100
+@@ -9,7 +9,7 @@ arch=(x86_64)
+ url="https://p11-glue.freedesktop.org"
+ license=(BSD)
+ depends=(glibc libtasn1 libffi)
+-makedepends=(gtk-doc git)
++makedepends=(git)
+ _commit=f6b7a992e442218a5afdbf8ae1697c53f3f03991  # tags/0.23.10^0
+ source=("git+https://github.com/p11-glue/p11-kit#commit=$_commit"
+         0001-Build-and-install-libnssckbi-p11-kit.so.patch)
+@@ -41,17 +41,12 @@ build() {
+     --sysconfdir=/etc \
+     --localstatedir=/var \
+     --libexecdir=/usr/lib \
+-    --enable-doc \
++    --disable-doc \
+     --with-module-path=/usr/lib/pkcs11 \
+     --with-trust-paths=/etc/ca-certificates/trust-source:/usr/share/ca-certificates/trust-source
+   make
+ }
+ 
+-check() {
+-  cd $pkgname
+-  make check
+-}
+-
+ package() {
+   cd $pkgname
+   make DESTDIR="$pkgdir" install

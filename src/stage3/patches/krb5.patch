@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-03-16 14:35:46.289222874 +0100
++++ b/PKGBUILD	2018-03-16 15:23:21.738828696 +0100
+@@ -55,6 +55,7 @@ build() {
+                --without-tcl \
+                --enable-dns-for-realm \
+                --with-ldap \
++               --disable-thread-support \
+                --without-system-verto
+    make
+ }

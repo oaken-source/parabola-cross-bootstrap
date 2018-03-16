@@ -25,9 +25,10 @@ msg "preparing native $CARCH decross'd packages"
 # cross-compiled packages con be a bit derpy.
 # rebuild a couple of things using native toolchain and custom patches
 
-_decross="bash make"
+while grep -q -- -decross "$_deptree"; do
+  _pkgname=$(grep -- -decross "$_deptree" | head -n1 | awk '{print $1}')
+  _pkgname=${_pkgname%-decross}
 
-for _pkgname in $_decross; do
   echo -n "checking for $CARCH $_pkgname ... "
   [ -f "$_makepkgdir"/$_pkgname-decross/$_pkgname-*.pkg.tar.xz ] && _have_pkg=yes || _have_pkg=no
   echo $_have_pkg
@@ -68,15 +69,20 @@ for _pkgname in $_decross; do
     chown -R $SUDO_USER "$_makepkgdir"/$_pkgname-decross
     PKGDEST=. libremakepkg -n $CHOST-stage3 || failed_build
 
-    # install the package
-    set +o pipefail
-    yes | librechroot \
-        -n "$CHOST-stage3" \
-        -C "$_builddir"/config/pacman.conf \
-        -M "$_builddir"/config/makepkg.conf \
-      install-file $_pkgname-*.pkg.tar.xz
-    set -o pipefail
-
     notify -c success -u low "*decross* $_pkgname"
+
+    popd >/dev/null
   fi
+
+  # install the package
+  set +o pipefail
+  yes | librechroot \
+      -n "$CHOST-stage3" \
+      -C "$_builddir"/config/pacman.conf \
+      -M "$_builddir"/config/makepkg.conf \
+    install-file "$_makepkgdir"/$_pkgname-decross/$_pkgname-*.pkg.tar.xz
+  set -o pipefail
+
+  # remove pkg from deptree
+  sed -i "/^$_pkgname-decross :/d; s/ $_pkgname\b//g" "$_deptree"
 done

@@ -1,0 +1,12 @@
+--- a/PKGBUILD	2018-03-11 08:48:06.763040565 +0100
++++ b/PKGBUILD	2018-03-11 18:56:19.184422692 +0100
+@@ -23,6 +23,9 @@ sha256sums=('2f1e960d92ce3b3abd03d06dfec
+ prepare() {
+   cd $pkgname-$pkgver
+ 
++  @CONFIG_SUB@ > config.sub
++  @CONFIG_GUESS@ > config.guess
++
+   # Add animated PNG (apng) support. Required by Firefox
+   # see http://sourceforge.net/projects/libpng-apng/
+   patch -Np1 -i ../libpng-$_apngver-apng.patch

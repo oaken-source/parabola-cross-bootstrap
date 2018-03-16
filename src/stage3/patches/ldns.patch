@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-15 19:38:21.462593632 +0100
++++ b/PKGBUILD	2018-03-15 19:39:40.578390009 +0100
+@@ -20,6 +20,8 @@ sha256sums=('c19f5b1b4fb374cfe34f4845ea1
+ 
+ prepare() {
+ 	cd "${srcdir}/${pkgname}-${pkgver}"
++  @CONFIG_SUB@ > config.sub
++  @CONFIG_GUESS@ > config.guess
+ 	patch -p1 -i ../pc.patch
+ }
+ 

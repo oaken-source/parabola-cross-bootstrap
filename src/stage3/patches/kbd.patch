@@ -1,0 +1,19 @@
+--- a/PKGBUILD	2018-03-16 20:11:07.357989223 +0100
++++ b/PKGBUILD	2018-03-16 20:12:43.847030062 +0100
+@@ -9,7 +9,6 @@ arch=('x86_64')
+ url="http://www.kbd-project.org"
+ license=('GPL')
+ depends=('glibc' 'pam')
+-makedepends=('check')
+ source=(https://www.kernel.org/pub/linux/utils/${pkgname}/${pkgname}-${pkgver}.tar.gz
+ https://www.kernel.org/pub/linux/utils/kbd/${pkgname}-${pkgver}.tar.sign
+         'fix-euro2.patch')
+@@ -22,6 +21,8 @@ validpgpkeys=(
+ 
+ prepare() {
+   cd ${srcdir}/${pkgname}-${pkgver}
++  @CONFIG_SUB@ > config/config.sub
++  @CONFIG_GUESS@ > config/config.guess
+   # rename keymap files with the same names
+   # this is needed because when only name of keymap is specified
+   # loadkeys loads the first keymap it can find, which is bad (see FS#13837)

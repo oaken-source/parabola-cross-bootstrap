@@ -44,34 +44,70 @@ if [ "x$_have_deptree" == "xno" ]; then
     _pkgdeps=$(pacman -Si $_pkgname | grep '^Depends' | cut -d':' -f2 | sed 's/None//')
 
     # add some additional build-time dependencies
-    _extra_deps=""
     case $_pkgname in
       binutils)
-        _extra_deps="git dejagnu bc" ;;
+        _pkgdeps+=" git dejagnu bc" ;;
+      blas|cblas|lapack|lapacke|lapack-doc)
+        _pkgdeps+=" cmake" ;;
+      boost-libs|boost)
+        _pkgdeps+=" python-numpy python2-numpy openmpi" ;;
       gcc-libs)
-        _extra_deps="dejagnu libmpc mpfr gmp" ;;
+        _pkgdeps+=" dejagnu libmpc mpfr gmp" ;;
+      git)
+        _pkgdeps="${_pkgdeps/curl}"
+        _pkgdeps="${_pkgdeps/shadow}" ;;
+      glib2)
+        _pkgdeps+=" python" ;;
+      gmp)
+        _pkgdeps="${_pkgdeps/gcc-libs}" ;;
+      gobject-introspection-runtime)
+        _pkgdeps+=" python-mako" ;;
+      jsoncpp)
+        _pkgdeps+=" meson" ;;
+      libaio)
+        _pkgdeps+=" git" ;;
       libatomic_ops)
-        _extra_deps="git" ;;
+        _pkgdeps+=" git" ;;
+      libdaemon)
+        _pkgdeps+=" git" ;;
+      libldap)
+        _pkgdeps="${_pkgdeps/libsasl}" ;;
       libffi)
-        _extra_deps="dejagnu git" ;;
+        _pkgdeps+=" dejagnu git" ;;
       libpsl)
-        _extra_deps="libxslt" ;;
-      libtool)
-        _extra_deps="git" ;;
+        _pkgdeps+=" libxslt" ;;
+      libsasl)
+        _pkgdeps+=" libldap krb5 openssl sqlite" ;;
       libseccomp)
-        _extra_deps="git" ;;
+        _pkgdeps+=" git" ;;
+      libsecret)
+        _pkgdeps+=" gobject-introspection git intltool gtk-doc" ;;
+      libtool)
+        _pkgdeps+=" git help2man" ;;
+      libxcb)
+        _pkgdeps+=" libxslt python xorg-util-macros" ;;
+      libxdmcp)
+        _pkgdeps+=" xorg-util-macros" ;;
       libxml2)
-        _extra_deps="git python python2" ;;
+        _pkgdeps+=" git python python2" ;;
       lz4)
-        _extra_deps="git" ;;
+        _pkgdeps+=" git" ;;
+      ninja)
+        _pkgdeps+=" python2 re2c" ;;
       nss-*|libudev|libsystemd*)
-        _extra_deps="libutil-linux pcre2 git meson" ;;
+        _pkgdeps+=" libutil-linux pcre2 git meson gperf python-lxml quota-tools" ;;
       patch)
-        _extra_deps="ed" ;;
+        _pkgdeps+=" ed" ;;
+      python-lxml)
+        _pkgdeps+=" cython cython2" ;;
+      python-markupsafe)
+        _pkgdeps+=" python-setuptools python2-setuptools" ;;
+      shadow)
+        _pkgdeps+=" gnome-doc-utils python2" ;;
     esac
 
     # iterate dependencies for pkg
-    for _dep in $_pkgdeps $_extra_deps; do
+    for _dep in $_pkgdeps; do
       # translate dependency string to actual package
       realdep=$(pacman --noconfirm -Sddw "$_dep" | grep '^Packages' | awk '{print $3}')
       realdep=${realdep%-*-*}
@@ -82,15 +118,14 @@ if [ "x$_have_deptree" == "xno" ]; then
   done
 
   # following is a bit of magic to untangle the build dependencies
-  for i in "${!_tree[@]}"; do
-    _tree[$i]="${_tree[$i]/bash}"
-  done
-  _tree[gmp]="${_tree[gmp]/gcc-libs}"
 
   # write package dependency tree
   truncate -s0 "$_deptree".FULL
+  for i in bash make; do
+    echo "$i-decross : [ ]" >> "$_deptree".FULL
+  done
   for i in "${!_tree[@]}"; do
-    echo "${i} : [${_tree[$i]} ]" >> "$_deptree".FULL
+    echo "$i : [${_tree[$i]} ]" >> "$_deptree".FULL
   done
 fi
 
