@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-17 21:00:05.386889081 +0100
++++ b/PKGBUILD	2018-03-17 21:37:30.246676777 +0100
+@@ -10,7 +10,7 @@ arch=('x86_64')
+ url="http://www.gnu.org/software/src-highlite/"
+ license=('GPL')
+ depends=('bash' 'boost-libs')
+-makedepends=('ctags' 'boost')
++makedepends=('boost')
+ source=("ftp://ftp.gnu.org/gnu/src-highlite/${pkgname}-${pkgver}.tar.gz")
+ md5sums=('3243470706ef5fefdc3e43b5306a4e41')
+ 

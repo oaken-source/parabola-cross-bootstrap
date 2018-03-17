@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-17 22:00:00.159973631 +0100
++++ b/PKGBUILD	2018-03-17 22:01:13.039546834 +0100
+@@ -14,7 +14,7 @@ arch=('x86_64')
+ optdepends=('libldap: gpg2keys_ldap'
+             'libusb-compat: scdaemon'
+             'pcsclite: scdaemon')
+-makedepends=('libldap' 'libusb-compat' 'pcsclite')
++makedepends=('libldap')
+ checkdepends=('openssh')
+ depends=('npth' 'libgpg-error' 'libgcrypt' 'libksba' 'libassuan'
+          'pinentry' 'bzip2' 'readline' 'gnutls' 'sqlite')

@@ -1,0 +1,55 @@
+--- a/PKGBUILD	2018-03-17 17:57:14.313844109 +0100
++++ b/PKGBUILD	2018-03-17 18:03:26.310554392 +0100
+@@ -13,14 +13,21 @@ arch=('x86_64')
+ license=('custom')
+ url="http://www.numpy.org/"
+ makedepends=('cblas' 'lapack' 'python' 'python2' 'python-setuptools' 'python2-setuptools' 'gcc-fortran'
+-	'python-nose' 'python2-nose' 'cython' 'cython2')
++	'cython' 'cython2')
+ options=('staticlibs')
+-source=("$pkgbase-$pkgver.tar.gz::https://github.com/numpy/numpy/archive/v$pkgver.tar.gz" 'site.cfg')
++source=("$pkgbase-$pkgver.tar.gz::https://github.com/numpy/numpy/archive/v$pkgver.tar.gz" 'site.cfg'
++        numpy-riscv64.patch)
+ sha512sums=('65b10462011e033669b700f0688df2e8630a097323fc7d72e71549fdfc2258546fe6f1317e0d51e1a0c9ab86451e0998ccbc7daa9af690652a96034571d5b76b'
+-            '03a0f161be4963625f110a26167efbd300a12bd4cf99c8250c47ac865466d03fc8640e7e4fb6a59c39bf8b797609f5ed50afbc720d1fcbd2c4c57263cf8b406b')
++            '03a0f161be4963625f110a26167efbd300a12bd4cf99c8250c47ac865466d03fc8640e7e4fb6a59c39bf8b797609f5ed50afbc720d1fcbd2c4c57263cf8b406b'
++            '82e25d6d73139d915a43cea5e76b2cffdf91fb6670d2df8226c928692ca489cf324fab4f0884bab368e28d8022a13d87760b3179521ce16614aa566eb222a3cd')
+ 
+ prepare() {
+   cp site.cfg numpy-$pkgver
++
++  cd numpy-$pkgver
++  patch -Np1 -i "$srcdir"/numpy-riscv64.patch
++  cd ..
++
+   cp -a numpy-$pkgver numpy-py2-$pkgver
+   cd numpy-py2-$pkgver
+ 
+--- /dev/null	2018-03-05 07:42:50.020223709 +0100
++++ b/numpy-riscv64.patch	2018-03-17 18:03:11.030395477 +0100
+@@ -0,0 +1,25 @@
++diff -ur a/numpy/core/include/numpy/npy_cpu.h b/numpy/core/include/numpy/npy_cpu.h
++--- a/numpy/core/include/numpy/npy_cpu.h	2016-06-18 17:15:37.000000000 +0100
+++++ b/numpy/core/include/numpy/npy_cpu.h	2016-10-26 17:43:45.604372275 +0100
++@@ -76,6 +76,8 @@
++     #define NPY_CPU_ARCEL
++ #elif defined(__arc__) && defined(__BIG_ENDIAN__)
++     #define NPY_CPU_ARCEB
+++#elif defined(__riscv)
+++    #define NPY_CPU_RISCV64
++ #else
++     #error Unknown CPU, please report this to numpy maintainers with \
++     information about your platform (OS, CPU and compiler)
++diff -ur a/numpy/core/include/numpy/npy_endian.h b/numpy/core/include/numpy/npy_endian.h
++--- a/numpy/core/include/numpy/npy_endian.h	2016-06-18 17:15:37.000000000 +0100
+++++ b/numpy/core/include/numpy/npy_endian.h	2016-10-26 17:43:58.381378464 +0100
++@@ -40,7 +40,8 @@
++             || defined(NPY_CPU_SH_LE)   \
++             || defined(NPY_CPU_MIPSEL)  \
++             || defined(NPY_CPU_PPC64LE) \
++-            || defined(NPY_CPU_ARCEL)
+++            || defined(NPY_CPU_ARCEL)   \
+++            || defined(NPY_CPU_RISCV64)
++         #define NPY_BYTE_ORDER NPY_LITTLE_ENDIAN
++     #elif defined(NPY_CPU_PPC)          \
++             || defined(NPY_CPU_SPARC)   \

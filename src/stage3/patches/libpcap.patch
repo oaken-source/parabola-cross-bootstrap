@@ -1,0 +1,19 @@
+--- a/PKGBUILD	2018-03-17 15:18:06.301643296 +0100
++++ b/PKGBUILD	2018-03-17 15:19:31.298809846 +0100
+@@ -10,7 +10,7 @@ arch=('x86_64')
+ url='http://www.tcpdump.org/'
+ license=('BSD')
+ depends=('glibc' 'libnl' 'sh' 'libusbx' 'dbus')
+-makedepends=('flex' 'bluez-libs')
++makedepends=('flex')
+ source=(http://www.tcpdump.org/release/libpcap-${pkgver}.tar.gz{,.sig}
+         mgmt.h
+         disable-remote.diff)
+@@ -33,7 +33,6 @@ build() {
+   CFLAGS="$CFLAGS -I${srcdir}/include $(pkg-config libnl-genl-3.0 --cflags)" \
+   ./configure --prefix=/usr \
+     --enable-ipv6 \
+-    --enable-bluetooth \
+     --with-libnl
+   make
+ }

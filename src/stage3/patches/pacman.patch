@@ -1,0 +1,176 @@
+--- a/PKGBUILD	2018-03-17 22:43:27.776000901 +0100
++++ b/PKGBUILD	2018-03-17 22:45:57.506623741 +0100
+@@ -20,9 +20,7 @@ groups=('base' 'base-devel' 'base-openrc
+ depends=('bash' 'glibc' 'libarchive' 'curl' 'gpgme'
+          'pacman-mirrorlist' 'archlinux-keyring' 'parabola-keyring'
+          'archlinuxarm-keyring' 'archlinux32-keyring')
+-makedepends=('asciidoc')
+-makedepends+=('openssl>=1.1' 'openssl-1.0') # for during openssl 1.0->1.1 rebuild; remove on next rebuild
+-checkdepends=('python2' 'fakechroot')
++makedepends+=('openssl>=1.1')
+ optdepends=('cron: run specified programs at scheduled times and related tools')
+ provides=("$pkgname-contrib")
+ conflicts=("$pkgname-contrib" "$pkgname-parabola" 'cacert-dot-org')
+@@ -45,6 +43,7 @@ sha256sums=('dfd36086ad68564bcd977f4a1fa
+             '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
+             '1b2c8f4ec84d0dc496516880a54b5e4deb78798618c9cf5e284a45303f156e58'
+             'b2cb3ba229edba338c0af7d7f5bb1a6ef6143bcd453c693bfee0c02fa1cfa18a'
++            '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
+             '0d174c7c47921cfbb35dacb9d099095e78f6f67bfaa86836a3e588552f14ed03'
+             '1df848c5038a3f81ae4dc79a4072d340109b02f56292a5c4a20c59f735edd2b3'
+             '1cc4af1cf8e2133d4520827cc7d3ffad731892595f8e699909002d2e40ad8df9'
+@@ -71,7 +70,7 @@ build() {
+   cd "$pkgname-$pkgver"
+ 
+   ./configure --prefix=/usr --sysconfdir=/etc \
+-    --localstatedir=/var --enable-doc \
++    --localstatedir=/var --disable-doc \
+     --with-scriptlet-shell=/usr/bin/bash \
+     --with-ldconfig=/usr/bin/ldconfig
+   make V=1
+@@ -96,6 +95,11 @@ build() {
+         mychost="armv7l-unknown-linux-gnueabihf"
+         myflags="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -O2 -pipe -fstack-protector-strong -fno-plt"
+         ;;
++      riscv64)
++        mycarch="riscv64"
++        mychost="riscv64-unknown-linux-gnu"
++        myflags="-march=rv64gc -mabi=lp64d -O2 -pipe -fstack-protector-strong -fno-plt"
++        ;;
+     esac
+     myldflags="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
+ 
+@@ -108,10 +112,6 @@ build() {
+   done
+ }
+ 
+-check() {
+-  make -C "$pkgname-$pkgver" check
+-}
+-
+ package() {
+   cd "$pkgname-$pkgver"
+ 
+--- /dev/null	2018-03-05 07:42:50.020223709 +0100
++++ b/pacman.conf.riscv64	2018-03-17 22:43:27.778000923 +0100
+@@ -0,0 +1,120 @@
++#
++# /etc/pacman.conf
++#
++# See the pacman.conf(5) manpage for option and repository directives
++
++#
++# GENERAL OPTIONS
++#
++[options]
++# The following paths are commented out with their default values listed.
++# If you wish to use different paths, uncomment and update the paths.
++#RootDir     = /
++#DBPath      = /var/lib/pacman/
++#CacheDir    = /var/cache/pacman/pkg/
++#LogFile     = /var/log/pacman.log
++#GPGDir      = /etc/pacman.d/gnupg/
++#HookDir     = /etc/pacman.d/hooks/
++HoldPkg     = pacman glibc
++#XferCommand = /usr/bin/curl -L -C - -f -o %o %u
++#XferCommand = /usr/bin/wget --passive-ftp -c -O %o %u
++#CleanMethod = KeepInstalled
++#UseDelta    = 0.7
++Architecture = auto
++
++# Pacman won't upgrade packages listed in IgnorePkg and members of IgnoreGroup
++#IgnorePkg   =
++#IgnoreGroup =
++
++#NoUpgrade   =
++#NoExtract   =
++
++# Misc options
++#UseSyslog
++#Color
++#TotalDownload
++CheckSpace
++#VerbosePkgLists
++
++# By default, pacman accepts packages signed by keys that its local keyring
++# trusts (see pacman-key and its man page), as well as unsigned packages.
++SigLevel    = Required DatabaseOptional
++LocalFileSigLevel = Optional
++#RemoteFileSigLevel = Required
++
++# NOTE: You must run `pacman-key --init` before first using pacman; the local
++# keyring can then be populated with the keys of all Arch/Parabola packagers
++# with `pacman-key --populate archlinux` and `pacman-key --populate parabola`.
++
++#
++# REPOSITORIES
++#   - can be defined here or included from another file
++#   - pacman will search repositories in the order defined here
++#   - local/custom mirrors can be added here or in separate files
++#   - repositories listed first will take precedence when packages
++#     have identical names, regardless of version number
++#   - URLs will have $repo replaced by the name of the current repo
++#   - URLs will have $arch replaced by the name of the architecture
++#
++# Repository entries are of the format:
++#       [repo-name]
++#       Server = ServerName
++#       Include = IncludePath
++#
++# The header [repo-name] is crucial - it must be present and
++# uncommented to enable the repo.
++#
++
++# The testing repositories are disabled by default. To enable, uncomment the
++# repo name header and Include lines. You can add preferred servers immediately
++# after the header, and they will be used before the default mirrors.
++
++# NOTE: Nonprism is a particular repository that aims to provide software built
++# and patched without services under global data surveillance programs like PRISM,
++# XKeyscore and Tempora. For more info see: https://wiki.parabola.nu/Nonprism
++
++#[nonprism-testing]
++#Include = /etc/pacman.d/mirrorlist
++
++#[nonprism]
++#Include = /etc/pacman.d/mirrorlist
++
++#[libre-testing]
++#Include = /etc/pacman.d/mirrorlist
++
++[libre]
++Include = /etc/pacman.d/mirrorlist
++
++#[testing]
++#Include = /etc/pacman.d/mirrorlist
++
++[core]
++Include = /etc/pacman.d/mirrorlist
++
++[extra]
++Include = /etc/pacman.d/mirrorlist
++
++#[community-testing]
++#Include = /etc/pacman.d/mirrorlist
++
++[community]
++Include = /etc/pacman.d/mirrorlist
++
++# The PCR (Parabola Community Repository) contains packages maintained by trusted
++# members of the Parabola community. It also contains packages maintained by
++# Parabola developers, but that the developer decided didn't belong in core/libre.
++
++#[pcr-testing]
++#Include = /etc/pacman.d/mirrorlist
++
++[pcr]
++Include = /etc/pacman.d/mirrorlist
++
++# Parabola also supports another community projects and personal repositories, to
++# find them check out this wiki page: https://wiki.parabola.nu/Repositories
++
++# An example of a custom package repository.  See the pacman manpage for
++# tips on creating your own repositories.
++#[custom]
++#SigLevel = Optional TrustAll
++#Server = file:///home/custompkgs

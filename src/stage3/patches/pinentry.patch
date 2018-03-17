@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-03-17 21:56:15.019771323 +0100
++++ b/PKGBUILD	2018-03-17 21:57:29.938546834 +0100
+@@ -10,7 +10,6 @@ url='http://gnupg.org/related_software/p
+ arch=('x86_64')
+ license=('GPL')
+ depends=('ncurses' 'libcap' 'libassuan' 'libsecret')
+-makedepends=('gtk2' 'qt5-base' 'gcr')
+ optdepends=('gtk2: gtk2 backend'
+             'qt5-base: qt backend'
+             'gcr: gnome3 backend')
+@@ -27,9 +26,6 @@ build() {
+ 		--enable-pinentry-curses \
+ 		--enable-fallback-curses \
+ 		--enable-pinentry-emacs \
+-		--enable-pinentry-gtk2 \
+-		--enable-pinentry-gnome3 \
+-		--enable-pinentry-qt \
+ 		--enable-libsecret \
+ 
+ 	make

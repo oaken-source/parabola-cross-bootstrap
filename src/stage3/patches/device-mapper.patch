@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-03-17 15:27:13.627685259 +0100
++++ b/PKGBUILD	2018-03-17 15:29:10.705091088 +0100
+@@ -9,7 +9,7 @@ pkgrel=5
+ arch=('x86_64')
+ url="http://sourceware.org/lvm2/"
+ license=('GPL2' 'LGPL2.1')
+-makedepends=('systemd' 'thin-provisioning-tools')
++makedepends=('systemd')
+ groups=('base')
+ validpgpkeys=('88437EF5C077BD113D3B7224228191C1567E2C17') # Alasdair G Kergon <agk@redhat.com>
+ source=("https://mirrors.kernel.org/sourceware/lvm2/releases/LVM2.${pkgver}.tgz"{,.asc}
+@@ -93,7 +93,7 @@ package_device-mapper() {
+ 
+ package_lvm2() {
+   pkgdesc="Logical Volume Manager 2 utilities"
+-  depends=('bash' "device-mapper>=${pkgver}" 'libsystemd' 'readline' 'thin-provisioning-tools')
++  depends=('bash' "device-mapper>=${pkgver}" 'libsystemd' 'readline')
+   conflicts=('lvm' 'mkinitcpio<0.7')
+   backup=('etc/lvm/lvm.conf'
+     'etc/lvm/lvmlocal.conf')

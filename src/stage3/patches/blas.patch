@@ -1,0 +1,28 @@
+--- a/PKGBUILD	2018-03-17 16:28:41.782588188 +0100
++++ b/PKGBUILD	2018-03-17 16:56:33.167656401 +0100
+@@ -5,12 +5,12 @@
+ # Contributor: Jason Taylor <jftaylor21@gmail.com>
+ 
+ pkgbase=lapack
+-pkgname=('lapack' 'blas' 'cblas' 'lapacke' 'lapack-doc')
++pkgname=('lapack' 'blas' 'cblas' 'lapacke')
+ pkgver=3.8.0
+ pkgrel=1
+ url="http://www.netlib.org/lapack"
+ pkgdesc="Linear Algebra PACKage"
+-makedepends=('gcc-fortran' 'cmake' 'python' 'doxygen')
++makedepends=('gcc-fortran' 'cmake' 'python')
+ arch=('x86_64')
+ license=("custom")
+ source=(http://www.netlib.org/${pkgbase}/${pkgbase}-${pkgver}.tar.gz LICENSE.blas)
+@@ -32,10 +32,6 @@ build() {
+     -DCBLAS=ON \
+     -DBUILD_DEPRECATED=ON
+   make
+-
+-# Build man pages
+-  cd ../$pkgname-$pkgver
+-  doxygen DOCS/Doxyfile_man
+ }
+ 
+ package_lapack() {

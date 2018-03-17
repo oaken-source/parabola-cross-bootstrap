@@ -1,0 +1,32 @@
+--- a/PKGBUILD	2018-03-17 22:21:06.935704351 +0100
++++ b/PKGBUILD	2018-03-17 22:28:17.113022076 +0100
+@@ -4,14 +4,14 @@
+ # Contributor: Sarah Hay <sarah@archlinux.org>
+ 
+ pkgbase=gpgme
+-pkgname=(gpgme qgpgme python-gpgme python2-gpgme)
++pkgname=(gpgme python-gpgme python2-gpgme)
+ pkgver=1.10.0
+ pkgrel=2
+ pkgdesc="A C wrapper library for GnuPG"
+ arch=('x86_64')
+ url="http://www.gnupg.org/related_software/gpgme/"
+ license=('LGPL')
+-makedepends=('libgpg-error' 'gnupg' 'qt5-base' 'python' 'python2' 'swig')
++makedepends=('libgpg-error' 'gnupg' 'python' 'python2')
+ source=("https://www.gnupg.org/ftp/gcrypt/${pkgbase}/${pkgbase}-${pkgver}.tar.bz2"{,.sig})
+ sha256sums=('1a8fed1197c3b99c35f403066bb344a26224d292afc048cfdfc4ccd5690a0693'
+             'SKIP')
+@@ -37,9 +37,9 @@ package_gpgme() {
+   make DESTDIR="${pkgdir}" install
+ 
+   # split qgpgme
+-  rm -r "${pkgdir}"/usr/include/{qgpgme,QGpgME}/
+-  rm -r "${pkgdir}"/usr/lib/{cmake/QGpgme/,libqgpgme.*}
+-  rm -r "${pkgdir}"/usr/lib/python*
++  rm -rf "${pkgdir}"/usr/include/{qgpgme,QGpgME}/
++  rm -rf "${pkgdir}"/usr/lib/{cmake/QGpgme/,libqgpgme.*}
++  rm -rf "${pkgdir}"/usr/lib/python*
+ }
+ 
+ package_qgpgme() {
