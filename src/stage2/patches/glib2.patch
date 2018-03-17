@@ -18,7 +18,7 @@
 +glib_cv_uscore=no
 +EOF
    ./configure \
-+    --host=@TARGET@ --build=@BUILDHOST@ \
++    --host=@CHOST@ --build=@BUILDHOST@ \
 +    --cache-file=config.cache \
      --prefix=/usr \
      --libdir=/usr/lib \

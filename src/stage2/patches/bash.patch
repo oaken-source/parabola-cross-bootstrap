@@ -1,20 +1,11 @@
 --- a/PKGBUILD	2018-02-18 22:28:52.553679169 +0100
 +++ b/PKGBUILD	2018-02-18 22:34:00.404428869 +0100
-@@ -34,6 +34,8 @@ fi
- prepare() {
-   cd $pkgname-$_basever
- 
-+  @CONFIG_SUB@ > support/config.sub
-+
-   for (( _p=1; _p<=$((10#${_patchlevel})); _p++ )); do
-     msg "applying patch bash${_basever//.}-$(printf "%03d" $_p)"
-     patch -p0 -i ../bash${_basever//.}-$(printf "%03d" $_p)
 @@ -50,7 +53,7 @@ build() {
                 -DNON_INTERACTIVE_LOGIN_SHELLS)
    export CFLAGS="${CFLAGS} ${_bashconfig[@]}"
  
 -  ./configure --prefix=/usr --with-curses --enable-readline \
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --disable-rpath --prefix=/usr --with-curses --enable-readline \
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --disable-rpath --prefix=/usr --with-curses --enable-readline \
      --without-bash-malloc --with-installed-readline
    make
  }

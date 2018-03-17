@@ -4,7 +4,7 @@
    cd "$pkgname-$pkgver"
  
    ./configure \
-+    --host=@TARGET@ --build=@BUILDHOST@ \
++    --host=@CHOST@ --build=@BUILDHOST@ \
      --sysconfdir=/etc \
 -    --enable-gtk-doc \
 +    --disable-gtk-doc \

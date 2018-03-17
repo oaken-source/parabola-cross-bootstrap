@@ -8,7 +8,7 @@
 +  cat > config.cache << EOF
 +gl_cv_func_getopt_gnu=yes
 +EOF
-+  ./configure --cache-file=config.cache --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
++  ./configure --cache-file=config.cache --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr
    make
  }
  

@@ -8,13 +8,3 @@
  source=(https://ftp.gnu.org/gnu/bash/bash-$_basever.tar.gz{,.sig}
          dot.bashrc
          dot.bash_profile
-@@ -34,6 +35,9 @@ fi
- prepare() {
-   cd $pkgname-$_basever
- 
-+  @CONFIG_SUB@ > support/config.sub
-+  @CONFIG_GUESS@ > support/config.guess
-+
-   for (( _p=1; _p<=$((10#${_patchlevel})); _p++ )); do
-     msg "applying patch bash${_basever//.}-$(printf "%03d" $_p)"
-     patch -p0 -i ../bash${_basever//.}-$(printf "%03d" $_p)

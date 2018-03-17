@@ -1,12 +1,11 @@
 --- a/PKGBUILD	2018-02-20 09:13:34.498993143 +0100
 +++ b/PKGBUILD	2018-02-20 09:14:30.307524138 +0100
-@@ -16,7 +16,8 @@ sha1sums=('fa3f8a41ad5101f43d08bc0efb624
+@@ -16,7 +16,7 @@ sha1sums=('fa3f8a41ad5101f43d08bc0efb624
  
  build() {
    cd "${srcdir}"/$pkgname-${pkgver}/build_unix
 -  ../dist/configure --prefix=/usr --enable-compat185 \
-+  @CONFIG_SUB@ > ../dist/config.sub
-+  ../dist/configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --enable-compat185 \
++  ../dist/configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr --enable-compat185 \
      --enable-shared --enable-static --enable-cxx --enable-dbm \
      --enable-stl
    make LIBSO_LIBS=-lpthread

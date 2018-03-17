@@ -5,7 +5,7 @@
  build() {
    cd $pkgname-$pkgver
 -  sh configure --prefix=/usr --sysconfdir=/etc --with-regex=pcre
-+  sh configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --sysconfdir=/etc --with-regex=pcre
++  sh configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr --sysconfdir=/etc --with-regex=pcre
    make
  }
  

@@ -8,12 +8,3 @@
  source=(https://www.kernel.org/pub/linux/utils/${pkgname}/${pkgname}-${pkgver}.tar.gz
  https://www.kernel.org/pub/linux/utils/kbd/${pkgname}-${pkgver}.tar.sign
          'fix-euro2.patch')
-@@ -22,6 +21,8 @@ validpgpkeys=(
- 
- prepare() {
-   cd ${srcdir}/${pkgname}-${pkgver}
-+  @CONFIG_SUB@ > config/config.sub
-+  @CONFIG_GUESS@ > config/config.guess
-   # rename keymap files with the same names
-   # this is needed because when only name of keymap is specified
-   # loadkeys loads the first keymap it can find, which is bad (see FS#13837)

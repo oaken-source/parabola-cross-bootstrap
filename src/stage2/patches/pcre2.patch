@@ -4,7 +4,7 @@
  build() {
    cd $pkgname-$pkgver
    ./configure \
-+    --host=@TARGET@ --build=@BUILDHOST@ \
++    --host=@CHOST@ --build=@BUILDHOST@ \
      --prefix=/usr \
      --enable-pcre2-16 \
      --enable-pcre2-32 \

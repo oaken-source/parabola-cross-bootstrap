@@ -5,7 +5,7 @@
    cd $pkgname
  
 -  ./configure --prefix=/usr \
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr \
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr \
      --sysconfdir=/etc \
      --localstatedir=/var \
      --libexecdir=/usr/lib \

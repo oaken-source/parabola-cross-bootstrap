@@ -4,7 +4,7 @@
  build() {
    cd "$srcdir/phc-winner-$pkgname-$pkgver"
  
-+  CC=@TARGET@-gcc AS=@TARGET@-as LD=@TARGET@-ld \
++  CC=@CHOST@-gcc AS=@CHOST@-as LD=@CHOST@-ld \
    make OPTTARGET=none
  }
  
@@ -12,7 +12,7 @@
  package() {
    cd "$srcdir/phc-winner-$pkgname-$pkgver"
  
-+  CC=@TARGET@-gcc AS=@TARGET@-as LD=@TARGET@-ld \
++  CC=@CHOST@-gcc AS=@CHOST@-as LD=@CHOST@-ld \
    make OPTTARGET=none DESTDIR="$pkgdir" install
  
    install -D -m0644 LICENSE "${pkgdir}/usr/share/licenses/argon2/LICENSE"

@@ -1,6 +1,6 @@
 --- a/PKGBUILD	2018-03-06 17:51:17.168809244 +0100
 +++ b/PKGBUILD	2018-03-06 17:53:43.157644481 +0100
-@@ -10,12 +10,16 @@ arch=('x86_64')
+@@ -10,7 +10,6 @@ arch=('x86_64')
  url="https://www.lysator.liu.se/~nisse/nettle"
  license=('GPL2')
  depends=('gmp')
@@ -8,16 +8,6 @@
  source=(https://ftp.gnu.org/gnu/$pkgname/$pkgname-$pkgver.tar.gz{,.sig})
  sha256sums=('ae7a42df026550b85daca8389b6a60ba6313b0567f374392e54918588a411e94'
              'SKIP')
- validpgpkeys=('343C2FF0FBEE5EC2EDBEF399F3599FF828C67298') # Niels Möller <nisse@lysator.liu.se>
- 
-+prepare() {
-+  cd $pkgname-$pkgver
-+  @CONFIG_SUB@ > config.sub
-+  @CONFIG_GUESS@ > config.guess
-+}
- 
- build() {
-   cd $pkgname-$pkgver
 @@ -24,11 +28,6 @@ build() {
    make
  }

@@ -26,10 +26,9 @@ export CHOST=riscv64-unknown-linux-gnu
 export LINUX_ARCH=riscv
 export GCC_MARCH=rv64gc
 export GCC_MABI=lp64d
-# no riscv32 support as of glibc-2.27
 #export MULTILIB=enable
-#export GCC_32_MARCH=rv32gc
-#export GCC_32_MABI=ilp32d
+#export GCC32_MARCH=rv32gc
+#export GCC32_MABI=ilp32d
 #export CARCH32=riscv32
 #export CHOST32=riscv32-linux-gnu
 

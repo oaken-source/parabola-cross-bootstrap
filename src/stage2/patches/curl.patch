@@ -13,7 +13,7 @@
    cd "$pkgname-$pkgver"
  
    ./configure \
-+      --host=@TARGET@ --build=@BUILDHOST@ \
++      --host=@CHOST@ --build=@BUILDHOST@ \
        --prefix=/usr \
        --mandir=/usr/share/man \
        --disable-ldap \

@@ -1,6 +1,6 @@
 --- a/PKGBUILD	2018-03-11 21:29:46.850580513 +0100
 +++ b/PKGBUILD	2018-03-11 21:30:57.782201272 +0100
-@@ -9,11 +9,16 @@ arch=('x86_64')
+@@ -9,7 +9,6 @@ arch=('x86_64')
  url="http://www.simplesystems.org/libtiff/"
  license=('custom')
  depends=('libjpeg' 'zlib' 'xz')
@@ -8,13 +8,3 @@
  optdepends=('freeglut: for using tiffgt')
  source=(http://download.osgeo.org/libtiff/tiff-${pkgver}.tar.gz)
  sha256sums=('6e7bdeec2c310734e734d19aae3a71ebe37a4d842e0e23dbb1b8921c0026cfcd')
- 
-+prepare() {
-+  cd tiff-${pkgver}
-+  @CONFIG_SUB@ > config/config.sub
-+  @CONFIG_GUESS@ > config/config.guess
-+}
-+
- build() {
-   cd tiff-${pkgver}
-   ./configure --prefix=/usr

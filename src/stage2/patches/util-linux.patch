@@ -13,7 +13,7 @@
    cd "$pkgbase-$pkgver"
  
    ./configure --prefix=/usr \
-+              --host=@TARGET@ --build=@BUILDHOST@ \
++              --host=@CHOST@ --build=@BUILDHOST@ \
 +              --without-systemd \
                --libdir=/usr/lib \
                --bindir=/usr/bin \

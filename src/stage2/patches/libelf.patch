@@ -5,7 +5,7 @@
  
    CFLAGS+=" -g"  # required for test-suite success
 -  ./configure --prefix=/usr --program-prefix="eu-" --enable-deterministic-archives
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --program-prefix="eu-" --enable-deterministic-archives
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr --program-prefix="eu-" --enable-deterministic-archives
  
    make
  }

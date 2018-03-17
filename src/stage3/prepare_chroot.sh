@@ -91,3 +91,14 @@ librechroot \
     -C "$_builddir"/config/pacman.conf \
     -M "$_builddir"/config/makepkg.conf \
   update
+
+# produce a patched libremakepkg to update config.sub/config.guess where needed
+cat $(which libremakepkg) > "$_builddir"/libremakepkg-$CARCH.sh
+sed -i '/Boring\/mundane/i \
+update_config_fragments() {\
+	local url="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"\
+	find $1/build -iname config.sub -print -exec curl "$url;f=config.sub;hb=HEAD" -o {} \\;\
+	find $1/build -iname config.guess -print -exec curl "$url;f=config.guess;hb=HEAD" -o {} \\;\
+}\
+hook_pre_build+=(update_config_fragments)' "$_builddir"/libremakepkg-$CARCH.sh
+

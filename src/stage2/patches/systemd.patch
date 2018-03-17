@@ -14,10 +14,10 @@
  
 +  cat > cross-file << EOF
 +[binaries]
-+c = '@TARGET@-gcc'
-+cpp = '@TARGET@-g++'
-+ar = '@TARGET@-ar'
-+strip = '@TARGET@-strip'
++c = '@CHOST@-gcc'
++cpp = '@CHOST@-g++'
++ar = '@CHOST@-ar'
++strip = '@CHOST@-strip'
 +pkgconfig = 'pkg-config'
 +[host_machine]
 +system = 'linux'

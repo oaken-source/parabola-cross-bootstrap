@@ -8,18 +8,8 @@
  optdepends=('netpbm: for use together with man -H command interaction in browsers'
              'psutils: for use together with man -H command interaction in browsers'
              'libxaw: for gxditview')
-@@ -22,9 +21,17 @@ md5sums=('cc825fa64bc7306a885f2fb2268d3e
-          'a1fedafd7863b37968d32ad9ae1d8c13')
- validpgpkeys=('58E0C111E39F5408C5D3EC76C1A60EACE707FDA5') # Werner Lemberg <wl@gnu.org>
+@@ -22,7 +21,7 @@ md5sums=('cc825fa64bc7306a885f2fb2268d3e
  
-+prepare() {
-+  cd $srcdir/$pkgname-$pkgver
-+  @CONFIG_SUB@ > config.sub
-+  @CONFIG_GUESS@ > config.guess
-+  @CONFIG_SUB@ > src/libs/gnulib/build-aux/config.sub
-+  @CONFIG_GUESS@ > src/libs/gnulib/build-aux/config.guess
-+}
-+
  build() {
    cd $srcdir/$pkgname-$pkgver
 -  ./configure --prefix=/usr --with-x --with-appresdir=/usr/share/X11/app-defaults

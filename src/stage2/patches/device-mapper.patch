@@ -1,19 +1,10 @@
 --- a/PKGBUILD	2018-02-22 10:27:36.222401768 +0100
 +++ b/PKGBUILD	2018-02-22 10:33:51.959185267 +0100
-@@ -27,6 +27,8 @@ sha256sums=('4025a23ec9b15c2cb7486d151c2
- prepare() {
-   cd LVM2.${pkgver}
- 
-+  @CONFIG_SUB@ > autoconf/config.sub
-+
-   # remove install section from systemd units that are enabled by default
-   sed -i -e '/^\[Install\]$/,$d' \
- 
 @@ -40,6 +43,7 @@ prepare() {
  
  build() {
    local CONFIGUREOPTS=(
-+    --host=@TARGET@ --build=@BUILDHOST@
++    --host=@CHOST@ --build=@BUILDHOST@
      --prefix=/usr
      --sbindir=/usr/bin
      --sysconfdir=/etc

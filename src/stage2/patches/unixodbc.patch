@@ -1,12 +1,11 @@
 --- a/PKGBUILD	2018-02-21 17:21:51.719593310 +0100
 +++ b/PKGBUILD	2018-02-21 17:22:23.987843397 +0100
-@@ -17,7 +17,8 @@ md5sums=('abf14cf943f1f8c5e63a24cb26d54f
+@@ -17,7 +17,7 @@ md5sums=('abf14cf943f1f8c5e63a24cb26d54f
  
  build() {
      cd unixODBC-${pkgver}
 -    ./configure --prefix=/usr --sysconfdir=/etc
-+    @CONFIG_SUB@ > config.sub
-+    ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --sysconfdir=/etc
++    ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr --sysconfdir=/etc
      make
  }
  

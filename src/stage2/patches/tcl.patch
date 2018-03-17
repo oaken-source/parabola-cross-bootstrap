@@ -5,10 +5,10 @@
    cd tcl${pkgver}/unix
    [[ $CARCH == "x86_64" ]] && BIT="--enable-64bit"
 -  ./configure --prefix=/usr --mandir=/usr/share/man --enable-threads $BIT
-+  export CC=@TARGET@-gcc
++  export CC=@CHOST@-gcc
 +  export ac_cv_func_strtod=yes
 +  export tcl_cv_strtod_buggy=1
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --mandir=/usr/share/man --enable-threads $BIT
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr --mandir=/usr/share/man --enable-threads $BIT
    make
  }
  

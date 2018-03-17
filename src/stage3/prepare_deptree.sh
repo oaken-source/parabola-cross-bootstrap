@@ -43,7 +43,7 @@ if [ "x$_have_deptree" == "xno" ]; then
 
     _pkgdeps=$(pacman -Si $_pkgname | grep '^Depends' | cut -d':' -f2 | sed 's/None//')
 
-    # add some additional build-time dependencies
+    # tweak some build-time dependencies
     case $_pkgname in
       binutils)
         _pkgdeps+=" git dejagnu bc" ;;
@@ -51,6 +51,8 @@ if [ "x$_have_deptree" == "xno" ]; then
         _pkgdeps+=" cmake" ;;
       boost-libs|boost)
         _pkgdeps+=" python-numpy python2-numpy openmpi" ;;
+      dbus)
+        _pkgdeps+=" autoconf-archive" ;;
       gcc-libs)
         _pkgdeps+=" dejagnu libmpc mpfr gmp" ;;
       git)
@@ -117,7 +119,7 @@ if [ "x$_have_deptree" == "xno" ]; then
     done
   done
 
-  # following is a bit of magic to untangle the build dependencies
+  echo -en "\r"
 
   # write package dependency tree
   truncate -s0 "$_deptree".FULL

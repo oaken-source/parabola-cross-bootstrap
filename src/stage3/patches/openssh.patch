@@ -8,12 +8,3 @@
  depends=('krb5' 'openssl' 'libedit' 'ldns')
  optdepends=('xorg-xauth: X11 forwarding'
              'x11-ssh-askpass: input passphrase in X')
-@@ -37,6 +36,8 @@ backup=('etc/ssh/ssh_config' 'etc/ssh/ss
- 
- prepare() {
- 	cd $pkgname-$pkgver
-+  @CONFIG_SUB@ > config.sub
-+  @CONFIG_GUESS@ > config.guess
- 	# OpenSSL 1.1.0 patch from http://vega.pgw.jp/~kabe/vsd/patch/openssh-7.4p1-openssl-1.1.0c.patch.html
- 	patch -Np1 -i ../openssl-1.1.0.patch
- }

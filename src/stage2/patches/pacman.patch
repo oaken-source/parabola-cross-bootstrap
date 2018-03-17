@@ -13,7 +13,7 @@
  
    ./configure --prefix=/usr --sysconfdir=/etc \
 -    --localstatedir=/var --enable-doc \
-+    --host=@TARGET@ --build=@BUILDHOST@ \
++    --host=@CHOST@ --build=@BUILDHOST@ \
 +    --localstatedir=/var --disable-doc \
      --with-scriptlet-shell=/usr/bin/bash \
      --with-ldconfig=/usr/bin/ldconfig

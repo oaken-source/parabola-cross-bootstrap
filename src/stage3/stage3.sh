@@ -111,12 +111,8 @@ EOF
       cp PKGBUILD{,.in}
 
       # substitute common variables
-      _config="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
-      _config_sub="$_config;f=config.sub;hb=HEAD"
-      _config_guess="$_config;f=config.guess;hb=HEAD"
-      sed -i "s#@CONFIG_SUB@#curl \"$_config_sub\"#g; \
-              s#@CONFIG_GUESS@#curl \"$_config_guess\"#g; \
-              s#@MULTILIB@#${MULTILIB:-disable}#g" \
+      sed -i \
+          "s#@MULTILIB@#${MULTILIB:-disable}#g" \
         PKGBUILD
 
       # enable the target CARCH in arch array
@@ -124,7 +120,7 @@ EOF
 
       # build the package
       chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
-      libremakepkg -n $CHOST-stage3 || failed_build
+      $_builddir/libremakepkg-$CARCH.sh -n $CHOST-stage3 || failed_build
     fi
 
     popd >/dev/null

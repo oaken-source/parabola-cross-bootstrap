@@ -7,7 +7,7 @@
 -	./configure --prefix=/usr \
 -		--disable-rpath \
 -		--enable-werror
-+	./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr \
++	./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr \
 +		--disable-rpath
  	make
  }

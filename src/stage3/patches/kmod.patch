@@ -9,18 +9,7 @@
  options=('strip' 'debug')
  provides=('module-init-tools=3.16' 'libkmod.so')
  conflicts=('module-init-tools')
-@@ -22,38 +20,24 @@ md5sums=('08297dfb6f2b3f625f928ca3278528
-          'SKIP'
-          'dd62cbf62bd8f212f51ef8c43bec9a77')
- 
-+prepare() {
-+  cd "$pkgname-$pkgver"
-+  @CONFIG_SUB@ > build-aux/config.sub
-+  @CONFIG_GUESS@ > build-aux/config.guess
-+}
- 
- build() {
-   cd "$pkgname-$pkgver"
+@@ -22,32 +20,13 @@ md5sums=('08297dfb6f2b3f625f928ca3278528
  
    ./configure \
      --sysconfdir=/etc \

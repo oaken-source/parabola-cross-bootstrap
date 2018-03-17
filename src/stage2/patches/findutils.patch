@@ -5,7 +5,7 @@
    sed -i '/^SUBDIRS/s/locate//' Makefile.in
  
 -  ./configure --prefix=/usr
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr
    # don't build locate, but the docs want a file in there.
    make -C locate dblocation.texi
    make

@@ -5,7 +5,7 @@
  build() {
    cd $srcdir/$pkgname-$pkgver
 -  ./configure --prefix=/usr --sbindir=/usr/bin --without-python
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --sbindir=/usr/bin --without-python
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr --sbindir=/usr/bin --without-python
    make 
  }
  

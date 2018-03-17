@@ -4,7 +4,7 @@
    cd $pkgname-$pkgver
    CFLAGS="$CFLAGS -I${srcdir}/include $(pkg-config libnl-genl-3.0 --cflags)" \
    ./configure --prefix=/usr \
-+    --host=@TARGET@ --build=@BUILDHOST@ \
++    --host=@CHOST@ --build=@BUILDHOST@ \
 +    --with-pcap=linux \
      --enable-ipv6 \
 -    --enable-bluetooth \

@@ -13,7 +13,7 @@
    cd "$srcdir/$pkgname-$_sudover"
  
    ./configure \
-+    --host=@TARGET@ --build=@BUILDHOST@ \
++    --host=@CHOST@ --build=@BUILDHOST@ \
      --prefix=/usr \
      --sbindir=/usr/bin \
      --libexecdir=/usr/lib \

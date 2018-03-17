@@ -50,7 +50,7 @@
 +  CXXFLAGS=${CXXFLAGS/-mabi=@GCC_MABI@}
 +
 +  sed -i 's/gcc_cv_objdump/ac_cv_prog_OBJDUMP/' $srcdir/gcc/libcc1/configure
-+  "$srcdir/gcc/configure" --host=@TARGET@ --build=@BUILDHOST@ --target=@TARGET@ --prefix=/usr \
++  "$srcdir/gcc/configure" --host=@CHOST@ --build=@BUILDHOST@ --target=@CHOST@ --prefix=/usr \
 +      --with-arch=@GCC_MARCH@ --with-api=@GCC_MABI@ \
 +      --disable-bootstrap \
        --libdir=/usr/lib \

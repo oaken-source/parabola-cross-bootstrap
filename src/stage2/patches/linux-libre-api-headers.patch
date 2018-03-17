@@ -5,13 +5,13 @@
  
    make mrproper
 -  make headers_check
-+  make ARCH=@LINUX_ARCH@ CROSS_COMPILE=@TARGET@- headers_check
++  make ARCH=@LINUX_ARCH@ CROSS_COMPILE=@CHOST@- headers_check
  }
  
  package() {
    cd linux-${_basever}
 -  make INSTALL_HDR_PATH="$pkgdir/usr" headers_install
-+  make INSTALL_HDR_PATH="$pkgdir"/usr ARCH=@LINUX_ARCH@ CROSS_COMPILE=@TARGET@- headers_install
++  make INSTALL_HDR_PATH="$pkgdir"/usr ARCH=@LINUX_ARCH@ CROSS_COMPILE=@CHOST@- headers_install
  
    # use headers from libdrm
    rm -r "$pkgdir/usr/include/drm"

@@ -20,7 +20,7 @@
  build() {
 -  make -C $pkgname-$pkgver KERNEL_HEADERS=/usr/include
 +  make -C $pkgname-$pkgver KERNEL_HEADERS=/usr/include \
-+    BUILD_CC=gcc CC=@TARGET@-gcc AR=@TARGET@-ar RANLIB=@TARGET@-ranlib
++    BUILD_CC=gcc CC=@CHOST@-gcc AR=@CHOST@-ar RANLIB=@CHOST@-ranlib
  }
  
  package() {

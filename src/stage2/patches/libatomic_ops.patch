@@ -19,7 +19,7 @@
 -  ./configure --prefix=/usr --disable-static --enable-shared
 +  cd $pkgname
 +  autoreconf --install
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --disable-static --enable-shared
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr --disable-static --enable-shared
    make
  }
  

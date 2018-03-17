@@ -5,7 +5,7 @@
  build() {
    cd ${srcdir}/${pkgname}-${pkgver}
 -  ./configure --prefix=/usr --datadir=/usr/share/kbd --mandir=/usr/share/man
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --datadir=/usr/share/kbd --mandir=/usr/share/man
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr --datadir=/usr/share/kbd --mandir=/usr/share/man
    make KEYCODES_PROGS=yes RESIZECONS_PROGS=yes
  }
  

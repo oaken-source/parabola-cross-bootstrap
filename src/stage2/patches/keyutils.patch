@@ -6,7 +6,7 @@
    cd ${pkgname}-${pkgver}
 -  make CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" SBINDIR='/usr/bin' BINDIR='/usr/bin'
 +  make CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" SBINDIR='/usr/bin' BINDIR='/usr/bin' \
-+    CC=@TARGET@-gcc
++    CC=@CHOST@-gcc
  }
  
  package() {

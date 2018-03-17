@@ -4,7 +4,7 @@
    # http://lists.gnupg.org/pipermail/gnutls-devel/2015-May/007582.html
  
    ./configure --prefix=/usr \
-+	--host=@TARGET@ --build=@BUILDHOST@ \
++	--host=@CHOST@ --build=@BUILDHOST@ \
 +	--with-libunistring-prefix=@SYSROOT@/usr \
  	--with-zlib \
  	--disable-static \

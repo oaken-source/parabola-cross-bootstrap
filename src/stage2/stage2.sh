@@ -118,24 +118,19 @@ EOF
       cp PKGBUILD{,.in}
 
       # substitute common variables
-      _config="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
-      _config_sub="$_config;f=config.sub;hb=HEAD"
-      _config_guess="$_config;f=config.guess;hb=HEAD"
-      sed -i "s#@CONFIG_SUB@#curl \"$_config_sub\"#g; \
-              s#@CONFIG_GUESS@#curl \"$_config_guess\"#g; \
-              s#@CARCH@#$CARCH#g; \
-              s#@CHOST@#$CHOST#g; \
-              s#@TARGET@#$CHOST#g; \
-              s#@GCC_MARCH@#$GCC_MARCH#g; \
-              s#@GCC_MABI@#$GCC_MABI#g; \
-              s#@BUILDHOST@#$_buildhost#g; \
-              s#@SYSROOT@#$_sysroot#g; \
-              s#@LINUX_ARCH@#$LINUX_ARCH#g; \
-              s#@MULTILIB@#${MULTILIB:-disable}#g; \
-              s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#g; \
-              s#@GCC_32_MABI@#${GCC_32_MABI:-}#g; \
-              s#@CARCH32@#${CARCH32:-}#g; \
-              s#@CHOST32@#${CHOST32:-}#g" \
+      sed -i
+          "s#@CARCH@#$CARCH#g; \
+           s#@CHOST@#$CHOST#g; \
+           s#@GCC_MARCH@#$GCC_MARCH#g; \
+           s#@GCC_MABI@#$GCC_MABI#g; \
+           s#@CARCH32@#${CARCH32:-}#g; \
+           s#@CHOST32@#${CHOST32:-}#g; \
+           s#@GCC32_MARCH@#${GCC32_MARCH:-}#g; \
+           s#@GCC32_MABI@#${GCC32_MABI:-}#g; \
+           s#@BUILDHOST@#$_buildhost#g; \
+           s#@SYSROOT@#$_sysroot#g; \
+           s#@LINUX_ARCH@#$LINUX_ARCH#g; \
+           s#@MULTILIB@#${MULTILIB:-disable}#g;" \
         PKGBUILD
 
       # enable the target CARCH in arch array
@@ -145,7 +140,14 @@ EOF
       chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
       sudo -u $SUDO_USER \
       "$_builddir"/makepkg-$CARCH.sh -fLC --config "$_builddir"/makepkg-$CARCH.conf \
-        --nocheck --nodeps || failed_build
+        --nocheck --nodeps --nobuild || failed_build
+
+	    url="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
+	    find src -iname config.sub -print -exec curl "$url;f=config.sub;hb=HEAD" -o {} \;
+
+      sudo -u $SUDO_USER \
+      "$_builddir"/makepkg-$CARCH.sh -fLC --config "$_builddir"/makepkg-$CARCH.conf \
+        --nocheck --nodeps --noprepare || failed_build
     fi
 
     popd >/dev/null

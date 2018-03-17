@@ -4,7 +4,7 @@
    cd $pkgname-$pkgver 
  
    ./configure \
-+      --host=@TARGET@ --build=@BUILDHOST@ \
++      --host=@CHOST@ --build=@BUILDHOST@ \
        --prefix=/usr \
        --without-xml2 \
        --without-nettle \

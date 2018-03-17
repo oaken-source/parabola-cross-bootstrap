@@ -43,27 +43,41 @@ if [ "x$_have_deptree" == "xno" ]; then
 
     _pkgdeps=$(pacman -Si $_pkgname | grep '^Depends' | cut -d':' -f2 | sed 's/None//')
 
-    # add some additional build-time dependencies
-    _extra_deps=""
+    # tweak some build-time dependencies
     case $_pkgname in
+      curl)
+        _pkgdeps="${_pkgdeps/krb5}" ;;
       gcc-libs)
-        _extra_deps="libmpc mpfr gmp" ;;
+        _pkgdeps+=" libmpc mpfr gmp" ;;
+      gmp)
+        _pkgdeps="${_pkgdeps/gcc-libs}"
+        _pkgdeps="${_pkgdeps/bash}" ;;
       iptables)
-        _extra_deps="libnfnetlink libnetfilter_conntrack" ;;
+        _pkgdeps+=" libnfnetlink libnetfilter_conntrack" ;;
       libcap)
-        _extra_deps="pam unixodbc" ;;
+        _pkgdeps+=" pam unixodbc" ;;
       libpsl)
-        _extra_deps="publicsuffix-list" ;;
+        _pkgdeps+=" publicsuffix-list" ;;
+      libtirpc)
+        _pkgdeps="${_pkgdeps/krb5}" ;;
       libutil-linux)
-        _extra_deps="pam shadow coreutils libcap-ng" ;;
+        _pkgdeps+=" pam shadow coreutils libcap-ng" ;;
+      make)
+        _pkgdeps="${_pkgdeps/guile}" ;;
       nss-*|libudev|libsystemd*)
-        _extra_deps="libutil-linux pcre2" ;;
+        _pkgdeps+=" libutil-linux pcre2" ;;
+      pinentry)
+        _pkgdeps="${_pkgdeps/libsecret}" ;;
       sqlite)
-        _extra_deps="tcl" ;;
+        _pkgdeps+=" tcl" ;;
+      suda)
+        _pkgdeps="${_pkgdeps/libldap}" ;;
+      util-linux)
+        _pkgdeps="${_pkgdeps/libsystemd}" ;;
     esac
 
     # iterate dependencies for pkg
-    for _dep in $_pkgdeps $_extra_deps; do
+    for _dep in $_pkgdeps; do
       # translate dependency string to actual package
       realdep=$(pacman --noconfirm -Sw "$_dep" | grep '^Packages' | awk '{print $3}')
       realdep=${realdep%-*-*}
@@ -74,23 +88,6 @@ if [ "x$_have_deptree" == "xno" ]; then
   done
 
   echo -en "\r"
-
-  # following is a bit of magic to untangle the build dependencies
-  _tree[gmp]="${_tree[gmp]/gcc-libs}"
-  _tree[gmp]="${_tree[gmp]/bash}"
-  _tree[util-linux]="${_tree[util-linux]/libsystemd}"
-
-  # we build stage2 without guile, gc, libsecret, libldap and krb5
-  _tree[make]="${_tree[make]/guile}"
-  _tree[pinentry]="${_tree[pinentry]/libsecret}"
-  _tree[sudo]="${_tree[sudo]/libldap}"
-  _tree[curl]="${_tree[curl]/krb5}"
-  _tree[libtirpc]="${_tree[libtirpc]/krb5}"
-  unset _tree[guile]
-  unset _tree[gc]
-  unset _tree[libsecret]
-  unset _tree[libldap]
-  unset _tree[krb5]
 
   # write package dependency tree
   truncate -s0 "$_deptree".FULL

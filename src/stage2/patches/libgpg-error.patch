@@ -19,7 +19,7 @@
    cd ${pkgname}-${pkgver}
 -  ./configure --prefix=/usr
 +  cp ${srcdir}/lock-obj-pub.riscv64-unknown-linux-gnu.h src/syscfg/
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr
    make
  }
  

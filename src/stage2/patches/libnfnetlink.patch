@@ -1,12 +1,11 @@
 --- a/PKGBUILD	2018-02-22 15:59:05.322290871 +0100
 +++ b/PKGBUILD	2018-02-22 15:59:40.170076311 +0100
-@@ -19,7 +19,8 @@ md5sums=('98927583d2016a9fb1936fed992e2c
+@@ -19,7 +19,7 @@ md5sums=('98927583d2016a9fb1936fed992e2c
  
  build() {
    cd $pkgname-$pkgver
 -  ./configure --prefix=/usr
-+  @CONFIG_SUB@ > build-aux/config.sub
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr
    make
  }
  

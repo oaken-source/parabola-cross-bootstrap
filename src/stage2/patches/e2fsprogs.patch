@@ -4,7 +4,7 @@
    cd "${srcdir}/${pkgname}-${pkgver}"
  
    ./configure \
-+      --host=@TARGET@ --build=@BUILDHOST@ \
++      --host=@CHOST@ --build=@BUILDHOST@ \
        --prefix=/usr \
        --with-root-prefix="" \
        --libdir=/usr/lib \

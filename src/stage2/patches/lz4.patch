@@ -4,9 +4,9 @@
    # do not use the main makefile, it calls sub make with -e
    # exported CLFAGS by makepkg break the version. see FS#50071
    cd $pkgname
-+  CC=@TARGET@-gcc RANLIB=@TARGET@-ranlib AR=@TARGET@-ar \
++  CC=@CHOST@-gcc RANLIB=@CHOST@-ranlib AR=@CHOST@-ar \
    make -C lib PREFIX=/usr
-+  CC=@TARGET@-gcc RANLIB=@TARGET@-ranlib AR=@TARGET@-ar \
++  CC=@CHOST@-gcc RANLIB=@CHOST@-ranlib AR=@CHOST@-ar \
    make -C programs PREFIX=/usr lz4 lz4c
  }
  
@@ -14,7 +14,7 @@
  package() {
    cd $pkgname
    # mandir is broken since 1.8.0
-+  CC=@TARGET@-gcc RANLIB=@TARGET@-ranlib AR=@TARGET@-ar \
++  CC=@CHOST@-gcc RANLIB=@CHOST@-ranlib AR=@CHOST@-ar \
    make install PREFIX=/usr MANDIR=/usr/share/man/man1 DESTDIR="$pkgdir"
  }
  

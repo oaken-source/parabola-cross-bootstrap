@@ -21,7 +21,7 @@
 -	autoreconf --install
 -	./configure --prefix=/usr --enable-static=no
 -	make
-+	make TARGETMACH=@TARGET@ CROSS=@TARGET@ CC=@TARGET@-gcc LD=@TARGET@-ld AS=@TARGET@-as
++	make TARGETMACH=@CHOST@ CROSS=@CHOST@ CC=@CHOST@-gcc LD=@CHOST@-ld AS=@CHOST@-as
  }
  
  check() {

@@ -5,7 +5,7 @@
  build() {
    cd $pkgname-$pkgver
 -  ./configure --prefix=/usr --without-included-regex
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr --without-included-regex
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr --without-included-regex
    make
  }
  

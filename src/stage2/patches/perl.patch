@@ -29,7 +29,7 @@
    fi
  
 -  ./Configure -des -Dusethreads -Duseshrplib -Doptimize="${CFLAGS}" \
-+  ./configure --target=@TARGET@ -Dusethreads -Duseshrplib -Doptimize="${CFLAGS}" \
++  ./configure --target=@CHOST@ -Dusethreads -Duseshrplib -Doptimize="${CFLAGS}" \
      -Dprefix=/usr -Dvendorprefix=/usr \
      -Dprivlib=/usr/share/perl5/core_perl \
      -Darchlib=/usr/lib/perl5/$_baseversion/core_perl \

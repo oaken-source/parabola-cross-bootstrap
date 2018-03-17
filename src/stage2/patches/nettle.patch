@@ -1,12 +1,11 @@
 --- a/PKGBUILD	2018-02-20 18:00:19.334381106 +0100
 +++ b/PKGBUILD	2018-02-20 18:01:24.689054638 +0100
-@@ -19,7 +19,8 @@ validpgpkeys=('343C2FF0FBEE5EC2EDBEF399F
+@@ -19,7 +19,7 @@ validpgpkeys=('343C2FF0FBEE5EC2EDBEF399F
  
  build() {
    cd $pkgname-$pkgver
 -  ./configure --prefix=/usr \
-+  @CONFIG_SUB@ > config.sub
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --prefix=/usr \
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr \
      --disable-static
    make
  }

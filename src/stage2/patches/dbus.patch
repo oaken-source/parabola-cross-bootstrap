@@ -4,7 +4,7 @@
  build() {
    cd $pkgbase
    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
-+      --host=@TARGET@ --build=@BUILDHOST@ \
++      --host=@CHOST@ --build=@BUILDHOST@ \
 +      --disable-silent-rules --without-x --disable-xml-docs \
        --libexecdir=/usr/lib/dbus-1.0 --with-dbus-user=dbus \
        --with-system-pid-file=/run/dbus/pid \

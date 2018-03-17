@@ -8,15 +8,6 @@
  validpgpkeys=('7D6293CC6378786E1B5C496885C7044E033FDE16')
  source=("https://downloads.sourceforge.net/project/${pkgname}/${pkgver}/${pkgname}-${pkgver}.tar.gz"{,.sig})
  sha256sums=('b24890e2bb46e12e72a79f7e965f409f4e16466d00e1dd15d93d73ee6b592523'
-@@ -22,6 +21,8 @@ replaces=('libjpeg' 'turbojpeg')
- 
- prepare() {
- 	cd "${srcdir}/${pkgname}-${pkgver}"
-+  @CONFIG_SUB@ > config.sub
-+  @CONFIG_GUESS@ > config.guess
- 	sed 's/Szathmáry/Szathmary/g' -i java/org/libjpegturbo/turbojpeg/*.java
- }
- 
 @@ -36,7 +37,7 @@ build() {
  		--prefix=/usr \
  		--mandir=/usr/share/man \

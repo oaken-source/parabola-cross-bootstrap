@@ -6,8 +6,8 @@
  
 -  make -f Makefile-libbz2_so
 -  make bzip2 bzip2recover
-+  make CC=@TARGET@-gcc RANLIB=@TARGET@-ranlib AR=@TARGET@-ar -f Makefile-libbz2_so
-+  make CC=@TARGET@-gcc RANLIB=@TARGET@-ranlib AR=@TARGET@-ar bzip2 bzip2recover
++  make CC=@CHOST@-gcc RANLIB=@CHOST@-ranlib AR=@CHOST@-ar -f Makefile-libbz2_so
++  make CC=@CHOST@-gcc RANLIB=@CHOST@-ranlib AR=@CHOST@-ar bzip2 bzip2recover
  }
  
  check() {

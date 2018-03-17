@@ -14,7 +14,7 @@
  build() {
    cd ${pkgname}-${pkgver}
 -  ./configure --prefix=/usr --sysconf=/etc
-+  ./configure --host=@TARGET@ --build=@BUILDHOST@ --disable-gssapi --prefix=/usr --sysconf=/etc
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --disable-gssapi --prefix=/usr --sysconf=/etc
    make
  }
  

@@ -13,7 +13,7 @@
  
    ./configure \
      LIBS="-lcrypt" \
-+    --host=@TARGET@ --build=@BUILDHOST@ \
++    --host=@CHOST@ --build=@BUILDHOST@ \
      --prefix=/usr \
      --bindir=/usr/bin \
      --sbindir=/usr/bin \
