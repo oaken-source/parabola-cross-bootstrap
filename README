@@ -20,8 +20,8 @@ To initiate a complete build of all stages, run:
 To discard fragments from an earlier run and start from a clean slate, run:
   $> sudo rm -rf build && sudo ./create
 
-To capture the build output and debug issues, it may be useful to run:
-  &> sudo ./create 2>&1 | tee create.out
+You might have to unmount the directories mounted by the stages as noted in the
+sections below.
 
 1.1. A note to the reader
 -------------------------
@@ -40,8 +40,9 @@ can email me at <andreas@grapentin.org>.
 1.2. Current state of the project
 ---------------------------------
 
-The stage2 cross-compiled base-devel makepkg chroot is finished, and stage3 is
-primed to begin with native compilation of base-devel in the chroot.
+The stage3 native base-devel makepkg chroot is finished, and stage4 is primed
+to begin with native compilation of a first batch of release packages in the
+chroot.
 
 2. Build Stages
 ---------------
@@ -55,10 +56,10 @@ the inline comments of the respective scripts.
 
 The first stage creates a cross-compile toolchain for the target triplet
 defined in $CHOST, consisting of binutils, linux-libre-api-headers, gcc and
-glibc. This toolchain has been pre-packaged for riscv64-linux-gnu on parabola
-GNU/Linux-libre and may be installed by running:
+glibc. This toolchain has been pre-packaged for riscv64-unknown-linux-gnu on
+parabola GNU/Linux-libre and may be installed by running:
 
-  $> sudo pacman -S riscv64-linux-gnu-{gcc,gdb}
+  $> pacman -S riscv64-unknown-linux-gnu-gcc
 
 In any case, the toolchain will be bootstrapped by the stage1.sh script, unless
 it is already installed. The scripts will check for $CHOST-ar and $CHOST-gcc in
@@ -89,44 +90,58 @@ src/stage1/toolchain-pkgbuilds/*.
 2.2. Stage 2
 ------------
 
-The second stage uses the toolchain created in Stage 1 to cross-compile the
-transitive dependency hull around the packages listed in base-devel group of
-packages to bootstrap a complete cross-makepkg chroot, in which native packages
-can then be built. In other words, we cross-compile everything in base-devel
-and dependencies to get something that librechroot and libremakepkg can work
-with.
+Stage 2 uses the toolchain created in Stage 1 to cross-compile the packages of
+the base-devel group of packages plus transitive runtime dependencies, in order
+to bootstrap a functional cross-makepkg librechroot.
 
-First, a skeleton chroot is created, where packages are installed into, and
-where new packages will be built and linked into. A sane makepkg.conf is
-created, and a modified makepkg script to work in the prepared chroot root
-directory. For the cross toolchain to find include headers and libraries, the
-/usr directory of the chroot is mounted into the toolchain sysroot temporarily
-for the Stage 2 build, and the contents of /usr in the toolchain sysroot are
-copied into the chroot directory.
+The script creates an empty skeleton chroot, into which the cross-compiled
+packages are installed, and creates a sane makepkg.conf and a patched
+makepkg.sh to work in the prepared chroot root directory. To make the sysroot
+of the compiler available to builds in the chroot and vice-versa, the /usr
+directory of the chroot is mounted into the sysroot. At the end of Stage 2,
+this directory is unmounted automatically.
 
-Second, the transitive dependency tree of the base-devel package group is
-created, and slightly modified in a way that resolves any cyclic dependencies,
-and preserves a somewhat sane build-order of the packages. Some packages that
-are too painful to cross-compile are removed entirely.
+The transitive dependency tree of the base-devel package group is slightly
+modified in a way that resolves any cyclic dependencies, and preserves a
+somewhat sane build-order of the packages. Some packages that are too painful
+to cross-compile are skipped entirely.
 
-Then, the package tree is traversed and packages are built in order, using
-specially created patches to cross-compile for the given $CHOST target. Most of
-these patches are agnostic to the actual target triplet, but some contain
-changes dedicated to the riscv64 target, such as changed package versions when
-upstream does not support the target yet, or additional compile time settings
-for the target architecture, when the configure scripts of the package are not
-smart enough. This is the point where the most work will probably need to be
-done when porting this project to another architecture.
+To build the packages, the dependency tree is traversed and packages are
+rebuilt using upstream PKGBUILDs and custom patches to cross-compile the
+packages for the configured target architecture. Packages with the `any'
+architecture are simply reused for this stage, since they should work for any
+architecture and do not need to be cross-compiled.
 
-As a final note, this stage uses the upstream PKGBUILD files from the archlinux
-and parabola GNU/Linux-libre repositories, along with a hand-crafted patch for
-each package to allow it to cross-compile to the target architecture. Since the
-upstream PKGBUILDS change frequently, and the patches are unlikely to be
-maintained once the initial bootstrap is done and stable, they can only
-represent a snapshot in time and will probably cease to function in the near
-future. Exercise caution.
+As a final note, since the upstream PKGBUILDS change frequently, and the
+patches are unlikely to be maintained once the initial bootstrap is done and
+stable, they will probably cease to function in the near future. Exercise
+caution.
 
 2.3. Stage 3
+------------
+
+Stage 3 uses the cross-compiled makepkg chroot created in Stage 2 to natively
+compile the base-devel group of packages again, but without using a
+cross-compiler and without the need for mandatory package patches. Many
+packages `just work' when compiling them using the upstream PKGBUILDs, but some
+still need to be altered, and build time dependencies need to be removed when
+they are too painful to compile.
+
+This stage requires more packages to complete, since the host system can not
+provide things like git for vcs sources. Everything is taken from the makepkg
+chroot.
+
+The process is similar to stage2, a clean librechroot is created using the
+packages built in Stage 2, a modified libremakepkg.sh is created to inclued a
+update hook for config.sub and config.guess scripts, which are unfortunately
+too old for most packages to detect the architecture correctly, a dependency
+tree is made, and then traversed.
+
+The patches in this stage are fewer and apply less pressure to the packages,
+so, while computationally more expensive, this stage is probably a bit easier
+to maintain and adapt.
+
+2.4. Stage 4
 ------------
 
 tbd.
