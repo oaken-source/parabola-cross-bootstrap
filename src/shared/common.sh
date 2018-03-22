@@ -33,7 +33,7 @@ import_keys() {
     local key
     for key in $keys; do
       echo -n "checking for key $key ... "
-      sudo -u $SUDO_USER gpg --list-keys $key >/dev/null && _have_key=yes || _have_key=no
+      sudo -u $SUDO_USER gpg --list-keys $key &>/dev/null && _have_key=yes || _have_key=no
       echo $_have_key
       if [ "x$_have_key" == "xno" ]; then
         retry 5 60 sudo -u $SUDO_USER gpg --recv-keys $key \
@@ -43,24 +43,27 @@ import_keys() {
   fi
 }
 
+_fetch_pkgfiles_from() {
+  curl -sL $url | grep -iq 'not found' && return 1
+  local src=$(curl -sL $url | grep -i 'source files' | cut -d'"' -f2 | sed 's#/tree/#/plain/#')
+  for link in $(curl -sL $src | grep '^  <li><a href' | cut -d"'" -f2 \
+      | sed "s#^#$(echo $src | awk -F/ '{print $3}')#"); do
+    wget -q $link -O $(basename ${link%\?*});
+  done
+  [ -f PKGBUILD ] || return 1
+}
+
 fetch_pkgfiles() {
   # acquire the pkgbuild and auxiliary files
-  local libre=https://www.parabola.nu/packages/libre/x86_64/$1/
-  local core=https://www.archlinux.org/packages/core/x86_64/$1/
-  local extra=https://www.archlinux.org/packages/extra/x86_64/$1/
-  local community=https://www.archlinux.org/packages/community/x86_64/$1/
-  local url
-  for url in $libre $core $extra $community; do
-    if ! curl -s $url | grep -iq 'not found'; then
-      local src=$(curl -s $url | grep -i 'source files' | cut -d'"' -f2 | sed 's#/tree/#/plain/#')
-      for link in $(curl -sL $src | grep '^  <li><a href' | cut -d"'" -f2 \
-          | sed "s#^#$(echo $src | awk -F/ '{print $3}')#"); do
-        wget -q $link -O $(basename ${link%\?*});
-      done
-      break
-    fi
+  local url=https://www.parabola.nu/packages/libre/x86_64/$1/
+  _fetch_pkgfiles_from $url && echo "libre" > .REPO && return
+
+  local repo
+  for repo in core extra community; do
+    url=https://www.archlinux.org/packages/$repo/x86_64/$1/
+    _fetch_pkgfiles_from $url && echo "$repo" > .REPO && return
   done
-  [ -f PKGBUILD ] || return
+  die "$1: failed to fetch pkgfiles"
 }
 
 prepare_makepkgdir() {

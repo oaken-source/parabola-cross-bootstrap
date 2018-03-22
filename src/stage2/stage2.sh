@@ -142,8 +142,10 @@ EOF
       "$_builddir"/makepkg-$CARCH.sh -fLC --config "$_builddir"/makepkg-$CARCH.conf \
         --nocheck --nodeps --nobuild || failed_build
 
-	    url="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
-	    find src -iname config.sub -print -exec curl "$url;f=config.sub;hb=HEAD" -o {} \;
+      if [ "x${REGEN_CONFIG_FRAGMENTS:-no}" == "xyes" ]; then
+	      url="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
+	      find src -iname config.sub -print -exec curl "$url;f=config.sub;hb=HEAD" -o {} \;
+      fi
 
       sudo -u $SUDO_USER \
       "$_builddir"/makepkg-$CARCH.sh -fLC --config "$_builddir"/makepkg-$CARCH.conf \

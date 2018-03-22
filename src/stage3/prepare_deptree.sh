@@ -72,8 +72,6 @@ if [ "x$_have_deptree" == "xno" ]; then
         _pkgdeps+=" git" ;;
       libdaemon)
         _pkgdeps+=" git" ;;
-      libldap)
-        _pkgdeps="${_pkgdeps/libsasl}" ;;
       libffi)
         _pkgdeps+=" dejagnu git" ;;
       libpsl)
@@ -120,6 +118,8 @@ if [ "x$_have_deptree" == "xno" ]; then
   done
 
   echo -en "\r"
+
+  _tree[libldap]="${_tree[libldap]/libsasl}"
 
   # write package dependency tree
   truncate -s0 "$_deptree".FULL

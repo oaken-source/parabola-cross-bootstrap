@@ -20,43 +20,30 @@
 
 set -euo pipefail
 
-# output formatting
-export BO=$(tput bold)
-export NO=$(tput sgr0)
-export RE=$(tput setf 4)
-export GR=$(tput setf 2)
-export WH=$(tput setf 7)
+msg "preparing transitive dependency tree for $_groups (Stage 4)"
 
-# messaging functions
-notify() {
-  # useful if running notify_telegram
-  local recipient=-211578786
-  if type -p notify-send >/dev/null; then
-    machinectl -q shell --uid=$SUDO_USER .host \
-      $(which notify-send) -h string:recipient:$recipient "$@" >/dev/null
-  fi
-}
+echo -n "checking for complete deptree ... "
+[ -f "$_deptree".FULL ] && _have_deptree=yes || _have_deptree=no
+echo $_have_deptree
 
-die() {
-  echo "$BO$RE==> ERROR:$WH $*$NO" 1>&2
-  notify -c error *Error:* "$(caller): $*"
-  trap - ERR
-  exit 1;
-}
+if [ "x$_have_deptree" == "xno" ]; then
+  truncate -s0 "$_deptree".FULL
 
-msg() {
-  echo "$BO$GR==>$WH $*$NO";
-}
+  for _group in $_groups; do
+    for _pkg in $(pacman -Sg $_group | awk '{print $2}'); do
+      _realpkg=$(pacman --noconfirm -Sddw "$_pkg" | grep '^Packages' | awk '{print $3}')
+      _realpkg="${_realpkg%-*-*}"
+      if ! grep -q "^$_realpkg :" "$_deptree".FULL; then
+        echo "$_realpkg : [ ] # $_group" >> "$_deptree".FULL
+      else
+        sed -i "s/^$_realpkg : \[.*/&, $_group/" "$_deptree".FULL
+      fi
+    done
+  done
+fi
 
-trap "die unknown error" ERR
+[ -f "$_deptree" ] || cp "$_deptree"{.FULL,}
+chown $SUDO_USER "$_deptree"
 
-# host system check helpers
-check_exe() {
-  echo -n "checking for $1 ... "
-  type -p $1 >/dev/null && echo yes || (echo no && die "missing ${2:-$1} in \$PATH")
-}
-
-check_file() {
-  echo -n "checking for $1 ... "
-  [ -f "$1" ] && echo yes || (echo no && die "missing ${2:-$1} in filesystem")
-}
+echo "  total pkges:      $(cat "$_deptree".FULL | wc -l)"
+echo "  remaining pkges:  $(cat "$_deptree" | wc -l)"

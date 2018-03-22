@@ -26,6 +26,7 @@ export CHOST=riscv64-unknown-linux-gnu
 export LINUX_ARCH=riscv
 export GCC_MARCH=rv64gc
 export GCC_MABI=lp64d
+export REGEN_CONFIG_FRAGMENTS=yes
 #export MULTILIB=enable
 #export GCC32_MARCH=rv32gc
 #export GCC32_MABI=ilp32d
@@ -54,6 +55,9 @@ chown $SUDO_USER "$topbuilddir"
 
 # Stage 3: libremakepkg native base-devel
 . "$topsrcdir"/stage3/stage3.sh
+
+# Stage 4: libremakepkg full native base & base-devel
+. "$topsrcdir"/stage4/stage4.sh
 
 msg "all done."
 notify "*Bootstrap Finished*"

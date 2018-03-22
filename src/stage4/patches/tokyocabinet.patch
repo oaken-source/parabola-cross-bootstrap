@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-19 20:28:29.634507163 +0100
++++ b/PKGBUILD	2018-03-19 20:31:37.436316240 +0100
+@@ -18,7 +18,7 @@ md5sums=('fd03df6965f8f56dd5b8518ca43b4f
+ 
+ build() {
+   cd "$srcdir/$pkgname-$pkgver"
+-  ./configure --prefix=/usr --enable-off64 --enable-fastest
++  ./configure --prefix=/usr --enable-off64
+   make
+ }
+ 

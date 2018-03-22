@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-19 17:18:55.602994824 +0100
++++ b/PKGBUILD	2018-03-19 17:20:22.332769036 +0100
+@@ -13,7 +13,7 @@ backup=('etc/'{protocols,services})
+ source=('https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xml'
+         'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xml'
+         'LICENSE')
+-sha256sums=('e0be507688063ececbc13908c7eced6e16c8aca351d8febbeb3dd09f64a82709'
++sha256sums=('9fbe6c0789133b703a4bfda41c12386e38ff48e4546b6a2e96fccd9efe776199'
+             '4992fbc5453d0feb48492e6abda96bf9285ff4d2516f6924a0f92f773dc4cea2'
+             'dd37e92942d5a4024f1c77df49d61ca77fc6284691814903a741785df61f78cb')
+ 

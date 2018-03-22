@@ -39,7 +39,7 @@ check_exe librechroot
 check_exe libremakepkg
 check_exe makepkg
 
-# make sure that binfmt is *enabled* for stage2 build
+# make sure that binfmt is *enabled* for stage3 build
 echo 1 > /proc/sys/fs/binfmt_misc/status
 
 # prepare for the build
@@ -120,7 +120,7 @@ EOF
 
       # build the package
       chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
-      $_builddir/libremakepkg-$CARCH.sh -n $CHOST-stage3 || failed_build
+      "$_builddir"/libremakepkg-$CARCH.sh -n $CHOST-stage3 || failed_build
     fi
 
     popd >/dev/null

@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-21 10:09:30.154295409 +0100
++++ b/PKGBUILD	2018-03-21 10:33:34.400187479 +0100
+@@ -26,6 +26,8 @@ build() {
+ 
+ check() {
+   cd $pkgname-$pkgver
++  # fix a benign testsuite failure under qemu-static
++  sed -i 's/unlimited/65536/' tests/pcre-jitstack
+   make check
+ }
+ 

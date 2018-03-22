@@ -1,0 +1,19 @@
+--- a/PKGBUILD	2018-03-22 10:12:40.652754176 +0100
++++ b/PKGBUILD	2018-03-22 10:20:47.385128228 +0100
+@@ -20,6 +20,8 @@ validpgpkeys=('3D2554F0A15338AB9AF1BB9D9
+ 
+ prepare() {
+   cd ${pkgname}-${pkgver}
++  # workaround for glibc-2.27 issues
++  sed -i '211,217 d; 219,229 d; 232 d' glob/glob.c
+   patch -p1 -i ${srcdir}/guile-2.2.patch
+   autoreconf -fi
+ }
+@@ -32,6 +34,7 @@ build() {
+ 
+ check() {
+   cd ${pkgname}-${pkgver}
++  export PERL_USE_UNSAFE_INC=1
+   make -k check
+ }
+ 

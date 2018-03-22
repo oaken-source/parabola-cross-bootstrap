@@ -1,0 +1,368 @@
+--- a/PKGBUILD	2018-03-19 21:40:22.903290789 +0100
++++ b/PKGBUILD	2018-03-20 08:48:54.783116351 +0100
+@@ -1,151 +1,61 @@
+-# Maintainer: David P. <megver83@parabola.nu>
+-# Contributor: André Silva <emulatorman@hyperbola.info>
+-# Contributor: Márcio Silva <coadde@hyperbola.info>
+-# Contributor: fauno <fauno@parabola.nu>
+-# Contributor: Sorin-Mihai Vârgolici <smv@yobicore.org>
+-# Contributor: Michał Masłowski <mtjm@mtjm.eu>
+-# Contributor: Luke Shumaker <lukeshu@sbcglobal.net>
+-# Contributor: Luke R. <g4jc@openmailbox.org>
+-# Contributor: Andreas Grapentin <andreas@grapentin.org>
+-
+-# Based on linux package
++# $Id$
++# Maintainer (Arch): Tobias Powalowski <tpowa@archlinux.org>
++# Maintainer (Arch): Thomas Baechler <thomas@archlinux.org>
+ 
+ pkgbase=linux-libre         # Build stock kernel
+ #pkgbase=linux-libre-custom # Build kernel with a different name
+-_pkgbasever=4.15-gnu
+-_pkgver=4.15.9-gnu
+-
+-_replacesarchkernel=('linux%') # '%' gets replaced with _kernelname
+-_replacesoldkernels=() # '%' gets replaced with _kernelname
+-_replacesoldmodules=() # '%' gets replaced with _kernelname
+-
+-_srcname=linux-${_pkgbasever%-*}
+-_archpkgver=${_pkgver%-*}
+-pkgver=${_pkgver//-/_}
+-pkgrel=3
+-rcnrel=armv7-x1
+-arch=('i686' 'x86_64' 'armv7h')
++_srcname=linux-4.15
++pkgver=4.15.11
++pkgver+=_gnu
++pkgrel=1
++arch=('x86_64')
+ url="https://linux-libre.fsfla.org/"
+ license=('GPL2')
+ makedepends=('xmlto' 'kmod' 'inetutils' 'bc' 'libelf')
+-makedepends_armv7h=('git')
+ options=('!strip')
+ source=(
+-  "https://linux-libre.fsfla.org/pub/linux-libre/releases/${_pkgbasever}/linux-libre-${_pkgbasever}.tar.xz"{,.sign}
+-  "https://linux-libre.fsfla.org/pub/linux-libre/releases/${_pkgver}/patch-${_pkgbasever}-${_pkgver}.xz"{,.sign}
+-  "https://repo.parabola.nu/other/linux-libre/logos/logo_linux_clut224.ppm"{,.sig}
+-  "https://repo.parabola.nu/other/linux-libre/logos/logo_linux_mono.pbm"{,.sig}
+-  "https://repo.parabola.nu/other/linux-libre/logos/logo_linux_vga16.ppm"{,.sig}
+-  # the main kernel config files
+-  'config.i686' 'config.x86_64' 'config.armv7h'
+-  # pacman hooks for depmod and initramfs regeneration
+-  '60-linux.hook' '90-linux.hook'
+-  # standard config files for mkinitcpio ramdisk
+-  'linux.preset'
+-  # armv7h patches
+-  "https://repo.parabola.nu/other/rcn-libre/patches/${_pkgver%-*}/rcn-libre-${_pkgver%-*}-${rcnrel}.patch"{,.sig}
+-  '0001-ARM-atags-add-support-for-Marvell-s-u-boot.patch'
+-  '0002-ARM-atags-fdt-retrieve-MAC-addresses-from-Marvell-bo.patch'
+-  '0003-SMILE-Plug-device-tree-file.patch'
+-  '0004-fix-mvsdio-eMMC-timing.patch'
+-  '0005-net-smsc95xx-Allow-mac-address-to-be-set-as-a-parame.patch'
+-  '0006-set-default-cubietruck-led-triggers.patch'
+-  '0007-exynos4412-odroid-set-higher-minimum-buck2-regulator.patch'
+-  '0008-disable-USB3-port-on-ODROID-XU.patch'
+-  '0009-ARM-dove-enable-ethernet-on-D3Plug.patch'
+-  '0010-power-add-power-sequence-library.patch'
+-  '0011-usb-core-add-power-sequence-handling-for-USB-devices.patch'
+-  '0012-ARM-dts-imx6qdl-Enable-usb-node-children-with-reg.patch'
+-  '0013-ARM-dts-imx6qdl-udoo.dtsi-fix-onboard-USB-HUB-proper.patch'
+-  '0014-ARM-dts-imx6q-evi-Fix-onboard-hub-reset-line.patch'
+-  # other patches
+-  '0001-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch'
+-  '0002-fix-Atmel-maXTouch-touchscreen-support.patch'
+-  '0001-add-sysctl-to-disallow-unprivileged-CLONE_NEWUSER-by.patch'
+-  '0002-drm-i915-edp-Only-use-the-alternate-fixed-mode-if-it.patch'
++  https://linux-libre.fsfla.org/pub/linux-libre/releases/${pkgver%.*}-gnu/linux-libre-${pkgver%.*}-gnu.tar.xz{,.sign}
++  https://linux-libre.fsfla.org/pub/linux-libre/releases/${pkgver//_/-}/patch-${pkgver%.*}-gnu-${pkgver//_/-}.xz{,.sign}
++  config         # the main kernel config file
++  60-linux.hook  # pacman hook for depmod
++  90-linux.hook  # pacman hook for initramfs regeneration
++  linux.preset   # standard config files for mkinitcpio ramdisk
++  0001-add-sysctl-to-disallow-unprivileged-CLONE_NEWUSER-by.patch
++  0002-drm-i915-edp-Only-use-the-alternate-fixed-mode-if-it.patch
++  https://repo.parabola.nu/other/linux-libre/logos/logo_linux_clut224.ppm{,.sig}
++  https://repo.parabola.nu/other/linux-libre/logos/logo_linux_mono.pbm{,.sig}
++  https://repo.parabola.nu/other/linux-libre/logos/logo_linux_vga16.ppm{,.sig}
+ )
+ validpgpkeys=(
+   '474402C8C582DAFBE389C427BCB7CF877E7D47A7' # Alexandre Oliva
+   '6DB9C4B4F0D8C0DC432CF6E4227CA7C556B2BA78' # David P.
+ )
+-sha512sums=('a55cc663c6fb1e1cfa7905282b368b5d5888bc2398f0acf37e5bb9a232ded04fd566b1980e654da26aaec005332e458581495184d6bd4cec669181085d4d78a5'
+-            'SKIP'
+-            '5b2ad5af70d432cf79eb11729ae39ed53e0b5b2a76688c35655c78538c1d0aa3852ad2c3244c2e0a4207d678919d806fa1903efdad6690e9679c9208d973bb73'
++sha256sums=('e6556514286f9cd6b46f5d5769b2cc3c61ac7d6fa9c9c400e3c2fb5949490186'
+             'SKIP'
+-            '13cb5bc42542e7b8bb104d5f68253f6609e463b6799800418af33eb0272cc269aaa36163c3e6f0aacbdaaa1d05e2827a4a7c4a08a029238439ed08b89c564bb3'
++            '52005a49f68f683e12b407216476ea5dcc1c6511fc0a927b029793c253036427'
+             'SKIP'
+-            '267295aa0cea65684968420c68b32f1a66a22d018b9d2b2c1ef14267bcf4cb68aaf7099d073cbfefe6c25c8608bdcbbd45f7ac8893fdcecbf1e621abdfe9ecc1'
++            'f38927db126ec7141ea2dd70cabb2ef378552672b31db4ab621493928497abd7'
++            'ae2e95db94ef7176207c690224169594d49445e04249d2499e9d2fbc117a0b21'
++            '75f99f5239e03238f88d1a834c50043ec32b1dc568f2cc291b07d04718483919'
++            'ad6344badc91ad0630caacde83f7f9b97276f80d26a20619a87952be65492c65'
++            '4ffdc2a458845c2a7c03c735477dbf51b5b01b10568bf577b37a29e872135cab'
++            '12b281dc45f1954cc3f52276927bb2965c3132c0a8bd7f485869ced2c541d485'
++            'bfd4a7f61febe63c880534dcb7c31c5b932dde6acf991810b41a939a93535494'
+             'SKIP'
+-            '7a3716bfe3b9f546da309c7492f3e08f8f506813afeb1c737a474c83313d5c313cf4582b65215c2cfce3b74d9d1021c96e8badafe8f6e5b01fe28d2b5c61ae78'
++            '13bd7a8d9ed6b6bc971e4cd162262c5a20448a83796af39ce394d827b0e5de74'
+             'SKIP'
+-            '93cc2b304a116edb351d05a7b5c0a6b900fa4222474c26ac5dd15c754ddf0a0e2b7ec8bb40671fcb38c3be08c9279343456a3caf9d0b7ee4088b6afb4c465512'
+-            '0c90ff5cfe3ed0484603255437fb7b7d3450482ede164e139324c2761f3640797932b95e5d696b074c173ef472a5cdeca04c0a56198e54b47c9394f9efd94570'
+-            'bd88e3f19be54f764e4066a00ef4a8df0a3d02f43d09cc4dc0beb27dd1df7d6efbc38c4a9528216c08c4451050ceeb18553b86685eb4f059078964697fa75243'
+-            '7ad5be75ee422dda3b80edd2eb614d8a9181e2c8228cd68b3881e2fb95953bf2dea6cbe7900ce1013c9de89b2802574b7b24869fc5d7a95d3cc3112c4d27063a'
+-            '4a8b324aee4cccf3a512ad04ce1a272d14e5b05c8de90feb82075f55ea3845948d817e1b0c6f298f5816834ddd3e5ce0a0e2619866289f3c1ab8fd2f35f04f44'
+-            '2dc6b0ba8f7dbf19d2446c5c5f1823587de89f4e28e9595937dd51a87755099656f2acec50e3e2546ea633ad1bfd1c722e0c2b91eef1d609103d8abdc0a7cbaf'
+-            'b2d123b84b33dbdaea28c3ea4517f962f3b1ec9b5318ebf33a3a10138a421641d25762a859d588b2ccb05f17804b3dad3e2e16ad5cfcd6dc77bbfe81d1ef642a'
+-            'SKIP'
+-            'ba44aa1252aa1b172e0bc8bbbff864ff60cad6739b2aed2f6a2402848aa65cdb8a8ca6bb9341569b089d60dfd83c3bdd744b5810061ac76b19f0d337afe4cc8d'
+-            '738bc2874351d9e1b94319e6caf615b49753155c99dc9318a1ce9eced50f87627a7331762951f55e2bea8abdb97b80a617a08f3f0bc735e56ff831a8bbb19816'
+-            'f45d8d417eb3f4b6e02e337480bd99a8ebb4b9ac004c53a5432255e5841578fb64530663b6eacb3c8f40aaade8e1dc1e584aa1cf4b560103119e4b32e19b66c3'
+-            '25ee5d9859d3df2d054fd6d53fe6b8931d6ac9f85533c54f3dd926fce917c81bd96cb3858189a20cf28a32b43efd1566cb5513f7db18a0bb8ead1a4e8a7be6fc'
+-            'a1aa8272760da0c8d2772cc8a57d8600f08db176206afd2a155055d2969bf0295f342a156841964a07de53fbf0356385b604ad75e5556569872dfad1863b2c27'
+-            'b58efc374344d10290371f3dfe8a124f855015d3ce169ccf538e6c1476092abf7ac689f0f10fb6a191fa19545b49ce13957ada066b37415f37dd5989ff93db37'
+-            'd2326e2e3ef6f2f5e911e6ad2fc3ac33b6f53fc5bb03e61d0e8371e6c7199028b226356926472ba676ca68a6cc57d33856c662615ed5b52566570670d0f96c89'
+-            'bc47549f2a79a79659d4d53f739e091c1e8f54cef8c1776be2034675cbb43f584a128607b1d4dd6a9f465706bb1470c6cb4277877dd3218e7280f503babf8300'
+-            'd90f3a3b74d65b84c4c2c229d10d2bb854e39e3429ba1469f8bb286819d559c68e00302de2be5043cf274b39a58686dc822c60afe1c553c4c967ef168d98af05'
+-            '0c1a4334fcb4e75d25ec43873275b2f8a599a096b05a51ef2f9d48f3c8425a153f5f0df775e030e61b792f8b34e9c848229028fb6d2411f85028441826951dd5'
+-            '0ccccf4411df6b86486b14e9354bf48355a2dc5bfefce693c5afc1a340db6f9db525a0306897ccbb5ed80304fa38ef13f32355cfeee1c9b684db0a9c0063d5c1'
+-            '1a491eab1b07e9fb0b8a8dba4ef17d658c85106e7f62f3a37c34513aa9cd50b4bbb273aa445380f2e2135adea68c7102718e71bf2c9f4d3a5c24515620606605'
+-            '9ae97a7f29323542d70576e8800e2090a69a43caee3182a453e80c3c3265d6cc04e2b5701e5d24d8a2717e29272950231b7e477aa32d69c7333c083626fc6802'
+-            '9b8829fd9bf6c91e5c9e21184c7f57b22d786c20a15512e91cc75890a5d08a633df555973b29f2da9a7d9b965abd0c76ecdefa5498217837389ad1d0be0fb754'
+-            '02af4dd2a007e41db0c63822c8ab3b80b5d25646af1906dc85d0ad9bb8bbf5236f8e381d7f91cf99ed4b0978c50aee37cb9567cdeef65b7ec3d91b882852b1af'
+-            'b8fe56e14006ab866970ddbd501c054ae37186ddc065bb869cf7d18db8c0d455118d5bda3255fb66a0dde38b544655cfe9040ffe46e41d19830b47959b2fb168'
+-            '0f5531df585efa48e72b335ab88973bbce6c3807db55dcfac2fcda20f69618ee5bd5881ab278bd8cdde1f96bc34d5becca11469516c56a157248e0ae793d8679'
+-            '04dfdfca8b59c2c3c18eb4b59f6466ef6d2fe6799a8b77f403fbce0554bfc739e43ff20897d9a6ed97ca101ab1bc1b067ff4a2491e3607b42de43f45005dc323')
++            '6de8a8319271809ffdb072b68d53d155eef12438e6d04ff06a5a4db82c34fa8a'
++            'SKIP')
+ 
+ _kernelname=${pkgbase#linux-libre}
+-_replacesarchkernel=("${_replacesarchkernel[@]/\%/${_kernelname}}")
+-_replacesoldkernels=("${_replacesoldkernels[@]/\%/${_kernelname}}")
+-_replacesoldmodules=("${_replacesoldmodules[@]/\%/${_kernelname}}")
+-
+-case "${CARCH}" in
+-  i686|x86_64) KARCH=x86;;
+-  armv7h) KARCH=arm;;
+-esac
++: ${_kernelname:=-PARABOLA}
+ 
+ prepare() {
+   cd ${_srcname}
++  exit 1
+ 
+   # add upstream patch
+-  if [ "${_pkgbasever}" != "${_pkgver}" ]; then
+-    patch -p1 -i ../patch-${_pkgbasever}-${_pkgver}
+-  fi
+-  
+-  if [ "${CARCH}" = "armv7h" ]; then
+-    # RCN patch (CM3 firmware deblobbed and AUFS removed)
+-    # Note: For stability reasons, AUFS has been removed in the RCN patch.
+-    # We are supporting AUFS in linux-libre-pck through PCK patch.
+-    # See https://wiki.parabola.nu/PCK for further details.
+-    git apply -v "${srcdir}/rcn-libre-${_pkgver%-*}-${rcnrel}.patch"
+-
+-    # ALARM patches
+-    patch -p1 -i "${srcdir}/0001-ARM-atags-add-support-for-Marvell-s-u-boot.patch"
+-    patch -p1 -i "${srcdir}/0002-ARM-atags-fdt-retrieve-MAC-addresses-from-Marvell-bo.patch"
+-    patch -p1 -i "${srcdir}/0003-SMILE-Plug-device-tree-file.patch"
+-    patch -p1 -i "${srcdir}/0004-fix-mvsdio-eMMC-timing.patch"
+-    patch -p1 -i "${srcdir}/0005-net-smsc95xx-Allow-mac-address-to-be-set-as-a-parame.patch"
+-    patch -p1 -i "${srcdir}/0006-set-default-cubietruck-led-triggers.patch"
+-    patch -p1 -i "${srcdir}/0007-exynos4412-odroid-set-higher-minimum-buck2-regulator.patch"
+-    patch -p1 -i "${srcdir}/0008-disable-USB3-port-on-ODROID-XU.patch"
+-    patch -p1 -i "${srcdir}/0009-ARM-dove-enable-ethernet-on-D3Plug.patch"
+-    patch -p1 -i "${srcdir}/0010-power-add-power-sequence-library.patch"
+-    patch -p1 -i "${srcdir}/0011-usb-core-add-power-sequence-handling-for-USB-devices.patch"
+-    patch -p1 -i "${srcdir}/0012-ARM-dts-imx6qdl-Enable-usb-node-children-with-reg.patch"
+-    patch -p1 -i "${srcdir}/0013-ARM-dts-imx6qdl-udoo.dtsi-fix-onboard-USB-HUB-proper.patch"
+-    patch -p1 -i "${srcdir}/0014-ARM-dts-imx6q-evi-Fix-onboard-hub-reset-line.patch"
+-  fi
++  patch -p1 -i ../patch-${pkgver}
+ 
+   # add freedo as boot logo
+   install -m644 -t drivers/video/logo \
+@@ -159,17 +68,8 @@ prepare() {
+ 
+   # https://bugs.archlinux.org/task/56711
+   patch -Np1 -i ../0002-drm-i915-edp-Only-use-the-alternate-fixed-mode-if-it.patch
+-  
+-  # maintain the TTY over USB disconnects
+-  # http://www.coreboot.org/EHCI_Gadget_Debug
+-  patch -p1 -i "${srcdir}/0001-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch"
+-
+-  # fix Atmel maXTouch touchscreen support
+-  # https://labs.parabola.nu/issues/877
+-  # http://www.fsfla.org/pipermail/linux-libre/2015-November/003202.html
+-  patch -p1 -i "${srcdir}/0002-fix-Atmel-maXTouch-touchscreen-support.patch"
+ 
+-  cat ../config.${CARCH} - >.config <<END
++  cat ../config - >.config <<END
+ CONFIG_LOCALVERSION="${_kernelname}"
+ CONFIG_LOCALVERSION_AUTO=n
+ END
+@@ -200,21 +100,17 @@ END
+ build() {
+   cd ${_srcname}
+ 
+-  if [ "${CARCH}" = "armv7h" ]; then
+-    make ${MAKEFLAGS} LOCALVERSION= zImage modules dtbs
+-  elif [ "${CARCH}" = "x86_64" ] || [ "${CARCH}" = "i686" ]; then
+-    make ${MAKEFLAGS} LOCALVERSION= bzImage modules
+-  fi
++  make bzImage modules
+ }
+ 
+ _package() {
+-  pkgdesc="The ${pkgbase^} kernel and modules"
+-  [ "${pkgbase}" = "linux-libre" ] && groups=('base' 'base-openrc')
++  pkgdesc="The ${pkgbase/linux/Linux} kernel and modules"
++  [ "${pkgbase}" = "linux-libre" ] && groups=('base')
+   depends=('coreutils' 'linux-libre-firmware' 'kmod' 'mkinitcpio>=0.7')
+   optdepends=('crda: to set the correct wireless channels of your country')
+-  provides=("${_replacesarchkernel[@]/%/=${_archpkgver}}")
+-  conflicts=("${_replacesarchkernel[@]}" "${_replacesoldkernels[@]}" "${_replacesoldmodules[@]}")
+-  replaces=("${_replacesarchkernel[@]}" "${_replacesoldkernels[@]}" "${_replacesoldmodules[@]}")
++  provides=(${pkgname/-libre}=${pkgver%_*})
++  conflicts=(${pkgname/-libre}=${pkgver%_*})
++  replaces=(${pkgname/-libre}=${pkgver%_*})
+   backup=("etc/mkinitcpio.d/${pkgbase}.preset")
+   install=linux.install
+ 
+@@ -227,12 +123,7 @@ _package() {
+ 
+   mkdir -p "${pkgdir}"/{boot,usr/lib/modules}
+   make INSTALL_MOD_PATH="${pkgdir}/usr" modules_install
+-  if [ "${CARCH}" = "armv7h" ]; then
+-    make LOCALVERSION= INSTALL_DTBS_PATH="${pkgdir}/boot/dtbs/${pkgbase}" dtbs_install
+-    cp arch/$KARCH/boot/zImage "${pkgdir}/boot/vmlinuz-${pkgbase}"
+-  elif [ "${CARCH}" = "x86_64" ] || [ "${CARCH}" = "i686" ]; then
+-    cp arch/$KARCH/boot/bzImage "${pkgdir}/boot/vmlinuz-${pkgbase}"
+-  fi
++  cp arch/riscv/boot/bzImage "${pkgdir}/boot/vmlinuz-${pkgbase}"
+ 
+   # make room for external modules
+   local _extramodules="extramodules-${_basekernel}${_kernelname}"
+@@ -248,26 +139,15 @@ _package() {
+   # now we call depmod...
+   depmod -b "${pkgdir}/usr" -F System.map "${_kernver}"
+ 
+-  if [ "${CARCH}" = "x86_64" ] || [ "${CARCH}" = "i686" ]; then
+-    # add vmlinux
+-    install -Dt "${pkgdir}/usr/lib/modules/${_kernver}/build" -m644 vmlinux
+-  fi
++  # add vmlinux
++  install -Dt "${pkgdir}/usr/lib/modules/${_kernver}/build" -m644 vmlinux
+ 
+   # sed expression for following substitutions
+-  if [ "${CARCH}" = "armv7h" ]; then
+-  local _subst="
+-    s|/boot/vmlinuz-%PKGBASE%|${_kernver}|g
+-    s|%PKGBASE%|${pkgbase}|g
+-    s|%KERNVER%|${_kernver}|g
+-    s|%EXTRAMODULES%|${_extramodules}|g
+-  "
+-  elif [ "${CARCH}" = "x86_64" ] || [ "${CARCH}" = "i686" ]; then
+   local _subst="
+     s|%PKGBASE%|${pkgbase}|g
+     s|%KERNVER%|${_kernver}|g
+     s|%EXTRAMODULES%|${_extramodules}|g
+   "
+-  fi
+ 
+   # hack to allow specifying an initially nonexisting install file
+   sed "${_subst}" "${startdir}/${install}" > "${startdir}/${install}.pkg"
+@@ -285,11 +165,11 @@ _package() {
+ }
+ 
+ _package-headers() {
+-  pkgdesc="Header files and scripts for building modules for ${pkgbase^} kernel"
+-  provides=("${_replacesarchkernel[@]/%/-headers=${_archpkgver}}")
+-  conflicts=("${_replacesarchkernel[@]/%/-headers}" "${_replacesoldkernels[@]/%/-headers}")
+-  replaces=("${_replacesarchkernel[@]/%/-headers}" "${_replacesoldkernels[@]/%/-headers}")
+-  
++  pkgdesc="Header files and scripts for building modules for ${pkgbase/linux/Linux} kernel"
++  provides=(${pkgname/-libre}=${pkgver%_*})
++  conflicts=(${pkgname/-libre}=${pkgver%_*})
++  replaces=(${pkgname/-libre}=${pkgver%_*})
++
+   cd ${_srcname}
+   local _builddir="${pkgdir}/usr/lib/modules/${_kernver}/build"
+ 
+@@ -300,14 +180,10 @@ _package-headers() {
+ 
+   cp -t "${_builddir}" -a include scripts
+ 
+-  install -Dt "${_builddir}/arch/${KARCH}" -m644 arch/${KARCH}/Makefile
+-  install -Dt "${_builddir}/arch/${KARCH}/kernel" -m644 arch/${KARCH}/kernel/asm-offsets.s
+-
+-  if [[ ${CARCH} = i686 ]]; then
+-    install -t "${_builddir}/arch/${KARCH}" -m644 arch/${KARCH}/Makefile_32.cpu
+-  fi
++  install -Dt "${_builddir}/arch/riscv" -m644 arch/riscv/Makefile
++  install -Dt "${_builddir}/arch/riscv/kernel" -m644 arch/riscv/kernel/asm-offsets.s
+ 
+-  cp -t "${_builddir}/arch/${KARCH}" -a arch/${KARCH}/include
++  cp -t "${_builddir}/arch/riscv" -a arch/riscv/include
+ 
+   install -Dt "${_builddir}/drivers/md" -m644 drivers/md/*.h
+   install -Dt "${_builddir}/net/mac80211" -m644 net/mac80211/*.h
+@@ -330,35 +206,17 @@ _package-headers() {
+   find . -name Kconfig\* -exec install -Dm644 {} "${_builddir}/{}" \;
+ 
+   # add objtool for external module building and enabled VALIDATION_STACK option
+-  if [[ -e tools/objtool/objtool ]]; then
+-    install -Dt "${_builddir}/tools/objtool" tools/objtool/objtool
+-  fi
++  install -Dt "${_builddir}/tools/objtool" tools/objtool/objtool
+ 
+   # remove unneeded architectures
+   local _arch
+   for _arch in "${_builddir}"/arch/*/; do
+-    [[ ${_arch} == */${KARCH}/ ]] && continue
++    [[ ${_arch} == */riscv/ ]] && continue
+     rm -r "${_arch}"
+   done
+ 
+   # remove files already in linux-docs package
+   rm -r "${_builddir}/Documentation"
+-  
+-  # parabola changes
+-  # 
+-  # since we don't want to diverge too much from arch's pkgbuild, we'll
+-  # start marking our changes as such
+-  if [ "${CARCH}" = "armv7h" ]; then
+-    for i in dove exynos omap2; do
+-      mkdir -p "${pkgdir}/usr/lib/modules/${_kernver}/build/arch/${KARCH}/mach-${i}"
+-      cp -a arch/${KARCH}/mach-${i}/include "${pkgdir}/usr/lib/modules/${_kernver}/build/arch/${KARCH}/mach-${i}/"
+-    done
+-    for i in omap orion samsung versatile; do
+-      mkdir -p "${pkgdir}/usr/lib/modules/${_kernver}/build/arch/${KARCH}/plat-${i}"
+-      cp -a arch/${KARCH}/plat-${i}/include "${pkgdir}/usr/lib/modules/${_kernver}/build/arch/${KARCH}/plat-${i}/"
+-    done
+-  fi
+-  # end of parabola changes
+ 
+   # remove now broken symlinks
+   find -L "${_builddir}" -type l -printf 'Removing %P\n' -delete
+@@ -380,11 +238,11 @@ _package-headers() {
+ }
+ 
+ _package-docs() {
+-  pkgdesc="Kernel hackers manual - HTML documentation that comes with the ${pkgbase^} kernel"
+-  provides=("${_replacesarchkernel[@]/%/-docs=${_archpkgver}}")
+-  conflicts=("${_replacesarchkernel[@]/%/-docs}" "${_replacesoldkernels[@]/%/-docs}")
+-  replaces=("${_replacesarchkernel[@]/%/-docs}" "${_replacesoldkernels[@]/%/-docs}")
+-  
++  pkgdesc="Kernel hackers manual - HTML documentation that comes with the ${pkgbase/linux/Linux} kernel"
++  provides=(${pkgname/-libre}=${pkgver%_*})
++  conflicts=(${pkgname/-libre}=${pkgver%_*})
++  replaces=(${pkgname/-libre}=${pkgver%_*})
++
+   cd ${_srcname}
+   local _builddir="${pkgdir}/usr/lib/modules/${_kernver}/build"
+ 

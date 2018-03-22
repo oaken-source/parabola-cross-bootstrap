@@ -25,17 +25,21 @@ msg "preparing $CARCH librechroot"
 # create directories
 mkdir -p "$_pkgdest" "$_logdest"
 
-# initialize [native] repo
-echo -n "checking for $CARCH [native] repo ... "
-[ -e "$_pkgdest"/native.db ] && _have_native=yes || _have_native=no
-echo $_have_native
+# initialize repos
+mkdir -p "$_pkgdest"/{pool,staging}
+for repo in libre core extra community; do
+  echo -n "checking for $CARCH [$repo] repo ... "
+  [ -e "$_pkgdest"/$repo/os/$CARCH/$repo.db ] && _have_repo=yes || _have_repo=no
+  echo $_have_repo
 
-if [ "x$_have_native" == "xno" ]; then
-  tar -czf "$_pkgdest"/native.db.tar.gz -T /dev/null
-  tar -czf "$_pkgdest"/native.files.tar.gz -T /dev/null
-  ln -s native.db.tar.gz "$_pkgdest"/native.db
-  ln -s native.files.tar.gz "$_pkgdest"/native.files
-fi
+  mkdir -p "$_pkgdest"/$repo/os/$CARCH
+  if [ "x$_have_repo" == "xno" ]; then
+    tar -czf "$_pkgdest"/$repo/os/$CARCH/$repo.db.tar.gz -T /dev/null
+    tar -czf "$_pkgdest"/$repo/os/$CARCH/$repo.files.tar.gz -T /dev/null
+    ln -s $repo.db.tar.gz "$_pkgdest"/$repo/os/$CARCH/$repo.db
+    ln -s $repo.files.tar.gz "$_pkgdest"/$repo/os/$CARCH/$repo.files
+  fi
+done
 
 # create configurations
 mkdir -p "$_builddir"/config
@@ -43,10 +47,16 @@ mkdir -p "$_builddir"/config
 cat > "$_builddir"/config/pacman.conf << EOF
 [options]
 Architecture = $CARCH
+[libre]
+Server = file://$topbuilddir/stage4/packages/\$repo/os/\$arch
+[core]
+Server = file://$topbuilddir/stage4/packages/\$repo/os/\$arch
+[extra]
+Server = file://$topbuilddir/stage4/packages/\$repo/os/\$arch
+[community]
+Server = file://$topbuilddir/stage4/packages/\$repo/os/\$arch
 [native]
 Server = file://$topbuilddir/stage3/packages/\$arch
-[cross]
-Server = file://$topbuilddir/stage2/packages/\$arch
 EOF
 
 cat "$_srcdir"/makepkg.conf.in > "$_builddir"/config/makepkg.conf
@@ -58,36 +68,42 @@ CXXFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -
 MAKEFLAGS="-j$(($(nproc) + 1))"
 EOF
 
-# initialize the chroot using the cross-compiled packages
+# initialize the chroot
 rm -rf /var/cache/pacman/pkg-$CARCH/*
 librechroot \
-    -n "$CHOST-stage3" \
+    -n "$CHOST-stage4" \
     -C "$_builddir"/config/pacman.conf \
     -M "$_builddir"/config/makepkg.conf \
   make
 
 set +o pipefail
-export _chrootdir="$(librechroot -n "$CHOST-stage3" 2>&1 | grep copydir.*: | awk '{print $3}')"
+export _chrootdir="$(librechroot -n "$CHOST-stage4" 2>&1 | grep copydir.*: | awk '{print $3}')"
 set -o pipefail
 
-for repo in native cross; do
-  mkdir -p "$_chrootdir"/$repo/$CARCH
-  if mount | grep -q "$_chrootdir"/$repo/$CARCH; then umount "$_chrootdir"/$repo/$CARCH; fi
-done
-mount -o bind "$_pkgdest" "$_chrootdir"/native/$CARCH
-mount -o bind "${_pkgdest//stage3/stage2}" "$_chrootdir"/cross/$CARCH
+# mount repo in chroot
+mkdir -p "$_chrootdir"/{repos,native}
+if mount | grep -q "$_chrootdir"/repos; then umount "$_chrootdir"/repos; fi
+if mount | grep -q "$_chrootdir"/native; then umount "$_chrootdir"/native; fi
+mount -o bind "$topbuilddir/stage4/packages" "$_chrootdir"/repos
+mount -o bind "$topbuilddir/stage3/packages" "$_chrootdir"/native
 
 cat > "$_builddir"/config/pacman.conf << EOF
 [options]
 Architecture = $CARCH
+[libre]
+Server = file:///repos/\$repo/os/\$arch
+[core]
+Server = file:///repos/\$repo/os/\$arch
+[extra]
+Server = file:///repos/\$repo/os/\$arch
+[community]
+Server = file:///repos/\$repo/os/\$arch
 [native]
 Server = file:///native/\$arch
-[cross]
-Server = file:///cross/\$arch
 EOF
 
 librechroot \
-    -n "$CHOST-stage3" \
+    -n "$CHOST-stage4" \
     -C "$_builddir"/config/pacman.conf \
     -M "$_builddir"/config/makepkg.conf \
   update
@@ -95,7 +111,6 @@ librechroot \
 # produce a patched libremakepkg to update config.sub/config.guess where needed
 cat $(which libremakepkg) > "$_builddir"/libremakepkg-$CARCH.sh
 chmod +x "$_builddir"/libremakepkg-$CARCH.sh
-
 if [ "x${REGEN_CONFIG_FRAGMENTS:-no}" == "xyes" ]; then
   sed -i '/Boring\/mundane/i \
 update_config_fragments() {\
