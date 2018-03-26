@@ -26,12 +26,12 @@ export CHOST=riscv64-unknown-linux-gnu
 export LINUX_ARCH=riscv
 export GCC_MARCH=rv64gc
 export GCC_MABI=lp64d
-export REGEN_CONFIG_FRAGMENTS=yes
 #export MULTILIB=enable
 #export GCC32_MARCH=rv32gc
 #export GCC32_MABI=ilp32d
 #export CARCH32=riscv32
 #export CHOST32=riscv32-linux-gnu
+export REGEN_CONFIG_FRAGMENTS=yes
 
 # common directories
 export startdir="$(pwd)"

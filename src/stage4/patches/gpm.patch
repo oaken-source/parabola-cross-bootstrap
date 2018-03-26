@@ -1,0 +1,62 @@
+--- a/PKGBUILD	2018-03-25 22:25:11.964862400 +0200
++++ b/PKGBUILD	2018-03-26 06:40:52.564545915 +0200
+@@ -11,10 +11,21 @@ license=('GPL')
+ depends=('bash' 'procps-ng')
+ options=('!makeflags')
+ source=(http://www.nico.schottelius.org/software/gpm/archives/${pkgname}-${pkgver}.tar.lzma
+-        gpm.sh gpm.service)
++        gpm.sh gpm.service
++        0001-gpm-1.20.7-sigemptyset.patch
++        0002-gpm-1.20.7-sysmacros.patch)
+ sha1sums=('8d9f3655c80ce7667d31ede2a100b44986480369'
+           '94447c6f8bfadd062efa1a747a597426f339d13e'
+-          'f9bde96eb9c78da9f225bcf40822647f6592cf23')
++          'f9bde96eb9c78da9f225bcf40822647f6592cf23'
++          'deb235e5acd5c9237dd03d8994faa535890a944b'
++          '014e188e6e2da8b57dcdb4130aa8b343ce5db008')
++
++prepare() {
++  cd "${srcdir}/${pkgname}-${pkgver}"
++  # fix build against glibc-2.27
++  patch -Np1 -i ../0001-gpm-1.20.7-sigemptyset.patch
++  patch -Np1 -i ../0002-gpm-1.20.7-sysmacros.patch
++}
+ 
+ build() {
+   cd "${srcdir}/${pkgname}-${pkgver}"
+--- /dev/null	2018-03-21 10:59:45.661284739 +0100
++++ b/0001-gpm-1.20.7-sigemptyset.patch	2018-03-26 06:37:31.916666330 +0200
+@@ -0,0 +1,16 @@
++diff -r -u gpm-1.20.7-orig/src/prog/gpm-root.y gpm-1.20.7/src/prog/gpm-root.y
++--- gpm-1.20.7-orig/src/prog/gpm-root.y	2012-10-26 16:21:38.000000000 -0500
+++++ gpm-1.20.7/src/prog/gpm-root.y	2017-10-10 13:50:02.115721252 -0500
++@@ -1196,11 +1196,7 @@
++                                                         LOG_DAEMON : LOG_USER);
++    /* reap your zombies */
++    childaction.sa_handler=reap_children;
++-#if defined(__GLIBC__)
++-   __sigemptyset(&childaction.sa_mask);
++-#else /* __GLIBC__ */
++-   childaction.sa_mask=0;
++-#endif /* __GLIBC__ */
+++   sigemptyset(&childaction.sa_mask);
++    childaction.sa_flags=SA_INTERRUPT; /* need to break the select() call */
++    sigaction(SIGCHLD,&childaction,NULL);
++ 
+--- /dev/null	2018-03-21 10:59:45.661284739 +0100
++++ b/0002-gpm-1.20.7-sysmacros.patch	2018-03-26 06:37:44.021780141 +0200
+@@ -0,0 +1,14 @@
++diff -r -u gpm-1.20.7-orig/src/daemon/open_console.c gpm-1.20.7/src/daemon/open_console.c
++--- gpm-1.20.7-orig/src/daemon/open_console.c	2012-10-26 16:21:38.000000000 -0500
+++++ gpm-1.20.7/src/daemon/open_console.c	2017-10-10 13:40:39.896316258 -0500
++@@ -23,6 +23,10 @@
++ #include <sys/stat.h>               /* stat()            */
++ #include <sys/ioctl.h>              /* ioctl             */
++ 
+++#ifdef HAVE_SYS_SYSMACROS_H
+++#include <sys/sysmacros.h>          /* major() w/newer glibc */
+++#endif
+++
++ /* Linux specific (to be outsourced in gpm2 */
++ #include <linux/serial.h>           /* for serial console check */
++ #include <asm/ioctls.h>            /* for serial console check */

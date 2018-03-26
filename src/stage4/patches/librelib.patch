@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-25 07:35:07.216154016 +0200
++++ b/PKGBUILD	2018-03-25 07:38:08.581008234 +0200
+@@ -4,7 +4,7 @@
+ # Contributor: Márcio Silva <coadde@hyperbola.info>
+ 
+ pkgbase=libretools
+-pkgname=(libretools librelib gitget xbs)
++pkgname=(librelib)
+ pkgdesc="Programs for Parabola development"
+ url="https://git.parabola.nu/packages/libretools.git/"
+ license=('GPL3' 'GPL2')

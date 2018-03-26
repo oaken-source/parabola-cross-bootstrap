@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-22 15:17:01.702094570 +0100
++++ b/PKGBUILD	2018-03-22 15:22:48.140682766 +0100
+@@ -20,7 +20,7 @@ build() {
+ 
+ 	./configure --prefix=/usr \
+ 		--disable-rpath \
+-		--enable-werror
++		--disable-werror
+ 	make
+ }
+ 

@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-09 18:37:49.072472938 +0100
++++ b/PKGBUILD	2018-03-09 18:55:09.707917296 +0100
+@@ -37,7 +39,7 @@ build() {
+     --enable-unicode-properties \
+     --enable-pcre16 \
+     --enable-pcre32 \
+-    --enable-jit \
++    --disable-jit \
+     --enable-pcregrep-libz \
+     --enable-pcregrep-libbz2 \
+     --enable-pcretest-libreadline

@@ -1,51 +1,52 @@
---- a/PKGBUILD	2018-03-06 19:28:00.569615387 +0100
-+++ b/PKGBUILD	2018-03-07 05:34:08.324893467 +0100
-@@ -5,8 +5,9 @@
+--- a/PKGBUILD	2018-03-23 07:34:01.091188345 +0100
++++ b/PKGBUILD	2018-03-23 10:57:18.131432493 +0100
+@@ -5,7 +5,8 @@
  # toolchain build order: linux-api-headers->glibc->binutils->gcc->binutils->glibc
  # NOTE: libtool requires rebuilt with each new gcc version
  
 -pkgname=(gcc gcc-libs gcc-fortran gcc-objc gcc-ada gcc-go lib32-gcc-libs)
--pkgver=7.3.0
 +pkgname=(gcc gcc-libs gcc-fortran)
 +[ "x@MULTILIB@" == "xdisable" ] || pkgname+=(lib32-gcc-libs)
-+pkgver=7.3.1
+ pkgver=7.3.1+20180312
  _majorver=${pkgver:0:1}
  _islver=0.18
- pkgrel=1
-@@ -14,17 +15,18 @@ pkgdesc='The GNU Compiler Collection'
+@@ -14,13 +15,15 @@ pkgdesc='The GNU Compiler Collection'
  arch=(x86_64)
  license=(GPL LGPL FDL custom)
  url='http://gcc.gnu.org'
--makedepends=(binutils libmpc gcc-ada doxygen lib32-glibc lib32-gcc-libs)
+-makedepends=(binutils libmpc gcc-ada doxygen lib32-glibc lib32-gcc-libs python)
 -checkdepends=(dejagnu inetutils)
 +makedepends=(binutils libmpc)
 +[ "x@MULTILIB@" == "xdisable" ] || makedepends+=(lib32-glibc lib32-gcc-libs)
 +checkdepends=(dejagnu)
  options=(!emptydirs)
-+_snapshot=7-20180215
- #source=(https://sources.archlinux.org/other/gcc/gcc-${pkgver/+/-}.tar.xz{,.sig}
--source=(https://ftp.gnu.org/gnu/gcc/gcc-$pkgver/gcc-$pkgver.tar.xz{,.sig}
-+source=(ftp://gcc.gnu.org/pub/gcc/snapshots/$_snapshot/gcc-$_snapshot.tar.xz
+ source=(https://sources.archlinux.org/other/gcc/gcc-${pkgver/+/-}.tar.xz{,.sig}
+ #source=(https://ftp.gnu.org/gnu/gcc/gcc-$pkgver/gcc-$pkgver.tar.xz{,.sig}
          http://isl.gforge.inria.fr/isl-${_islver}.tar.bz2
-         c89 c99)
+         c89 c99
++        0001-pthread-reentrant.patch
+         bz84080.patch)
  validpgpkeys=(F3691687D867B81B51CE07D9BBE43771487328A9  # bpiotrowski@archlinux.org
                13975A70E63C361C73AE69EF6EEB81F8981C74C7) # richard.guenther@gmail.com
--sha256sums=('832ca6ae04636adbb430e865a1451adf6979ab44ca1c8374f61fba65645ce15c'
--            'SKIP'
-+sha256sums=('bb276f6fce4822fc0806d1e87d21245854d1e41f2a7027c7288375084176c679'
+@@ -29,6 +32,7 @@ sha256sums=('c52618f656f2102b3544419e7d0
              '6b8b0fd7f81d0a957beb3679c81bbb34ccc7568d5682844d8924424a0dadcb1b'
              'de48736f6e4153f03d0a5d38ceb6c6fdb7f054e8f47ddd6af0a3dbf14f27b931'
-             '2513c6d9984dd0a2058557bf00f06d8d5181734e41dcfe07be7ed86f2959622a')
-@@ -51,7 +53,7 @@ snapshot() {
- }
+             '2513c6d9984dd0a2058557bf00f06d8d5181734e41dcfe07be7ed86f2959622a'
++            'fc9c6f0edd615f2b39deff28b9626a08fd98ef8ce19f7e34281c0a5bd653ac3b'
+             'bce05807443558db55f0d6b4dae37a678ea1bb3388b541c876fe3d110e3717e7')
  
- prepare() {
--  ln -s gcc-${pkgver/+/-} gcc
-+  ln -s gcc-$_snapshot gcc
-   cd gcc
+ _svnrev=258469
+@@ -59,6 +63,9 @@ prepare() {
+   # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=84080
+   patch -p0 -i "$srcdir/bz84080.patch"
  
++  # parabola patches
++  patch -Np1 -i "$srcdir"/0001-pthread-reentrant.patch
++
    # link isl for in-tree build
-@@ -83,10 +85,10 @@ build() {
+   ln -s ../isl-${_islver} isl
+ 
+@@ -88,10 +95,10 @@ build() {
        --mandir=/usr/share/man \
        --infodir=/usr/share/info \
        --with-bugurl=https://bugs.archlinux.org/ \
@@ -58,7 +59,7 @@
        --with-system-zlib \
        --with-isl \
        --enable-__cxa_atexit \
-@@ -101,16 +103,13 @@ build() {
+@@ -106,24 +113,13 @@ build() {
        --enable-install-libiberty \
        --with-linker-hash-style=gnu \
        --enable-gnu-indirect-function \
@@ -73,10 +74,18 @@
 -
 -  # make documentation
 -  make -C $CHOST/libstdc++-v3/doc doc-man-doxygen
+-}
+-
+-check() {
+-  cd gcc-build
+-
+-  # do not abort on error as some are "expected"
+-  make -k check || true
+-  "$srcdir/gcc/contrib/test_summary"
  }
  
- check() {
-@@ -134,25 +133,17 @@ package_gcc-libs() {
+ package_gcc-libs() {
+@@ -139,25 +135,17 @@ package_gcc-libs() {
    rm -f "$pkgdir/$_libdir/libgcc_eh.a"
  
    for lib in libatomic \
@@ -103,7 +112,7 @@
               libquadmath; do
      make -C $CHOST/$lib DESTDIR="$pkgdir" install-info
    done
-@@ -183,22 +174,22 @@ package_gcc() {
+@@ -188,22 +176,21 @@ package_gcc() {
    install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
@@ -114,7 +123,7 @@
    make -C $CHOST/libstdc++-v3/src DESTDIR="$pkgdir" install
    make -C $CHOST/libstdc++-v3/include DESTDIR="$pkgdir" install
    make -C $CHOST/libstdc++-v3/libsupc++ DESTDIR="$pkgdir" install
-   make -C $CHOST/libstdc++-v3/python DESTDIR="$pkgdir" install
+-  make -C $CHOST/libstdc++-v3/python DESTDIR="$pkgdir" install
 -  make -C $CHOST/32/libstdc++-v3/src DESTDIR="$pkgdir" install
 -  make -C $CHOST/32/libstdc++-v3/include DESTDIR="$pkgdir" install
 -  make -C $CHOST/32/libstdc++-v3/libsupc++ DESTDIR="$pkgdir" install
@@ -131,7 +140,7 @@
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -208,26 +199,16 @@ package_gcc() {
+@@ -213,26 +200,16 @@ package_gcc() {
    ln -s /${_libdir}/liblto_plugin.so \
      "$pkgdir/usr/lib/bfd-plugins/"
  
@@ -161,7 +170,7 @@
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -239,9 +220,6 @@ package_gcc() {
+@@ -244,16 +221,9 @@ package_gcc() {
    install -Dm755 "$srcdir/c89" "$pkgdir/usr/bin/c89"
    install -Dm755 "$srcdir/c99" "$pkgdir/usr/bin/c99"
  
@@ -171,7 +180,14 @@
    # remove files provided by lib32-gcc-libs
    rm -f "$pkgdir"/usr/lib32/lib{stdc++,gcc_s}.so
  
-@@ -260,7 +238,7 @@ package_gcc-fortran() {
+-  # byte-compile python libraries
+-  python -m compileall "$pkgdir/usr/share/gcc-${pkgver%%+*}/"
+-  python -O -m compileall "$pkgdir/usr/share/gcc-${pkgver%%+*}/"
+-
+   # Install Runtime Library Exception
+   install -d "$pkgdir/usr/share/licenses/$pkgname/"
+   ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
+@@ -269,7 +239,7 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS}
@@ -180,3 +196,17 @@
      install-{toolexeclibDATA,nodist_fincludeHEADERS}
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_fincludeHEADERS
    make -C gcc DESTDIR="$pkgdir" fortran.install-{common,man,info}
+--- /dev/null	2018-03-21 10:59:45.661284739 +0100
++++ b/0001-pthread-reentrant.patch	2018-03-23 07:34:01.165189272 +0100
+@@ -0,0 +1,11 @@
++--- trunk/gcc/config/riscv/linux.h	2018/01/03 10:03:58	256169
+++++ trunk/gcc/config/riscv/linux.h	2018/02/13 11:21:01	257621
++@@ -47,6 +47,8 @@
++ 
++ #define ICACHE_FLUSH_FUNC "__riscv_flush_icache"
++ 
+++#define CPP_SPEC "%{pthread:-D_REENTRANT}"
+++
++ #define LINK_SPEC "\
++ -melf" XLEN_SPEC "lriscv \
++ %{shared} \

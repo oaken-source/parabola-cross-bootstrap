@@ -1,0 +1,37 @@
+--- a/PKGBUILD	2018-03-24 20:46:01.777425917 +0100
++++ b/PKGBUILD	2018-03-25 06:25:21.860107063 +0200
+@@ -17,14 +17,18 @@ checkdepends=('gcc-objc' 'vala' 'rust' '
+               'doxygen' 'vulkan-validation-layers' 'openmpi' 'openssh' 'mercurial' 'gtk-sharp-2'
+               'qt5-tools' 'libwmf' 'dmd' 'valgrind')
+ source=(https://github.com/mesonbuild/meson/releases/download/${pkgver}/meson-${pkgver}.tar.gz{,.asc}
+-        arch-meson)
++        arch-meson
++        0001-logfile-encoding-utf-8.patch)
+ sha512sums=('50bcc299d69a3649a3aa3582322c548af44c2771d65e57c79eae9d67ccb256a17e534649ee5080f50f6f9d4e5d717a1b1a28b3ef4684468094b16bbed8864846'
+             'SKIP'
+-            'e901f87f3ee1baa7b9aedb79bd5c9e50898a5695ac938f7f8420d8e81f526a09f07ceedadb65975437efa5a68fcf581110a040f579f2530437d1e6eb5addea76')
++            'e901f87f3ee1baa7b9aedb79bd5c9e50898a5695ac938f7f8420d8e81f526a09f07ceedadb65975437efa5a68fcf581110a040f579f2530437d1e6eb5addea76'
++            'e79873a0357242517cd86599fca9e03b0c3811f8feb343d958f3e9a0ebd56bc15e73db7f1bc2fbf11b463b847b9bc034ea7087d85963b59bc017eea95a565b3a')
+ validpgpkeys=('95181F4EED14FDF4E41B518D3BF4693BFEEB9428') # Jussi Pakkanen <jpakkane@gmail.com>
+ 
+ prepare() {
+   cd ${pkgname}-${pkgver}
++  # fix encoding errors in systemd test suite
++  patch -Np1 -i ../0001-logfile-encoding-utf-8.patch
+ }
+ 
+ build() {
+--- /dev/null	2018-03-21 10:59:45.661284739 +0100
++++ b/0001-logfile-encoding-utf-8.patch	2018-03-25 06:24:43.980844672 +0200
+@@ -0,0 +1,11 @@
++--- a/mesonbuild/mtest.py	2018-03-24 19:45:26.377647311 +0100
+++++ b/mesonbuild/mtest.py	2018-03-24 19:44:57.104401841 +0100
++@@ -493,7 +493,7 @@ TIMEOUT: %4d
++         self.jsonlogfilename = logfile_base + '.json'
++ 
++         self.jsonlogfile = open(self.jsonlogfilename, 'w')
++-        self.logfile = open(self.logfilename, 'w')
+++        self.logfile = open(self.logfilename, 'w', encoding='utf-8')
++ 
++         self.logfile.write('Log of Meson test suite run on %s\n\n'
++                            % datetime.datetime.now().isoformat())

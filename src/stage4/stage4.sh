@@ -60,10 +60,17 @@ while [ -s "$_deptree" ]; do
   fetch_pkgfiles $_pkgname
   import_keys
 
+  # produce pkgbase
+  echo -n "checking for pkgbase ... "
+  _srcinfo=$(sudo -u $SUDO_USER makepkg --config "$_builddir"/config/makepkg.conf --printsrcinfo)
+  _pkgbase=$(echo "$_srcinfo" | grep '^pkgbase =' | awk '{print $3}')
+  [ -n "$_pkgbase" ] || _pkgbase=$_pkgname
+  echo "$_pkgbase"
+
   # patch if necessary
   cp PKGBUILD{,.old}
-  [ -f "$_srcdir"/patches/$_pkgname.patch ] && \
-    patch -Np1 -i "$_srcdir"/patches/$_pkgname.patch
+  [ -f "$_srcdir"/patches/$_pkgbase.patch ] && \
+    patch -Np1 -i "$_srcdir"/patches/$_pkgbase.patch
   cp PKGBUILD{,.in}
   chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
 
@@ -79,22 +86,28 @@ while [ -s "$_deptree" ]; do
   set +o pipefail
   _needs_postpone=no
   _srcinfo=$(sudo -u $SUDO_USER makepkg --config "$_builddir"/config/makepkg.conf --printsrcinfo)
-  _pkgdeps=$(echo "$_srcinfo" | grep -E "	(make|check|)depends =" | awk '{print $3}')
-  for _dep in $_pkgdeps; do
-    _realdep=$(pacman --noconfirm -Sddw "$_dep" | grep '^Packages' | awk '{print $3}')
-    _realdep="${_realdep%-*-*}"
+  _builddeps=$(echo "$_srcinfo" | awk '/^pkgbase = /,/^$/{print}' \
+      | grep '	\(make\|check\|\)depends =' | awk '{print $3}')
+  _rundeps=$(echo "$_srcinfo" | awk '/^pkgname = '$_pkgname'$/,/^$/{print}' \
+      | grep '	depends =' | awk '{print $3}')
+  # make sure all deps (build-time and run-time) are in deptree
+  for _dep in $_builddeps $_rundeps; do
+    _realdep=""
+    make_realdep "$_dep"
 
     [ -n "$_realdep" ] || die "failed to translate dependency string '$_dep'"
-
     if ! grep -q "^$_realdep :" "$_deptree".FULL; then
       echo "$_realdep : [ ] # $_pkgname" >> "$_deptree".FULL
       echo "$_realdep : [ ] # $_pkgname" >> "$_deptree"
     else
-      sed -i "s/^$_realdep : \[.*/&, $_pkgname/" "$_deptree".FULL
-      sed -i "s/^$_realdep : \[.*/&, $_pkgname/" "$_deptree"
-      sed -i "s/$_pkgname\(, $_pkgname\)*/$_pkgname/" "$_deptree".FULL
-      sed -i "s/$_pkgname\(, $_pkgname\)*/$_pkgname/" "$_deptree"
+      sed -i "/#.* $_pkgname\(\$\|[ ,]\)/! s/^$_realdep : \[.*/&, $_pkgname/" "$_deptree"{,.FULL}
     fi
+  done
+  # postpone build on missing build-time deps
+  for _dep in $_builddeps; do
+    _realdep=""
+    make_realdep "$_dep"
+    [ -n "$_realdep" ] || die "failed to translate dependency string '$_dep'"
 
     echo -n "checking for built dependency $_realdep ... "
     _depfile=$(find $_pkgdest/pool $topbuilddir/stage3/packages/ \
@@ -103,8 +116,7 @@ while [ -s "$_deptree" ]; do
     echo $_have_dep
 
     if [ "x$_have_dep" == "xno" ]; then
-      sed -i "s/^$_pkgname : \[/& $_realdep/" "$_deptree".FULL
-      sed -i "s/^$_pkgname : \[/& $_realdep/" "$_deptree"
+      sed -i "s/^$_pkgname : \[/& $_realdep/" "$_deptree"{,.FULL}
       _needs_postpone=yes
     fi
   done

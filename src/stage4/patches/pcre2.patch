@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-11 07:51:44.848192988 +0100
++++ b/PKGBUILD	2018-03-11 07:54:55.208940305 +0100
+@@ -23,7 +23,7 @@ build() {
+     --prefix=/usr \
+     --enable-pcre2-16 \
+     --enable-pcre2-32 \
+-    --enable-jit \
++    --disable-jit \
+     --enable-pcre2grep-libz \
+     --enable-pcre2grep-libbz2 \
+     --enable-pcre2test-libreadline

@@ -70,6 +70,7 @@ prepare_makepkgdir() {
   rm -rf "$_makepkgdir"/$_pkgname
   mkdir -p "$_makepkgdir"/$_pkgname
   pushd "$_makepkgdir"/$_pkgname >/dev/null
+  chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
 }
 
 failed_build() {
@@ -83,4 +84,18 @@ failed_build() {
     notify -c error "$_pkgname: error in makepkg"
   fi
   die "error building $_pkgname"
+}
+
+make_realdep() {
+  local dep
+
+  dep="$1"
+  _realdep=$(pacman --noconfirm -Sddw "$dep" \
+    | grep '^Packages' | awk '{print $3}')
+  [ -n "$_realdep" ] && _realdep="${_realdep%-*-*}" && return
+
+  dep="$(echo "$dep" | sed 's/[<>=].*//')"
+  _realdep=$(pacman --noconfirm -Sddw "$dep" \
+    | grep '^Packages' | awk '{print $3}')
+  [ -n "$_realdep" ] && _realdep="${_realdep%-*-*}" && return
 }
