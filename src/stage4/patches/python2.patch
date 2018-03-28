@@ -1,0 +1,20 @@
+--- a/PKGBUILD	2018-03-25 21:53:23.069659893 +0200
++++ b/PKGBUILD	2018-03-26 06:51:00.797288518 +0200
+@@ -14,7 +14,7 @@ license=('PSF')
+ url="http://www.python.org/"
+ depends=('bzip2' 'gdbm' 'openssl' 'zlib' 'expat' 'sqlite' 'libffi')
+ makedepends=('tk' 'bluez-libs')
+-checkdepends=('gdb' 'file' 'xorg-server-xvfb')
++checkdepends=('file' 'xorg-server-xvfb')
+ optdepends=('tk: for IDLE'
+             'python2-setuptools'
+             'python2-pip')
+@@ -90,7 +90,7 @@ check() {
+ 
+   cd Python-${pkgver}
+   LD_LIBRARY_PATH="${srcdir}/Python-${pkgver}":${LD_LIBRARY_PATH} \
+-    xvfb-run "${srcdir}/Python-${pkgver}/python" -m test.regrtest -v -uall -x test_bytes test_str test_string test_tuple test_unicode test_userstring
++    xvfb-run "${srcdir}/Python-${pkgver}/python" -m test.regrtest -v -uall -x test_gdb test_bytes test_str test_string test_tuple test_unicode test_userstring
+ }
+ 
+ package() {

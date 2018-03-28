@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-25 21:57:59.513053107 +0200
++++ b/PKGBUILD	2018-03-26 15:22:13.681032590 +0200
+@@ -14,7 +14,7 @@ arch=('x86_64')
+ license=('custom')
+ url="http://www.python.org/"
+ depends=('expat' 'bzip2' 'gdbm' 'openssl' 'libffi' 'zlib')
+-makedepends=('tk' 'sqlite' 'valgrind' 'bluez-libs' 'mpdecimal' 'llvm' 'gdb' 'xorg-server-xvfb')
++makedepends=('tk' 'sqlite' 'bluez-libs' 'mpdecimal' 'llvm' 'xorg-server-xvfb')
+ optdepends=('python-setuptools'
+             'python-pip'
+             'sqlite'

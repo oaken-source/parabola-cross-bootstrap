@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-27 22:20:01.300573718 +0200
++++ b/PKGBUILD	2018-03-27 23:30:52.102898304 +0200
+@@ -11,7 +11,7 @@ url="https://cgit.freedesktop.org/gstrea
+ arch=(x86_64)
+ license=(custom)
+ depends=(glibc)
+-makedepends=(valgrind git gtk-doc meson)
++makedepends=(git gtk-doc meson)
+ _commit=31cb4bfc51de81b5c2569abdcff830b83c74499c  # tags/orc-0.4.28^0
+ source=("git+https://anongit.freedesktop.org/git/gstreamer/orc#commit=$_commit")
+ sha256sums=('SKIP')

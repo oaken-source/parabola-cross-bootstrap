@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-27 22:42:01.292633002 +0200
++++ b/PKGBUILD	2018-03-27 23:31:52.976549495 +0200
+@@ -9,7 +9,7 @@ url="https://dri.freedesktop.org/"
+ arch=(x86_64)
+ license=('custom')
+ depends=('libpciaccess')
+-makedepends=('valgrind' 'libxslt' 'docbook-xsl' 'meson')
++makedepends=('libxslt' 'docbook-xsl' 'meson')
+ checkdepends=('cairo')
+ replaces=('libdrm-new' 'libdrm-nouveau')
+ source=(https://dri.freedesktop.org/$pkgname/$pkgname-$pkgver.tar.bz2{,.sig}

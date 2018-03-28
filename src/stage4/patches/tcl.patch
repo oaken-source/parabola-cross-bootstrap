@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-26 23:30:35.601886802 +0200
++++ b/PKGBUILD	2018-03-27 08:00:17.252668141 +0200
+@@ -27,6 +27,8 @@ build() {
+ 
+ check() {
+   cd tcl${pkgver}/unix
++  # http tests fail due to missing network in the chroot
++  rm ../tests/{socket,http{,11}}.test
+   make test
+ }
+ 

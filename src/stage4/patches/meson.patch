@@ -1,8 +1,11 @@
---- a/PKGBUILD	2018-03-24 20:46:01.777425917 +0100
-+++ b/PKGBUILD	2018-03-25 06:25:21.860107063 +0200
-@@ -17,14 +17,18 @@ checkdepends=('gcc-objc' 'vala' 'rust' '
+--- a/PKGBUILD	2018-03-25 21:55:28.996219660 +0200
++++ b/PKGBUILD	2018-03-26 15:21:25.437467723 +0200
+@@ -15,16 +15,20 @@ checkdepends=('gcc-objc' 'vala' 'rust' '
+               'cython' 'gtkmm3' 'gtest' 'gmock' 'protobuf' 'wxgtk' 'python-gobject' 'gobject-introspection'
+               'itstool' 'gtk3' 'java-environment=8' 'gtk-doc' 'llvm' 'clang' 'sdl2' 'graphviz'
                'doxygen' 'vulkan-validation-layers' 'openmpi' 'openssh' 'mercurial' 'gtk-sharp-2'
-               'qt5-tools' 'libwmf' 'dmd' 'valgrind')
+-              'qt5-tools' 'libwmf' 'dmd' 'valgrind')
++              'qt5-tools' 'libwmf' 'dmd')
  source=(https://github.com/mesonbuild/meson/releases/download/${pkgver}/meson-${pkgver}.tar.gz{,.asc}
 -        arch-meson)
 +        arch-meson
@@ -21,17 +24,3 @@
  }
  
  build() {
---- /dev/null	2018-03-21 10:59:45.661284739 +0100
-+++ b/0001-logfile-encoding-utf-8.patch	2018-03-25 06:24:43.980844672 +0200
-@@ -0,0 +1,11 @@
-+--- a/mesonbuild/mtest.py	2018-03-24 19:45:26.377647311 +0100
-++++ b/mesonbuild/mtest.py	2018-03-24 19:44:57.104401841 +0100
-+@@ -493,7 +493,7 @@ TIMEOUT: %4d
-+         self.jsonlogfilename = logfile_base + '.json'
-+ 
-+         self.jsonlogfile = open(self.jsonlogfilename, 'w')
-+-        self.logfile = open(self.logfilename, 'w')
-++        self.logfile = open(self.logfilename, 'w', encoding='utf-8')
-+ 
-+         self.logfile.write('Log of Meson test suite run on %s\n\n'
-+                            % datetime.datetime.now().isoformat())

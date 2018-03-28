@@ -74,16 +74,20 @@ prepare_makepkgdir() {
 }
 
 failed_build() {
-  _log=$(find "$_logdest" -type f -printf "%T@ %p\n" | sort -n | tail -n1 | cut -d' ' -f2-)
+  _log=$(find "$_logdest" -type f -iname "$1-*" -printf "%T@ %p\n" \
+      | sort -n | tail -n1 | cut -d' ' -f2-)
   set +o pipefail
-  _phase=$(cat $_log | grep '==>.*occurred in' | awk '{print $7}' | sed 's/().*//')
+  _phase=""
+  [ -z "$_log" ] || _phase=$(cat $_log | grep '==>.*occurred in' \
+      | awk '{print $7}' | sed 's/().*//')
   set -o pipefail
   if [ -n "${_phase:-}" ]; then
     notify -c error "$_pkgname: error in $_phase()" -h string:document:"$_log"
   else
     notify -c error "$_pkgname: error in makepkg"
   fi
-  die "error building $_pkgname"
+  [ "x$KEEP_GOING" == "xyes" ] || die "error building $_pkgname"
+  _build_failed=yes
 }
 
 make_realdep() {
@@ -92,10 +96,12 @@ make_realdep() {
   dep="$1"
   _realdep=$(pacman --noconfirm -Sddw "$dep" \
     | grep '^Packages' | awk '{print $3}')
-  [ -n "$_realdep" ] && _realdep="${_realdep%-*-*}" && return
+  [ -n "$_realdep" ] && _realdep="${_realdep%-*-*}" && return 0
 
   dep="$(echo "$dep" | sed 's/[<>=].*//')"
   _realdep=$(pacman --noconfirm -Sddw "$dep" \
     | grep '^Packages' | awk '{print $3}')
-  [ -n "$_realdep" ] && _realdep="${_realdep%-*-*}" && return
+  [ -n "$_realdep" ] && _realdep="${_realdep%-*-*}" && return 0
+
+  return 0
 }

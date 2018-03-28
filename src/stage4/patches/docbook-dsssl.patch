@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-03-27 21:20:58.398058462 +0200
++++ b/PKGBUILD	2018-03-27 21:40:09.943685533 +0200
+@@ -26,6 +26,7 @@ prepare() {
+ 
+ package(){
+   cd "${pkgname}-${pkgver}"
++  MAKEFLAGS=
+   make install \
+      BINDIR="${pkgdir}/usr/bin" \
+      DESTDIR="${pkgdir}/usr/share/sgml/docbook/dsssl-stylesheets-${pkgver}" \

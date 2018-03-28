@@ -38,6 +38,9 @@ export startdir="$(pwd)"
 export topbuilddir="$startdir"/build
 export topsrcdir="$startdir"/src
 
+# options
+export KEEP_GOING=${KEEP_GOING:-no}
+
 . "$topsrcdir"/shared/feedback.sh
 . "$topsrcdir"/shared/common.sh
 

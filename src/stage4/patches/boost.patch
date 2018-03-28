@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-17 18:52:01.668936255 +0100
++++ b/PKGBUILD	2018-03-17 19:06:24.436261723 +0100
+@@ -28,7 +28,7 @@ build() {
+ 
+    ./bootstrap.sh --with-toolset=gcc --with-icu --with-python=/usr/bin/python2
+ 
+-   _bindir="bin.linuxx86"
++   _bindir="bin.linux"
+    [[ "${CARCH}" = "x86_64" ]] && _bindir="bin.linuxx86_64"
+    install -Dm755 tools/build/src/engine/$_bindir/b2 "${_stagedir}"/bin/b2
+ 

@@ -1,0 +1,79 @@
+--- a/PKGBUILD	2018-03-27 21:21:45.773612046 +0200
++++ b/PKGBUILD	2018-03-27 21:45:54.408574372 +0200
+@@ -14,16 +14,20 @@ options=('!makeflags')
+ source=(http://downloads.sourceforge.net/firebird/Firebird-$pkgver-0.tar.bz2
+         firebird-c++11.patch
+         firebird-c++14.patch
+-        LICENSE)
++        LICENSE
++        0001-firebird-riscv-support.patch)
+ md5sums=('fb34241e96f9707604bf6cd78357d5a2'
+          '5094347a8298143ca147edd49b552fe9'
+          'a02710203cee81b4f48b7bdca3b1b33f'
+-         '0d61798861e159c85dbdf0f30fe2f2ce')
++         '0d61798861e159c85dbdf0f30fe2f2ce'
++         '287a91af029d7b91f3e41cbe4a2bd342')
+ 
+ prepare() {
+   cd $srcdir/Firebird-$pkgver-0
+   patch -Np1 -i ../firebird-c++11.patch
+   patch -Np0 -i ../firebird-c++14.patch
++  # https://github.com/FirebirdSQL/firebird/commit/1e8e7858db84750a77006d307bf28e9686f9414e
++  patch -Np1 -i ../0001-firebird-riscv-support.patch
+ }
+ 
+ build() {
+--- /dev/null	2018-03-21 10:59:45.661284739 +0100
++++ b/0001-firebird-riscv-support.patch	2018-03-27 21:45:45.246470426 +0200
+@@ -0,0 +1,51 @@
++diff --git a/configure.ac b/configure.ac
++index ee114415b6..235dc373d4 100644
++--- a/configure.in
+++++ b/configure.in
++@@ -249,6 +249,18 @@ dnl CPU_TYPE=ppc64
++     SHRLIB_EXT=so
++     ;;
++ 
+++  riscv64*-*-linux*)
+++    MAKEFILE_PREFIX=linux_riscv64
+++    INSTALL_PREFIX=linux
+++    PLATFORM=LINUX
+++    AC_DEFINE(LINUX, 1, [Define this if OS is Linux])
+++    EDITLINE_FLG=Y
+++    SHRLIB_EXT=so
+++    STD_EDITLINE=true
+++    STD_ICU=true
+++    libdir=/usr/lib64
+++    ;;
+++
++   powerpc64le-*-linux*)
++     MAKEFILE_PREFIX=linux_powerpc64el
++     INSTALL_PREFIX=linux
++diff --git a/src/jrd/common.h b/src/jrd/common.h
++index 9f2c8c067f..7d67bf5845 100644
++--- a/src/jrd/common.h
+++++ b/src/jrd/common.h
++@@ -139,6 +139,10 @@
++ #define IMPLEMENTATION  isc_info_db_impl_linux_arm	// 75
++ #endif /* ARM */
++ 
+++#ifdef __riscv
+++#define IMPLEMENTATION  isc_info_db_impl_linux_riscv64 // 86
+++#endif /* __riscv */
+++
++ #ifdef sparc
++ #define IMPLEMENTATION  isc_info_db_impl_linux_sparc /* 65  */
++ #define RISC_ALIGNMENT
++diff --git a/src/jrd/inf_pub.h b/src/jrd/inf_pub.h
++index a3513f98be..df61e9c498 100644
++--- a/src/jrd/inf_pub.h
+++++ b/src/jrd/inf_pub.h
++@@ -256,6 +256,8 @@ enum  info_db_implementations
++ 	isc_info_db_impl_linux_arm64 = 84,
++ 	isc_info_db_impl_linux_ppc64el = 85,
++ 
+++	isc_info_db_impl_linux_riscv64 = 86,
+++
++ 	isc_info_db_impl_last_value   // Leave this LAST!
++ };
++ 

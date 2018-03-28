@@ -94,8 +94,27 @@ while [ -s "$_deptree" ]; do
   for _dep in $_builddeps $_rundeps; do
     _realdep=""
     make_realdep "$_dep"
+    if [ -z "$_realdep" ]; then
+      if [ "x$KEEP_GOING" == "xyes" ]; then
+        notify -c error "$_pkgname: failed to translate dependency string '$_dep'"
+        _needs_postpone=yes
+        break
+      else
+        die "$_pkgname: failed to translate dependency string '$_dep'"
+      fi
+    fi
 
-    [ -n "$_realdep" ] || die "failed to translate dependency string '$_dep'"
+    case $_realdep in
+      gcc-ada|gcc-go|gdb|valgrind|lib32*)
+        if [ "x$KEEP_GOING" == "xyes" ]; then
+          notify -c error "$_pkgname: known bad package pulled in : '$_realdep'"
+          _needs_postpone=yes
+          break
+        else
+          die "$_pkgname: known bad package pulled in : '$_realdep'"
+        fi ;;
+    esac
+
     if ! grep -q "^$_realdep :" "$_deptree".FULL; then
       echo "$_realdep : [ ] # $_pkgname" >> "$_deptree".FULL
       echo "$_realdep : [ ] # $_pkgname" >> "$_deptree"
@@ -103,6 +122,14 @@ while [ -s "$_deptree" ]; do
       sed -i "/#.* $_pkgname\(\$\|[ ,]\)/! s/^$_realdep : \[.*/&, $_pkgname/" "$_deptree"{,.FULL}
     fi
   done
+
+  # bad package was pulled in, postpone
+  if [ "x$_needs_postpone" == "xyes" ]; then
+    sed -i "s/^$_pkgname : \[/& FIXME/" "$_deptree"
+    popd >/dev/null
+    continue
+  fi
+
   # postpone build on missing build-time deps
   for _dep in $_builddeps; do
     _realdep=""
@@ -137,17 +164,27 @@ while [ -s "$_deptree" ]; do
     # clean staging
     rm -f "$_pkgdest"/staging/*
 
+    # clean package cache
+    rm -rfv /var/cache/pacman/pkg/*
+    rm -rfv /var/cache/pacman/pkg-$CARCH/*
     # build the package
-    "$_builddir"/libremakepkg-$CARCH.sh -n $CHOST-stage4 || failed_build
+    _build_failed=no
+    "$_builddir"/libremakepkg-$CARCH.sh -n $CHOST-stage4 || failed_build $_pkgbase
+
+    # if we continued after a failed build, mark the entry in the deptree and continue
+    if [ "x$_build_failed" == "xyes" ]; then
+      sed -i "s/^$_pkgname : \[/& FIXME/" "$_deptree"
+      popd >/dev/null
+      continue
+    fi
 
     # release the package
     _pkgrepo=$(cat .REPO)
     for f in "$_pkgdest"/staging/*; do
-      ln -s ../../../pool/$(basename "$f") "$_pkgdest"/$_pkgrepo/os/$CARCH/$(basename "$f")
+      ln -fs ../../../pool/$(basename "$f") "$_pkgdest"/$_pkgrepo/os/$CARCH/$(basename "$f")
       mv $f "$_pkgdest"/pool/
     done
 
-    rm -rf /var/cache/pacman/pkg-$CARCH/*
     rm -rf "$_pkgdest"/$_pkgrepo/os/$CARCH/$_pkgrepo.{db,files}*
     repo-add -q -R "$_pkgdest"/$_pkgrepo/os/$CARCH/{$_pkgrepo.db.tar.gz,*.pkg.tar.xz}
 
@@ -171,9 +208,9 @@ while [ -s "$_deptree" ]; do
   # remove pkg from deptree
   sed -i "/^$_pkgname :/d; s/ /  /g; s/ $_pkgname / /g; s/  */ /g" "$_deptree"
 
-  full=$(cat "$_deptree".FULL | wc -l)
-  curr=$(expr $full - $(cat "$_deptree" | wc -l))
-  notify -c success -u low "*$curr/$full* $_pkgname"
+  # full=$(cat "$_deptree".FULL | wc -l)
+  # curr=$(expr $full - $(cat "$_deptree" | wc -l))
+  # notify -c success -u low "*$curr/$full* $_pkgname"
 
   popd >/dev/null
 done

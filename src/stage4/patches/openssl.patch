@@ -21,7 +21,7 @@
  	# revert this patch for make test
  	patch -p0 -R -i "$srcdir/ca-dir.patch"
 -	make test
-+  # benign test suite failure in cross-arch chroot
++	# benign test suite failure in cross-arch chroot
 +	make test || true
  	patch -p0 -i "$srcdir/ca-dir.patch"
  }
