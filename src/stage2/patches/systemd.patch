@@ -1,14 +1,24 @@
---- a/PKGBUILD	2018-03-05 11:20:19.665799440 +0100
-+++ b/PKGBUILD	2018-03-05 11:20:19.664799432 +0100
-@@ -26,7 +26,6 @@ makedepends=('acl' 'cryptsetup' 'docbook
+--- a/PKGBUILD	2018-03-29 08:40:33.725839233 +0200
++++ b/PKGBUILD	2018-03-29 08:47:05.303802120 +0200
+@@ -24,7 +24,7 @@ makedepends=('acl' 'cryptsetup' 'docbook
               'meson' 'libseccomp' 'pcre2')
  makedepends_i686=('gnu-efi-libs')
  makedepends_x86_64=('gnu-efi-libs')
 -options=('strip')
- validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4')  # Lennart Poettering <lennart@poettering.net>
- source=('git://github.com/systemd/systemd-stable.git'
-         'git://github.com/systemd/systemd.git' # pull in for tags, backports & reverts
-@@ -146,10 +145,30 @@ build() {
++depends=('libutil-linux' 'pcre2')
+ validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
+               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
+ source=('git+https://github.com/systemd/systemd-stable'
+@@ -85,6 +85,8 @@ sha512sums=('SKIP'
+ _backports=(
+   # core: do not free heap-allocated strings (#8391) (FS#57741)
+   '5cbaad2f6795088db56063d20695c6444595822f'
++  # basic/macros: rename noreturn into _noreturn_ (#8456)
++  '848e863acc51ecfb0f3955c498874588201d9130'
+ )
+ 
+ _reverts=(
+@@ -163,10 +165,30 @@ build() {
      CXXFLAGS+=" -fno-lto"
    fi
  
@@ -39,7 +49,7 @@
  
      -Ddbuspolicydir=/usr/share/dbus-1/system.d
      -Ddefault-dnssec=no
-@@ -166,7 +185,7 @@ build() {
+@@ -183,7 +205,7 @@ build() {
      meson_options+=(-Dgnuefi=true)
    fi
  
@@ -48,7 +58,7 @@
  
    ninja -C build
  
-@@ -181,28 +202,21 @@ build() {
+@@ -198,28 +220,21 @@ build() {
    mv -T "$srcdir/dest"/{systemd,libsystemd}/usr/include/systemd
    mv -T "$srcdir/dest"/{systemd,libsystemd}/usr/lib/pkgconfig/libsystemd.pc
    mv "$srcdir/dest"/systemd/usr/lib/libsystemd.so*      -t "$srcdir/dest"/libsystemd/usr/lib/
@@ -70,20 +80,20 @@
    done
  
    install -dm755 "$srcdir/dest/systemd-sysvcompat"/usr/share/man/man8
--  mv "$srcdir/dest/systemd"/usr/share/man/man8/{telinit,halt,reboot,poweroff,runlevel,shutdown}.8 \
+-  mv "$srcdir/dest/systemd"/usr/share/man/man8/{halt,poweroff,reboot,runlevel,shutdown,telinit}.8 \
 -     -t "$srcdir/dest/systemd-sysvcompat"/usr/share/man/man8
  
 -  rmdir "$srcdir/dest"/systemd/usr/{share/man/man3,lib/pkgconfig,include}
-+  rmdir "$srcdir/dest"/systemd/usr/{share/man/man3,lib/pkgconfig,include} || true
++  rm -rf "$srcdir/dest"/systemd/usr/{share/man/man3,lib/pkgconfig,include}
  }
  
- package_systemd() {
-@@ -267,7 +281,7 @@ package_systemd() {
-   chmod 0750     "$pkgdir"/usr/share/polkit-1/rules.d
+ check() {
+@@ -261,7 +276,7 @@ package_systemd() {
+   rm -rv "$pkgdir"/etc/systemd/system/*
  
    # we'll create this on installation
--  rmdir "$pkgdir/var/log/journal/remote"
-+  rmdir "$pkgdir/var/log/journal/remote" || true
+-  rmdir "$pkgdir"/var/log/journal/remote
++  rm -rf "$pkgdir"/var/log/journal/remote
  
-   # ship default policy to leave services disabled
-   echo 'disable *' >"$pkgdir"/usr/lib/systemd/system-preset/99-default.preset
+   # executable (symlinks) shipped with systemd-sysvcompat
+   rm "$pkgdir"/usr/bin/{halt,init,poweroff,reboot,runlevel,shutdown,telinit}

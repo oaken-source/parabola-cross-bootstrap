@@ -18,45 +18,67 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -euo pipefail
-
-# output formatting
-export BO=$(tput bold)
-export NO=$(tput sgr0)
-export RE=$(tput setf 4)
-export GR=$(tput setf 2)
-export WH=$(tput setf 7)
+# error codes
+export ERROR_UNSPECIFIED=1
+export ERROR_INVOCATION=2
+export ERROR_MISSING=3
+export ERROR_BUILDFAIL=4
+export ERROR_KEYFAIL=5
 
 # messaging functions
 notify() {
   # useful if running notify_telegram
-  local recipient=-211578786
+  local recipient=260151125
+  #local recipient=-211578786
   if type -p notify-send >/dev/null; then
-    machinectl -q shell --uid=$SUDO_USER .host \
-      $(which notify-send) -h string:recipient:$recipient "$@" >/dev/null
+    machinectl -q shell --uid="$SUDO_USER" .host \
+      "$(which notify-send)" -h string:recipient:$recipient "$@" >/dev/null
   fi
 }
 
-die() {
-  echo "$BO$RE==> ERROR:$WH $*$NO" 1>&2
-  notify -c error *Error:* "$(caller): $*"
-  trap - ERR
-  exit 1;
-}
-
 msg() {
-  echo "$BO$GR==>$WH $*$NO";
+  local OPTIND o n='' d=()
+  while getopts "d:n" o; do
+    case "$o" in
+      n) n=yes ;;
+      d) d=(-h string:document:"$OPTARG") ;;
+      *) die -e "$ERROR_INVOCATION" "Usage: ${FUNCNAME[0]} [-n] [-d file] msg ..." ;;
+    esac
+  done
+  shift $((OPTIND-1))
+
+  [ "x$n" == "xyes" ] && notify "${d[@]}" "$*"
+  echo "$(tput bold)$(tput setf 2)==>$(tput setf 7) $*$(tput sgr0)";
 }
 
-trap "die unknown error" ERR
+error() {
+  local OPTIND o n='' d=()
+  while getopts "d:n" o; do
+    case "$o" in
+      n) n=yes ;;
+      d) d=(-h string:document:"$OPTARG") ;;
+      *) die -e "$ERROR_INVOCATION" "Usage: ${FUNCNAME[0]} [-n] [-d file] msg ..." ;;
+    esac
+  done
+  shift $((OPTIND-1))
 
-# host system check helpers
-check_exe() {
-  echo -n "checking for $1 ... "
-  type -p $1 >/dev/null && echo yes || (echo no && die "missing ${2:-$1} in \$PATH")
+  [ "x$n" == "xyes" ] && notify -c error "${d[@]}" "$*"
+  echo "$(tput bold)$(tput setf 4)==> ERROR:$(tput setf 7) $*$(tput sgr0)" 1>&2
 }
 
-check_file() {
-  echo -n "checking for $1 ... "
-  [ -f "$1" ] && echo yes || (echo no && die "missing ${2:-$1} in filesystem")
+die() {
+  local OPTIND o e="$ERROR_UNSPECIFIED" d=()
+  while getopts "e:d:" o; do
+    case "$o" in
+      e) e="$OPTARG" ;;
+      d) d=(-d "$OPTARG") ;;
+      *) die -e "$ERROR_INVOCATION" "Usage: ${FUNCNAME[0]} [-e status] [-d file] msg ..." ;;
+    esac
+  done
+  shift $((OPTIND-1))
+
+  error -n "${d[@]}" "$*"
+  trap - ERR
+  exit "$e"
 }
+trap 'die "unknown error"' ERR

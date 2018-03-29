@@ -8,8 +8,8 @@
 +options=('debug')
  validpgpkeys=('B0C64D14301CC6EFAEDF60E4E4B71D5EEC39C284')  # Karel Zak
  source=("https://www.kernel.org/pub/linux/utils/util-linux/v$_pkgmajor/$pkgbase-$pkgver.tar."{xz,sign}
-         pam-{login,common,su}
-@@ -35,6 +35,8 @@ build() {
+         '0001-fstrim-cleanup-uncludes.patch'
+@@ -46,6 +46,8 @@ build() {
    cd "$pkgbase-$pkgver"
  
    ./configure --prefix=/usr \
@@ -18,7 +18,7 @@
                --libdir=/usr/lib \
                --bindir=/usr/bin \
                --localstatedir=/run \
-@@ -45,7 +47,7 @@ build() {
+@@ -56,7 +58,7 @@ build() {
                --enable-chfn-chsh \
                --enable-write \
                --enable-mesg \
@@ -27,7 +27,7 @@
  
    make
  }
-@@ -78,7 +80,6 @@ package_util-linux() {
+@@ -89,7 +91,6 @@ package_util-linux() {
    install -m644 "$srcdir/pam-su" "$pkgdir/etc/pam.d/su-l"
  
    # TODO(dreisner): offer this upstream?
@@ -35,3 +35,11 @@
  
    # adjust for usrmove
    # TODO(dreisner): fix configure.ac upstream so that this isn't needed
+@@ -115,6 +116,7 @@ package_util-linux() {
+ 
+ package_libutil-linux() {
+   pkgdesc="util-linux runtime libraries"
++  depends=(pam shadow coreutils libcap-ng)
+   provides=('libblkid.so' 'libfdisk.so' 'libmount.so' 'libsmartcols.so' 'libuuid.so')
+ 
+   make -C "$pkgbase-$pkgver" DESTDIR="$pkgdir" install-usrlib_execLTLIBRARIES

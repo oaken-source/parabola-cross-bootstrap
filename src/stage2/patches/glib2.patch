@@ -6,12 +6,12 @@
  pkgbase=glib2
 -pkgname=(glib2 glib2-docs)
 +pkgname=(glib2)
- pkgver=2.55.1+240+g5d93dd63e
+ pkgver=2.56.0+7+g66948ae23
  pkgrel=1
  pkgdesc="Low level core library"
-@@ -40,13 +40,18 @@ prepare() {
+@@ -43,13 +43,18 @@ build() {
+   check_option debug n && debug=yes
  
- build() {
    cd glib
 +  cat > config.cache << EOF
 +glib_cv_stack_grows=no
@@ -24,12 +24,12 @@
      --libdir=/usr/lib \
      --sysconfdir=/etc \
      --with-pcre=system \
-     --enable-debug=yes \
+     --enable-debug=$debug \
 -    --enable-gtk-doc \
      --disable-fam
    sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
    make
-@@ -60,7 +65,6 @@ check() {
+@@ -63,7 +68,6 @@ check() {
  package_glib2() {
    cd glib
    make DESTDIR="$pkgdir" install

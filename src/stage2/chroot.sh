@@ -18,55 +18,61 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-# target platform
-export CARCH=riscv64
-export CHOST=riscv64-unknown-linux-gnu
-export LINUX_ARCH=riscv
-export GCC_MARCH=rv64gc
-export GCC_MABI=lp64d
-#export MULTILIB=enable
-#export GCC32_MARCH=rv32gc
-#export GCC32_MABI=ilp32d
-#export CARCH32=riscv32
-#export CHOST32=riscv32-pc-linux-gnu
+check_chroot() {
+  echo -n "checking for functional $CARCH skeleton chroot ... "
 
-# common directories
-startdir="$(pwd)"
-export TOPBUILDDIR="$startdir"/build
-export TOPSRCDIR="$startdir"/src
-export SRCDEST="$TOPBUILDDIR"/sources
-mkdir -p "$TOPBUILDDIR" "$SRCDEST"
-chown "$SUDO_USER" "$TOPBUILDDIR"
+  local pacman_works=yes
+  pacman --config "$CHROOTDIR"/etc/pacman.conf -r "$CHROOTDIR" -Syyu &>/dev/null || pacman_works=no
+  echo $pacman_works
 
-# options
-export KEEP_GOING=${KEEP_GOING:-no}
-export REGEN_CONFIG_FRAGMENTS=${REGEN_CONFIG_FRAGMENTS:-yes}
+  [ "x$pacman_works" == "xyes" ] || return "$ERROR_MISSING"
+}
 
-# shellcheck source=src/shared/common.sh
-. "$TOPSRCDIR"/shared/common.sh
+build_chroot() {
+  # create directories
+  rm -rf "$CHROOTDIR"
+  mkdir -pv "$CHROOTDIR"/etc/pacman.d/{gnupg,hooks} \
+            "$CHROOTDIR"/var/{lib/pacman,cache/pacman/pkg,log} \
+    | sed "s#$CHROOTDIR#\$CHROOTDIR#"
 
-# sanity checks
-if [ "$(id -u)" -ne 0 ]; then
-  die -e "$ERROR_INVOCATION" "must be root"
-fi
-if [ -z "${SUDO_USER:-}" ]; then
-  die -e "$ERROR_INVOCATION" "SUDO_USER must be set in environment"
-fi
+  # create sane pacman config
+  cat > "$CHROOTDIR"/etc/pacman.conf << EOF
+[options]
+RootDir = $CHROOTDIR
+DBPath = $CHROOTDIR/var/cache/pacman/
+CacheDir = $CHROOTDIR/var/cache/pacman/pkg/
+LogFile = $CHROOTDIR/var/log/pacman.log
+GPGDir = $CHROOTDIR/etc/pacman.d/gnupg
+HookDir = $CHROOTDIR/etc/pacman.d/hooks
+Architecture = $CARCH
 
-# import stages
-# shellcheck source=src/stage1/stage1.sh
-. "$TOPSRCDIR"/stage1/stage1.sh
-# shellcheck source=src/stage2/stage2.sh
-. "$TOPSRCDIR"/stage2/stage2.sh
-# shellcheck source=src/stage3/stage3.sh
-. "$TOPSRCDIR"/stage3/stage3.sh
-# shellcheck source=src/stage4/stage4.sh
-#. "$TOPSRCDIR"/stage4/stage4.sh
+[cross]
+SigLevel = Never
+Server = file://${PKGDEST%/$CARCH}/\$arch
+EOF
 
-# run stages
-stage1 || die -e "$ERROR_BUILDFAIL" "Stage 1 failed. Exiting..."
-stage2 || die -e "$ERROR_BUILDFAIL" "Stage 2 failed. Exiting..."
-stage3 || die -e "$ERROR_BUILDFAIL" "Stage 3 failed. Exiting..."
-#stage4
+  # copy toolchain sysroot to chroot
+  cp -ar "$SYSROOT"/usr "$CHROOTDIR"/
 
-msg -n "all done."
+  # final sanity check
+  check_chroot || return
+}
+
+umount_chrootdir() {
+  umount "$SYSROOT"/usr
+
+  trap - INT TERM EXIT
+}
+
+mount_chrootdir() {
+  if mount | grep -q "$SYSROOT/usr"; then umount_chrootdir; fi
+  mount -o bind "$CHROOTDIR"/usr "$SYSROOT"/usr
+
+  trap 'umount_chrootdir' INT TERM EXIT
+}
+
+prepare_chroot() {
+  check_chroot || build_chroot || return
+
+  mount_chrootdir
+}

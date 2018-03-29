@@ -1,5 +1,14 @@
 --- a/PKGBUILD	2018-02-21 21:02:19.655165323 +0100
 +++ b/PKGBUILD	2018-02-21 21:03:34.912657502 +0100
+@@ -10,7 +10,7 @@ arch=(x86_64)
+ license=('GPL')
+ url='https://gitlab.com/cryptsetup/cryptsetup/'
+ groups=('base')
+-depends=('device-mapper' 'libgcrypt' 'popt' 'libutil-linux' 'json-c' 'argon2')
++depends=('device-mapper' 'libgcrypt' 'popt' 'libutil-linux' 'json-c' 'argon2' 'fakeroot')
+ makedepends=('util-linux')
+ options=('!emptydirs')
+ validpgpkeys=('2A2918243FDE46648D0686F9D9B0577BD93E98FC') # Milan Broz <gmazyland@gmail.com>
 @@ -28,6 +28,7 @@ build() {
    cd "${srcdir}"/$pkgname-${pkgver}
  

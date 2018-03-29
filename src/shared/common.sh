@@ -18,90 +18,75 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -euo pipefail
+# shellcheck source=src/shared/feedback.sh
+. "$TOPSRCDIR"/shared/feedback.sh
+# shellcheck source=src/shared/checks.sh
+. "$TOPSRCDIR"/shared/checks.sh
+# shellcheck source=src/shared/srcinfo.sh
+. "$TOPSRCDIR"/shared/srcinfo.sh
+# shellcheck source=src/shared/pacman.sh
+. "$TOPSRCDIR"/shared/pacman.sh
+# shellcheck source=src/shared/upstream.sh
+. "$TOPSRCDIR"/shared/upstream.sh
+# shellcheck source=src/shared/deptree.sh
+. "$TOPSRCDIR"/shared/deptree.sh
 
 retry() {
-  for i in $(seq $(expr $1 - 1)); do
-    "${@:3}" && return 0 || sleep $2;
+  local OPTIND o n=5 s=60
+  while getopts "n:s:" o; do
+    case "$o" in
+      n) n="$OPTARG" ;;
+      s) s="$OPTARG" ;;
+      *) die -e $ERROR_INVOCATION "Usage: ${FUNCNAME[0]} [-n tries] [-s delay] cmd ..." ;;
+    esac
   done
-  "${@:3}" || return;
-}
+  shift $((OPTIND-1))
 
-import_keys() {
-  local keys="$(source ${1:-PKGBUILD} && echo "${validpgpkeys[@]}")"
-  if [ -n "$keys" ]; then
-    local key
-    for key in $keys; do
-      echo -n "checking for key $key ... "
-      sudo -u $SUDO_USER gpg --list-keys $key &>/dev/null && _have_key=yes || _have_key=no
-      echo $_have_key
-      if [ "x$_have_key" == "xno" ]; then
-        retry 5 60 sudo -u $SUDO_USER gpg --recv-keys $key \
-          || die "failed to import key $key"
-      fi
-    done
-  fi
-}
-
-_fetch_pkgfiles_from() {
-  curl -sL $url | grep -iq 'not found' && return 1
-  local src=$(curl -sL $url | grep -i 'source files' | cut -d'"' -f2 | sed 's#/tree/#/plain/#')
-  for link in $(curl -sL $src | grep '^  <li><a href' | cut -d"'" -f2 \
-      | sed "s#^#$(echo $src | awk -F/ '{print $3}')#"); do
-    wget -q $link -O $(basename ${link%\?*});
+  for _ in $(seq "$((n - 1))"); do
+    "$@" && return 0
+    sleep "$s"
   done
-  [ -f PKGBUILD ] || return 1
-}
-
-fetch_pkgfiles() {
-  # acquire the pkgbuild and auxiliary files
-  local url=https://www.parabola.nu/packages/libre/x86_64/$1/
-  _fetch_pkgfiles_from $url && echo "libre" > .REPO && return
-
-  local repo
-  for repo in core extra community; do
-    url=https://www.archlinux.org/packages/$repo/x86_64/$1/
-    _fetch_pkgfiles_from $url && echo "$repo" > .REPO && return
-  done
-  die "$1: failed to fetch pkgfiles"
+  "$@" || return
 }
 
 prepare_makepkgdir() {
-  rm -rf "$_makepkgdir"/$_pkgname
-  mkdir -p "$_makepkgdir"/$_pkgname
-  pushd "$_makepkgdir"/$_pkgname >/dev/null
-  chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
+  rm -rf "$1"
+  mkdir -p "$1"
+  chown -R "$SUDO_USER" "$1"
+
+  pushd "$1" >/dev/null || return 1
 }
 
-failed_build() {
-  _log=$(find "$_logdest" -type f -iname "$1-*" -printf "%T@ %p\n" \
-      | sort -n | tail -n1 | cut -d' ' -f2-)
-  set +o pipefail
-  _phase=""
-  [ -z "$_log" ] || _phase=$(cat $_log | grep '==>.*occurred in' \
-      | awk '{print $7}' | sed 's/().*//')
-  set -o pipefail
-  if [ -n "${_phase:-}" ]; then
-    notify -c error "$_pkgname: error in $_phase()" -h string:document:"$_log"
-  else
-    notify -c error "$_pkgname: error in makepkg"
-  fi
-  [ "x$KEEP_GOING" == "xyes" ] || die "error building $_pkgname"
-  _build_failed=yes
+find_lastlog() {
+  local log
+  # shellcheck disable=SC2010
+  log=$(ls -t "$1" | grep -P "^$2(-[^-]*){3}-(pkgver|prepare|build|package)" | head -n1)
+  [ -n "$log" ] && echo "$log"
 }
 
-make_realdep() {
-  local dep
-
-  dep="$1"
-  _realdep=$(pacman --noconfirm -Sddw "$dep" \
-    | grep '^Packages' | awk '{print $3}')
-  [ -n "$_realdep" ] && _realdep="${_realdep%-*-*}" && return 0
-
-  dep="$(echo "$dep" | sed 's/[<>=].*//')"
-  _realdep=$(pacman --noconfirm -Sddw "$dep" \
-    | grep '^Packages' | awk '{print $3}')
-  [ -n "$_realdep" ] && _realdep="${_realdep%-*-*}" && return 0
-
-  return 0
+binfmt_enable() {
+  echo 1 > /proc/sys/fs/binfmt_misc/status
 }
+
+binfmt_disable() {
+  echo 0 > /proc/sys/fs/binfmt_misc/status
+}
+
+#failed_build() {
+#  # FIXME
+#  _log=$(find "$_logdest" -type f -iname "$1-*" -printf "%T@ %p\n" \
+#      | sort -n | tail -n1 | cut -d' ' -f2-)
+#  set +o pipefail
+#  _phase=""
+#  [ -z "$_log" ] || _phase=$(cat $_log | grep '==>.*occurred in' \
+#      | awk '{print $7}' | sed 's/().*//')
+#  set -o pipefail
+#  if [ -n "${_phase:-}" ]; then
+#    notify -c error "$_pkgname: error in $_phase()" -h string:document:"$_log"
+#  else
+#    notify -c error "$_pkgname: error in makepkg"
+#  fi
+#  [ "x$KEEP_GOING" == "xyes" ] || die "error building $_pkgname"
+#  _build_failed=yes
+#}
+

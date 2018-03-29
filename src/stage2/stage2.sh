@@ -18,163 +18,204 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -euo pipefail
+# shellcheck source=src/stage2/makepkg.sh
+. "$TOPSRCDIR"/stage2/makepkg.sh
+# shellcheck source=src/stage2/chroot.sh
+. "$TOPSRCDIR"/stage2/chroot.sh
 
-msg "Entering Stage 2"
-notify "*Bootstrap Entering Stage 2*"
+build_pkg_any() {
+  local dep
+  for dep in $(pkgdeps "$pkgname"); do
+    deptree_check_depends "$pkgname" "$dep" || return
+  done
+  [ "x$(deptree_next)" != "x$pkgname" ] && return
 
-# set a bunch of convenience variables
-_builddir="$topbuilddir"/stage2
-_srcdir="$topsrcdir"/stage2
-_chrootdir="$_builddir"/$CARCH-root
-_makepkgdir="$_builddir"/$CARCH-makepkg
-_deptree="$_builddir"/DEPTREE
-_sysroot="$($CHOST-gcc --print-sysroot)"
-_buildhost="$(gcc -dumpmachine)"
-_groups="base-devel"
-_pkgdest="$_builddir"/packages/$CARCH
-_logdest="$_builddir"/makepkglogs
+  check_pkgfile "$PKGDEST" "$pkgname" && return
 
-# check for required programs
-check_exe awk
-check_exe bsdtar
-check_exe git
-check_exe pacman
-check_exe sed
-check_exe tar
+  pacman -Sddw --noconfirm --cachedir "$PKGDEST" "$pkgname" || return
+}
 
-# required for dbus
-check_file /usr/share/aclocal/ax_append_flag.m4
+build_pkg_ca-certificates-mozilla() {
+  # repackage ca-certificates-mozilla to avoid building nss
+  local dep
+  for dep in $(pkgdeps "$pkgname"); do
+    deptree_check_depends "$pkgname" "$dep" || return
+  done
+  [ "x$(deptree_next)" != "x$pkgname" ] && return
 
-# make sure that binfmt is *disabled* for stage2 build
-echo 0 > /proc/sys/fs/binfmt_misc/status
+  check_pkgfile "$PKGDEST" "$pkgname" && return
 
-# prepare for the build
-. "$_srcdir"/prepare_makepkg.sh
-. "$_srcdir"/prepare_chroot.sh
-. "$_srcdir"/prepare_deptree.sh
-
-msg "starting $CARCH cross-build"
-
-# keep building packages until the deptree is empty
-while [ -s "$_deptree" ]; do
-  # grab one without unfulfilled dependencies
-  _pkgname=$(grep '\[ *\]' "$_deptree" | head -n1 | awk '{print $1}') || true
-  [ -n "$_pkgname" ] || die "could not resolve dependencies. exiting."
-
-  _pkgarch=$(pacman -Si $_pkgname | grep '^Architecture' | awk '{print $3}')
-
-  # set arch to $CARCH, unless it is any
-  [ "x$_pkgarch" == "xany" ] || _pkgarch=$CARCH
-
-  msg "makepkg: $_pkgname"
-  msg "  remaining packages: $(cat "$_deptree" | wc -l)"
-
-  echo -n "checking for built $_pkgname package ... "
-  pacman --config "$_chrootdir"/etc/pacman.conf -r "$_chrootdir" -Syyi $_pkgname &>/dev/null \
-    && _have_pkg=yes || _have_pkg=no
-  echo $_have_pkg
-
-  if [ "x$_have_pkg" == "xno" ]; then
-    prepare_makepkgdir
-
-    _pkgdir="$_makepkgdir"/$_pkgname/pkg/$_pkgname
-
-    if [ "x$_pkgarch" == "xany" ]; then
-      # repackage arch=(any) packages
-      _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
-      pacman -Sddw --noconfirm --cachedir "$_pkgdest" $_pkgname
-    elif [ "x$_pkgname" == "xca-certificates-mozilla" ]; then
-      # repackage ca-certificates-mozilla to avoid building nss
-      _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
-      pacman -Sw --noconfirm --cachedir . $_pkgname
-      mkdir tmp && bsdtar -C tmp -xf $_pkgname-$_pkgver-*.pkg.tar.xz
-      mkdir -p "$_pkgdir"/usr/share/
-      cp -rv tmp/usr/share/ca-certificates/ "$_pkgdir"/usr/share/
-      cat > "$_pkgdir"/.PKGINFO << EOF
-pkgname = $_pkgname
-pkgver = $_pkgver
+  local pkgver pkgdir="$MAKEPKGDIR"/$pkgname/pkg/$pkgname
+  pkgver=$(pkgver "$pkgname") || return
+  pacman -Sddw --noconfirm --cachedir . "$pkgname" || return
+  mkdir tmp && bsdtar -C tmp -xf "$pkgname"-*.pkg.tar.xz || return
+  mkdir -p "$pkgdir"/usr/share/
+  cp -rv tmp/usr/share/ca-certificates/ "$pkgdir"/usr/share/
+  cat > "$pkgdir"/.PKGINFO << EOF
+pkgname = $pkgname
+pkgver = $pkgver
 pkgdesc = Mozilla's set of trusted CA certificates
 url = https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS
 builddate = $(date '+%s')
 size = 0
-arch = $_pkgarch
+arch = $pkgarch
 EOF
-      cd "$_pkgdir"
-      env LANG=C bsdtar -czf .MTREE \
-        --format=mtree \
-        --options='!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link' \
-        .PKGINFO *
-      env LANG=C bsdtar -cf - .MTREE .PKGINFO * | xz -c -z - > \
-        "$_pkgdest"/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz
-    else
-      fetch_pkgfiles $_pkgname
-      import_keys
+  cd "$pkgdir" || return
+  env LANG=C bsdtar -czf .MTREE \
+    --format=mtree \
+    --options='!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link' \
+    .PKGINFO ./* || return
+  env LANG=C bsdtar -cf - .MTREE .PKGINFO ./* | xz -c -z - > \
+    "$PKGDEST/$pkgname-$pkgver-$pkgarch.pkg.tar.xz" || return
+}
 
-      # patch for cross-compiling
-      [ -f "$_srcdir"/patches/$_pkgname.patch ] || die "missing package patch"
-      cp PKGBUILD{,.old}
-      patch -Np1 -i "$_srcdir"/patches/$_pkgname.patch || die "patch does not apply"
-      cp PKGBUILD{,.in}
+build_stage2_pkg() {
+  package_fetch_upstream_pkgfiles "$pkgname" || return
+  import_keys || return
 
-      # substitute common variables
-      sed -i
-          "s#@CARCH@#$CARCH#g; \
-           s#@CHOST@#$CHOST#g; \
-           s#@GCC_MARCH@#$GCC_MARCH#g; \
-           s#@GCC_MABI@#$GCC_MABI#g; \
-           s#@CARCH32@#${CARCH32:-}#g; \
-           s#@CHOST32@#${CHOST32:-}#g; \
-           s#@GCC32_MARCH@#${GCC32_MARCH:-}#g; \
-           s#@GCC32_MABI@#${GCC32_MABI:-}#g; \
-           s#@BUILDHOST@#$_buildhost#g; \
-           s#@SYSROOT@#$_sysroot#g; \
-           s#@LINUX_ARCH@#$LINUX_ARCH#g; \
-           s#@MULTILIB@#${MULTILIB:-disable}#g;" \
-        PKGBUILD
+  local pkgbase
+  pkgbase=$(srcinfo_pkgbase) || return
 
-      # enable the target CARCH in arch array
-      sed -i "s/arch=([^)]*/& $CARCH/" PKGBUILD
+  # patch for cross-compiling
+  cp PKGBUILD{,.old}
+  patch -Np1 -i "$SRCDIR"/patches/"$pkgbase".patch || return
+  cp PKGBUILD{,.in}
 
-      # build the package
-      chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
-      sudo -u $SUDO_USER \
-      "$_builddir"/makepkg-$CARCH.sh -fLC --config "$_builddir"/makepkg-$CARCH.conf \
-        --nocheck --nodeps --nobuild || failed_build
+  # substitute common variables
+  sed -i \
+      "s#@CARCH@#$CARCH#g; \
+       s#@CHOST@#$CHOST#g; \
+       s#@GCC_MARCH@#$GCC_MARCH#g; \
+       s#@GCC_MABI@#$GCC_MABI#g; \
+       s#@CARCH32@#${CARCH32:-}#g; \
+       s#@CHOST32@#${CHOST32:-}#g; \
+       s#@GCC32_MARCH@#${GCC32_MARCH:-}#g; \
+       s#@GCC32_MABI@#${GCC32_MABI:-}#g; \
+       s#@BUILDHOST@#$BUILDHOST#g; \
+       s#@SYSROOT@#$SYSROOT#g; \
+       s#@LINUX_ARCH@#$LINUX_ARCH#g; \
+       s#@MULTILIB@#${MULTILIB:-disable}#g;" \
+    PKGBUILD
 
-      if [ "x${REGEN_CONFIG_FRAGMENTS:-no}" == "xyes" ]; then
-	      url="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
-	      find src -iname config.sub -print -exec curl "$url;f=config.sub;hb=HEAD" -o {} \;
-      fi
+  # enable the target CARCH in arch array
+  sed -i "s/arch=([^)]*/& $CARCH/" PKGBUILD
 
-      sudo -u $SUDO_USER \
-      "$_builddir"/makepkg-$CARCH.sh -fLC --config "$_builddir"/makepkg-$CARCH.conf \
-        --nocheck --nodeps --noprepare || failed_build
-    fi
+  # force regeneration of .SRCINFO
+  rm .SRCINFO
 
-    popd >/dev/null
+  # check built dependencies
+  local dep
+  for dep in $(srcinfo_builddeps -nm); do
+    deptree_check_depends "$pkgname" "$dep" || return
+  done
+  for dep in $(srcinfo_rundeps "$pkgname"); do
+    deptree_check_depends "$pkgname" "$dep" || return
+  done
 
-    # update pacman cache
-    rm -rf "$_chrootdir"/var/cache/pacman/pkg/*
-    rm -rf "$_pkgdest"/cross.{db,files}*
-    repo-add -q -R "$_pkgdest"/{cross.db.tar.gz,*.pkg.tar.xz}
+  # postpone build if necessary
+  [ "x$(deptree_next)" != "x$pkgname" ] && return
+
+  # don't rebuild if already exists
+  check_pkgfile "$PKGDEST" "$pkgname" && return
+
+  # build the package
+  sudo -u "$SUDO_USER" \
+  "$BUILDDIR"/makepkg-"$CARCH".sh -fLC --config "$BUILDDIR"/makepkg-"$CARCH".conf \
+    --nocheck --nodeps --nobuild --noconfirm || return
+
+  if [ "x${REGEN_CONFIG_FRAGMENTS:-no}" == "xyes" ]; then
+    url="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
+    find src -iname config.sub -print -exec curl "$url;f=config.sub;hb=HEAD" -o {} \; || return
   fi
 
-  # install in chroot
-  set +o pipefail
-  yes | pacman --noscriptlet --force --config "$_chrootdir"/etc/pacman.conf \
-    -r "$_chrootdir" -Syydd $_pkgname
-  set -o pipefail
+  sudo -u "$SUDO_USER" \
+  "$BUILDDIR"/makepkg-"$CARCH".sh -efL --config "$BUILDDIR"/makepkg-"$CARCH".conf \
+    --nocheck --nodeps --noprepare --noconfirm || return
+}
 
-  # remove pkg from deptree
-  sed -i "/^$_pkgname :/d; s/ /  /g; s/ $_pkgname / /g; s/  */ /g" "$_deptree"
+build_pkg() {
+  local pkgname="$1"
+  pkgarch=$(pkgarch "$pkgname") || return
 
-  full=$(cat "$_deptree".FULL | wc -l)
-  curr=$(expr $full - $(cat "$_deptree" | wc -l))
-  notify -c success -u low "*$curr/$full* $_pkgname"
-done
+  if [ "x$pkgarch" == "xany" ]; then
+    build_pkg_any "$1" || return
+  elif [ "x$pkgname" == "xca-certificates-mozilla" ]; then
+    build_pkg_ca-certificates-mozilla "$1" || return
+  else
+    build_stage2_pkg "$1" || return
+  fi
 
-echo "all packages built."
+  # postpone on unmet dependencies
+  [ "x$(deptree_next)" != "x$pkgname" ] && return
 
-# unmount sysroot
-umount "$_sysroot"/usr
+  # update pacman cache
+  rm -rf "$CHROOTDIR"/var/cache/pacman/pkg/*
+  rm -rf "$PKGDEST"/cross.{db,files}*
+  repo-add -q -R "$PKGDEST"/{cross.db.tar.gz,*.pkg.tar.xz}
+}
+
+stage2() {
+  msg -n "Entering Stage 2"
+
+  local sysroot
+  sysroot="$("$CHOST"-gcc --print-sysroot)"
+
+  export BUILDDIR="$TOPBUILDDIR"/stage2
+  export SRCDIR="$TOPSRCDIR"/stage2
+  export CHROOTDIR="$BUILDDIR"/$CARCH-root
+  export MAKEPKGDIR="$BUILDDIR"/$CARCH-makepkg
+  export DEPTREE="$BUILDDIR"/DEPTREE
+  export SYSROOT="$sysroot"
+  export BUILDHOST="x86_64-pc-linux-gnu"
+  export PKGDEST="$BUILDDIR"/packages/$CARCH
+  export LOGDEST="$BUILDDIR"/makepkglogs
+
+  mkdir -p "$PKGDEST" "$LOGDEST"
+  chown "$SUDO_USER" "$PKGDEST" "$LOGDEST"
+
+  binfmt_disable
+
+  prepare_makepkg || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH makepkg"
+  prepare_chroot || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH chroot"
+  prepare_deptree base-devel || die -e "$ERROR_BUILDFAIL" "failed to prepare DEPTREE"
+
+  echo "remaining pkges: $(wc -l < "$DEPTREE") / $(wc -l < "$DEPTREE".FULL)"
+  [ -s "$DEPTREE" ] || return 0
+
+  # pull in various tools required to run the scripts or build the packages
+  check_exe -r arch-meson asp awk bsdtar git gperf help2man pacman sed svn tar tclsh
+
+  while [ -s "$DEPTREE" ]; do
+    local pkgname pkgarch
+    pkgname=$(deptree_next) \
+      || die -e "$ERROR_MISSING" "could not resolve dependencies"
+
+    msg "makepkg: $pkgname"
+    msg "  remaining packages: $(wc -l < "$DEPTREE")"
+
+    prepare_makepkgdir "$MAKEPKGDIR/$pkgname" || return
+
+    build_pkg "$pkgname" 2>&1 | tee .MAKEPKGLOG
+    if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+      notify -c error "$pkgname" -h string:document:.MAKEPKGLOG
+      [ "x$KEEP_GOING" == "xyes" ] || return
+      sed -i "s/^$pkgname : \\[/& FIXME/" "$DEPTREE"
+    fi
+
+    popd >/dev/null || return
+
+    [ "x$(deptree_next)" != "x$pkgname" ] && continue
+
+    # install in chroot
+    yes | pacman --noscriptlet --force --config "$CHROOTDIR"/etc/pacman.conf \
+      -r "$CHROOTDIR" -Syydd "$pkgname" || die -e "$ERROR_BUILDFAIL" "failed to install pkg"
+
+    deptree_remove "$pkgname"
+
+    full=$(wc -l < "$DEPTREE".FULL)
+    curr=$((full - $(wc -l < "$DEPTREE")))
+    notify -c success -u low "*$curr/$full* $pkgname"
+  done
+
+  umount_chrootdir
+}

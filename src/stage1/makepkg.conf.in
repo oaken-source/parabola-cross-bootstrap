@@ -10,6 +10,12 @@ VCSCLIENTS=('bzr::bzr'
 BUILDENV=(!distcc color !ccache check !sign)
 OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !optipng !upx !debug)
 INTEGRITY_CHECK=(md5)
+CARCH="x86_64"
+CHOST="x86_64-pc-linux-gnu"
+CPPFLAGS="-D_FORTIFY_SOURCE=2"
+CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe -fstack-protector-strong  -fno-plt"
+CXXFLAGS="-march=x86-64 -mtune=generic -O2 -pipe -fstack-protector-strong  -fno-plt"
+LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
 STRIP_BINARIES="--strip-all"
 STRIP_SHARED="--strip-unneeded"
 STRIP_STATIC="--strip-debug"

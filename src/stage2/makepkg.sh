@@ -18,59 +18,50 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -euo pipefail
+check_makepkg() {
+  echo -n "checking for makepkg-$CARCH.sh ... "
 
-msg "preparing a $CARCH cross makepkg environment"
+  local have_makepkg=yes
+  [ -f "$BUILDDIR"/makepkg-"$CARCH".sh ] || have_makepkg=no
+  echo $have_makepkg
 
-echo -n "checking for makepkg-$CARCH.sh ... "
-[ -f "$_builddir"/makepkg-$CARCH.sh ] && _have_makepkg=yes || _have_makepkg=no
-echo $_have_makepkg
+  [ "x$have_makepkg" == "xyes" ] || return "$ERROR_MISSING"
+}
 
-if [ "x$_have_makepkg" == "xno" ]; then
-  rm -rf "$_makepkgdir"/makepkg-$CARCH
-  mkdir -p "$_makepkgdir"/makepkg-$CARCH
-  pushd "$_makepkgdir"/makepkg-$CARCH >/dev/null
+build_makepkg() {
+  check_exe bsdtar pacman || return
+
+  prepare_makepkgdir "$MAKEPKGDIR/makepkg-$CARCH" || return
 
   # fetch pacman package to excract makepkg
   pacman -Sw --noconfirm --cachedir . pacman
   mkdir tmp && bsdtar -C tmp -xf pacman-*.pkg.tar.xz
 
   # install makepkg
-  cp -Lv tmp/usr/bin/makepkg "$_builddir"/makepkg-$CARCH.sh
+  cp -Lv tmp/usr/bin/makepkg "$BUILDDIR"/makepkg-"$CARCH".sh
 
   # patch run_pacman in makepkg, we cannot pass the pacman root to it as parameter ATM
-  sed -i "s#\"\$PACMAN_PATH\"#& --config $_chrootdir/etc/pacman.conf -r $_chrootdir#" \
-    "$_builddir"/makepkg-$CARCH.sh
-  popd >/dev/null
-fi
+  sed -i "s#\"\$PACMAN_PATH\"#& --config $CHROOTDIR/etc/pacman.conf -r $CHROOTDIR#" \
+    "$BUILDDIR"/makepkg-"$CARCH".sh
 
-# create a sane makepkg.conf
-cat "$_srcdir"/makepkg.conf.in > "$_builddir"/makepkg-$CARCH.conf
-cat >> "$_builddir"/makepkg-$CARCH.conf << EOF
+  popd >/dev/null || return
+}
+
+prepare_makepkg() {
+  check_makepkg || build_makepkg || return
+
+  # create a sane makepkg.conf
+  cat "$SRCDIR"/makepkg.conf.in > "$BUILDDIR"/makepkg-"$CARCH".conf
+  cat >> "$BUILDDIR"/makepkg-"$CARCH".conf << EOF
 CARCH="$CARCH"
 CHOST="$CHOST"
 CFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
 CXXFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
-PKGDEST="$_pkgdest"
-LOGDEST="$_logdest"
+LOGDEST="$LOGDEST"
+PKGDEST="$PKGDEST"
+SRCDEST="$SRCDEST"
 MAKEFLAGS="-j$(($(nproc) + 1))"
 EOF
 
-_srcdest="$(source /etc/makepkg.conf && echo $SRCDEST || true)"
-[ -z "$_srcdest" ] || echo "SRCDEST=\"$_srcdest\"" >> "$_builddir"/makepkg-$CARCH.conf
-
-# create build artefact directories
-mkdir -p "$_logdest" "$_pkgdest"
-chown $SUDO_USER "$_logdest" "$_pkgdest"
-
-# initialize [cross] repo
-echo -n "checking for $CARCH [cross] repo ... "
-[ -e "$_pkgdest"/cross.db ] && _have_cross=yes || _have_cross=no
-echo $_have_cross
-
-if [ "x$_have_cross" == "xno" ]; then
-  tar -czf "$_pkgdest"/cross.db.tar.gz -T /dev/null
-  tar -czf "$_pkgdest"/cross.files.tar.gz -T /dev/null
-  ln -s cross.db.tar.gz "$_pkgdest"/cross.db
-  ln -s cross.files.tar.gz "$_pkgdest"/cross.files
-fi
+  check_repo "$PKGDEST" cross || make_repo "$PKGDEST" cross
+}

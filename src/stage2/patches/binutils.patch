@@ -1,26 +1,26 @@
---- a/PKGBUILD	2018-03-05 08:54:51.864853816 +0100
-+++ b/PKGBUILD	2018-03-05 08:54:51.864853816 +0100
+--- a/PKGBUILD	2018-03-29 08:30:40.025895502 +0200
++++ b/PKGBUILD	2018-03-29 08:58:13.640738777 +0200
 @@ -4,8 +4,8 @@
  # toolchain build order: linux-api-headers->glibc->binutils->gcc->binutils->glibc
  
  pkgname=binutils
 -pkgver=2.29.1
--pkgrel=2
+-pkgrel=3
 +pkgver=2.30
 +pkgrel=1
  pkgdesc='A set of programs to assemble and manipulate binary and object files'
  arch=(x86_64)
  url='http://www.gnu.org/software/binutils/'
-@@ -22,7 +22,7 @@ options=(staticlibs !distcc !ccache)
- source=(https://ftp.gnu.org/gnu/binutils/binutils-$pkgver.tar.xz{,.sig}
-         0001-x86-64_Dont_pass_output_bfd_to_info-callbacks-minfo.patch)
+@@ -24,7 +24,7 @@ source=(https://ftp.gnu.org/gnu/binutils
+         0001-PR22741-objcopy-segfault-on-fuzzed-COFF-object.patch
+         0001-PR22829-objcopy-strip-removes-PT_GNU_RELRO-from-lld-.patch)
  validpgpkeys=(3A24BC1E8FB409FA9F14371813FCEF89DD9E3C4F)
 -md5sums=('acc9cd826edb9954ac7cecb81c727793'
 +md5sums=('ffc476dd46c96f932875d1b2e27e929f'
           'SKIP'
-          'e4be936139ef46122cb3841881c432b2')
- 
-@@ -43,6 +43,7 @@ build() {
+          'e4be936139ef46122cb3841881c432b2'
+          '469164f3c93a0e92a697537b60c9806c'
+@@ -53,6 +53,7 @@ build() {
    cd binutils-build
  
    "$srcdir/binutils-$pkgver/configure" \
@@ -28,7 +28,7 @@
      --prefix=/usr \
      --with-lib-path=/usr/lib:/usr/local/lib \
      --with-bugurl=https://bugs.archlinux.org/ \
-@@ -56,7 +57,7 @@ build() {
+@@ -66,7 +67,7 @@ build() {
      --with-pic \
      --disable-werror \
      --disable-gdb \

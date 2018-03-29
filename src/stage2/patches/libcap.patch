@@ -1,14 +1,17 @@
 --- a/PKGBUILD	2018-02-16 19:41:56.996792407 +0100
 +++ b/PKGBUILD	2018-02-16 20:17:25.900329276 +0100
-@@ -13,16 +13,20 @@ license=('GPL2')
- depends=('glibc' 'attr')
+@@ -10,18 +10,22 @@ pkgdesc='POSIX 1003.1e capabilities'
+ arch=('i686' 'x86_64')
+ url='http://sites.google.com/site/fullycapable/'
+ license=('GPL2')
+-depends=('glibc' 'attr')
++depends=('glibc' 'attr' 'pam' 'unixodbc' 'linux-api-headers')
  makedepends=('linux-api-headers')
- validpgpkeys=('38A644698C69787344E954CE29EE848AE2CCF3F4') # Andrew G. Morgan <morgan@kernel.org>
--source=(https://kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-$pkgver.tar.{xz,sign})
--md5sums=('6666b839e5d46c2ad33fc8aa2ceb5f77' 'SKIP')
-+source=(https://kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-$pkgver.tar.{xz,sign}
+-source=(https://kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-$pkgver.tar.xz)
+-md5sums=('6666b839e5d46c2ad33fc8aa2ceb5f77')
++source=(https://kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-$pkgver.tar.xz
 +        libcap-2.25-gperf.patch)
-+md5sums=('6666b839e5d46c2ad33fc8aa2ceb5f77' 'SKIP'
++md5sums=('6666b839e5d46c2ad33fc8aa2ceb5f77'
 +         '03198e18adb059f9d666d2069ff9e9a7')
  
  prepare() {
@@ -19,8 +22,8 @@
  
  build() {
 -  make -C $pkgname-$pkgver KERNEL_HEADERS=/usr/include
-+  make -C $pkgname-$pkgver KERNEL_HEADERS=/usr/include \
-+    BUILD_CC=gcc CC=@CHOST@-gcc AR=@CHOST@-ar RANLIB=@CHOST@-ranlib
++  make -C $pkgname-$pkgver KERNEL_HEADERS=@SYSROOT@/usr/include \
++    BUILD_CC=gcc BUILD_CFLAGS="" CC=@CHOST@-gcc AR=@CHOST@-ar RANLIB=@CHOST@-ranlib
  }
  
  package() {

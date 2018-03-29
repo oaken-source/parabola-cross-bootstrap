@@ -18,43 +18,40 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -euo pipefail
+makesrcinfo() {
+  if [ ! -f .SRCINFO ] || [ .SRCINFO -ot PKGBUILD ]; then
+    (sudo -u "$SUDO_USER" makepkg --printsrcinfo) > .SRCINFO
+  fi
+}
 
-msg "preparing a $CARCH skeleton chroot"
+srcinfo_validpgpkeys() {
+  makesrcinfo
+  grep 'validpgpkeys =' .SRCINFO | awk '{print $3}'
+}
 
-echo -n "checking for $CARCH skeleton chroot ... "
-[ -e $_chrootdir ] && _have_chroot=yes || _have_chroot=no
-echo $_have_chroot
+srcinfo_pkgbase() {
+  makesrcinfo
+  grep '^pkgbase =' .SRCINFO | awk '{print $3}'
+}
 
-if [ "x$_have_chroot" == "xno" ]; then
-  # create required directories
-  mkdir -pv "$_chrootdir"/etc/pacman.d/{gnupg,hooks} \
-            "$_chrootdir"/var/{lib/pacman,cache/pacman/pkg,log} \
-    | sed "s#$_chrootdir#\$_chrootdir#"
+srcinfo_builddeps() {
+  local OPTIND o n='check\|' m='make\|'
+  while getopts "nm" o; do
+    case "$o" in
+      n) n='' ;;
+      m) m='' ;;
+      *) die -e "$ERROR_INVOCATION" "Usage: ${FUNCNAME[0]} [-n]" ;;
+    esac
+  done
+  shift $((OPTIND-1))
 
-  # copy sysroot /usr to chroot
-  cp -ar "$_sysroot"/usr "$_chrootdir"/
+  makesrcinfo
+  awk '/^pkgbase = /,/^$/{print}' < .SRCINFO \
+    | grep "	\\($m$n\\)depends =" | awk '{print $3}'
+}
 
-  # create pacman.conf
-  cat > "$_chrootdir"/etc/pacman.conf << EOF
-[options]
-RootDir = $_chrootdir
-DBPath = $_chrootdir/var/cache/pacman/
-CacheDir = $_chrootdir/var/cache/pacman/pkg/
-LogFile = $_chrootdir/var/log/pacman.log
-GPGDir = $_chrootdir/etc/pacman.d/gnupg
-HookDir = $_chrootdir/etc/pacman.d/hooks
-Architecture = $CARCH
-
-[cross]
-SigLevel = Never
-Server = file://${_pkgdest%/$CARCH}/\$arch
-EOF
-
-  # test and initialize ALPM library
-  pacman --config "$_chrootdir"/etc/pacman.conf -r "$_chrootdir" -Syyu
-fi
-
-# mount chroot /usr to sysroot
-if mount | grep -q "$_sysroot/usr"; then umount "$_sysroot"/usr; fi
-mount -o bind "$_chrootdir"/usr "$_sysroot"/usr
+srcinfo_rundeps() {
+  makesrcinfo
+  awk '/^pkgname = '"$1"'$/,/^$/{print}' < .SRCINFO \
+    | grep '	depends =' | awk '{print $3}'
+}

@@ -18,119 +18,106 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -euo pipefail
-
-msg "Entering Stage 1"
-notify "*Bootstrap Entering Stage 1*"
-
-# set a bunch of convenience variables
-_builddir="$topbuilddir"/stage1
-_srcdir="$topsrcdir"/stage1
-_pkgdest="$_builddir"/packages
-_logdest="$_builddir"/makepkglogs
-_makepkgdir="$_builddir"
-
-function check_toolchain() {
+check_cross_toolchain() {
   echo -n "checking for $CHOST binutils ... "
-  local _have_binutils
-  type -p $CHOST-ar >/dev/null && _have_binutils=yes || _have_binutils=no
-  echo $_have_binutils
-  [ "x$_have_binutils" == "xyes" ] || return 1
+  local have_binutils=yes
+  type -p "$CHOST-ar" >/dev/null || have_binutils=no
+  echo $have_binutils
+  [ "x$have_binutils" == "xyes" ] || return 1
 
   echo -n "checking for $CHOST gcc ... "
-  local _have_gcc
-  type -p $CHOST-g++ >/dev/null && _have_gcc=yes || _have_gcc=no
-  echo $_have_gcc
-  [ "x$_have_gcc" == "xyes" ] || return 1
+  local have_gcc=yes
+  type -p "$CHOST-g++" >/dev/null || have_gcc=no
+  echo $have_gcc
+  [ "x$have_gcc" == "xyes" ] || return 1
 
-  local _sysroot=$($CHOST-gcc --print-sysroot)
+  local sysroot
+  sysroot=$("$CHOST-gcc" --print-sysroot) || die "failed to produce $CHOST-gcc sysroot"
 
   echo -n "checking for $CHOST linux api headers ... "
-  local _have_headers
-  [ -e "$_sysroot"/include/linux/kernel.h ] && _have_headers=yes || _have_headers=no
-  echo $_have_headers
-  [ "x$_have_headers" == "xyes" ] || return 1
+  local have_headers=yes
+  [ -e "$sysroot"/include/linux/kernel.h ] || have_headers=no
+  echo $have_headers
+  [ "x$have_headers" == "xyes" ] || return 1
 
   echo -n "checking for $CHOST glibc ... "
-  local _have_glibc
-  [ -e "$_sysroot"/usr/lib/libc.so.6 ] && _have_glibc=yes || _have_glibc=no
-  echo $_have_glibc
-  [ "x$_have_glibc" == "xyes" ] || return 1
+  local have_glibc=yes
+  [ -e "$sysroot"/usr/lib/libc.so.6 ] || have_glibc=no
+  echo $have_glibc
+  [ "x$have_glibc" == "xyes" ] || return 1
 }
 
-# simply return if the toolchain is already there
-if check_toolchain; then return 0; fi
+stage1() {
+  msg -n "Entering Stage 1"
 
-# check for required programs in $PATH to build the toolchain
-check_exe makepkg
-check_exe pacman
-check_exe sed
-check_exe sudo
+  export BUILDDIR="$TOPBUILDDIR"/stage1
+  export SRCDIR="$TOPSRCDIR"/stage1
+  export PKGDEST="$BUILDDIR"/packages
+  export LOGDEST="$BUILDDIR"/makepkglogs
+  export MAKEPKGDIR="$BUILDDIR"
 
-# create required directories
-mkdir -p "$_logdest" "$_pkgdest"
-chown $SUDO_USER "$_logdest" "$_pkgdest"
+  check_cross_toolchain && return
 
-# create a sane makepkg.conf
-cat "$_srcdir"/makepkg.conf.in > "$_builddir"/makepkg.conf
-cat >> "$_builddir"/makepkg.conf << EOF
-CARCH="$(source /etc/makepkg.conf && echo $CARCH)"
-CHOST="$(source /etc/makepkg.conf && echo $CHOST)"
-CPPFLAGS="$(source /etc/makepkg.conf && echo $CPPFLAGS)"
-CFLAGS="$(source /etc/makepkg.conf && echo $CFLAGS)"
-CXXFLAGS="$(source /etc/makepkg.conf && echo $CXXFLAGS)"
-LDFLAGS="$(source /etc/makepkg.conf && echo $LDFLAGS)"
-LOGDEST="$_logdest"
-PKGDEST="$_pkgdest"
+  check_exe gpg makepkg pacman sed sudo || return
+
+  # create required directories
+  mkdir -p "$LOGDEST" "$PKGDEST" "$SRCDEST"
+  chown "$SUDO_USER" "$LOGDEST" "$PKGDEST" "$SRCDEST"
+
+  # create a sane makepkg.conf
+  cat "$SRCDIR"/makepkg.conf.in > "$BUILDDIR"/makepkg.conf
+  cat >> "$BUILDDIR"/makepkg.conf << EOF
+LOGDEST="$LOGDEST"
+PKGDEST="$PKGDEST"
+SRCDEST="$SRCDEST"
 MAKEFLAGS="-j$(($(nproc) + 1))"
 EOF
 
-_srcdest="$(source /etc/makepkg.conf && echo $SRCDEST || true)"
-[ -z "$_srcdest" ] || echo "SRCDEST=\"$_srcdest\"" >> "$_builddir"/makepkg.conf
+  # build and install the toolchain packages
+  for pkg in binutils linux-libre-api-headers gcc-bootstrap glibc gcc; do
+    msg "makepkg: $CHOST-$pkg"
 
-# build and install the toolchain packages
-for pkg in binutils linux-libre-api-headers gcc-bootstrap glibc gcc; do
-  _pkgname=$CHOST-$pkg
-  echo -n "checking for $_pkgname ... "
-  _pkgfile=$(find $_pkgdest -regex "^.*/$_pkgname-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$")
-  [ -n "$_pkgfile" ] && _have_pkg=yes || _have_pkg=no
-  echo $_have_pkg
+    if ! check_pkgfile "$PKGDEST" "$CHOST-$pkg"; then
+      prepare_makepkgdir "$MAKEPKGDIR/$CHOST-$pkg" || return
 
-  if [ "x$_have_pkg" == "xno" ]; then
-    msg "makepkg: $_pkgname"
-    prepare_makepkgdir
+      # produce pkgfiles
+      for f in "$SRCDIR"/toolchain-pkgbuilds/$pkg/*.in; do cp "$f" "$(basename "${f%.in}")"; done
+      sed -i "s#@CHOST@#$CHOST#g; \
+              s#@CARCH@#$CARCH#g; \
+              s#@LINUX_ARCH@#$LINUX_ARCH#g; \
+              s#@GCC_MARCH@#${GCC_MARCH:-}#g; \
+              s#@GCC_MABI@#${GCC_MABI:-}#g; \
+              s#@MULTILIB@#${MULTILIB:-disable}#g; \
+              s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#g; \
+              s#@GCC_32_MABI@#${GCC_32_MABI:-}#g; \
+              s#@CARCH32@#${CARCH32:-}#g; \
+              s#@CHOST32@#${CHOST32:-}#g" \
+        PKGBUILD
 
-    cp "$_srcdir"/toolchain-pkgbuilds/$pkg/PKGBUILD.in .
+      import_keys || return
 
-    import_keys
+      if ! sudo -u "$SUDO_USER" makepkg -LC --config "$BUILDDIR"/makepkg.conf; then
+        local log phase
+        log=$(find_lastlog "$LOGDEST" "$CHOST-$pkg")
+        if [ -z "$log" ]; then
+          error -n "$CHOST-$pkg: error in makepkg"
+        else
+          phase=$(sed 's/.*\(pkgver\|prepare\|build\|package\).*/\1/' <<< "$log")
+          error -n -d "$log" "$CHOST-$pkg: error in $phase"
+        fi
+        return "$ERROR_BUILDFAIL"
+      fi
 
-    # substitute architecture variables
-    sed -i "s#@CHOST@#$CHOST#g; \
-            s#@CARCH@#$CARCH#g; \
-            s#@LINUX_ARCH@#$LINUX_ARCH#g; \
-            s#@GCC_MARCH@#${GCC_MARCH:-}#g; \
-            s#@GCC_MABI@#${GCC_MABI:-}#g; \
-            s#@MULTILIB@#${MULTILIB:-disable}#g; \
-            s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#g; \
-            s#@GCC_32_MABI@#${GCC_32_MABI:-}#g; \
-            s#@CARCH32@#${CARCH32:-}#g; \
-            s#@CHOST32@#${CHOST32:-}#g" \
-      PKGBUILD
+      popd >/dev/null || return
+      notify -c success -u low "$CHOST-$pkg"
+    fi
 
-    # build the package
-    chown -R $SUDO_USER .
-    sudo -u $SUDO_USER makepkg -LC --config "$_builddir"/makepkg.conf || failed_build
+    # install the package
+    # shellcheck disable=SC2010
+    pkgfile=$(ls -t "$PKGDEST" | grep -P "^$CHOST-$pkg(-[^-]*){3}\\.pkg" | head -n1)
+    yes | pacman -U "$PKGDEST/$pkgfile"
+  done
 
-    popd >/dev/null
-    notify -c success -u low "$_pkgname"
-  fi
-
-  # install the package
-  set +o pipefail
-  _pkgfile=$(find $_pkgdest -regex "^.*/$_pkgname-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$" | head -n1)
-  yes | pacman -U "$_pkgfile"
-  set -o pipefail
-done
-
-# final sanity check
-check_toolchain || die "toolchain build incomplete"
+  # final sanity check
+  check_cross_toolchain || die -e "$ERROR_MISSING" "toolchain build incomplete"
+}

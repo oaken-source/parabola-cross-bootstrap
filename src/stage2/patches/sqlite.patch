@@ -1,6 +1,14 @@
 --- a/PKGBUILD	2018-02-20 14:26:45.612481607 +0100
 +++ b/PKGBUILD	2018-02-20 14:28:37.776428772 +0100
-@@ -38,7 +38,7 @@ build() {
+@@ -13,6 +13,7 @@ pkgdesc="A C library that implements an
+ arch=('x86_64')
+ license=('custom:Public Domain')
+ url="http://www.sqlite.org/"
++depends=('tcl')
+ makedepends=('tcl' 'readline' 'zlib')
+ source=(https://www.sqlite.org/2018/sqlite-src-${_srcver}.zip
+         https://www.sqlite.org/2018/sqlite-doc-${_docver}.zip
+@@ -38,7 +39,7 @@ build() {
  
    # build sqlite
    cd sqlite-src-$_srcver
@@ -9,3 +17,11 @@
  	--disable-static \
  	--disable-amalgamation \
  	--enable-fts3 \
+@@ -47,6 +48,7 @@ build() {
+ 	--enable-rtree \
+ 	--enable-json1 \
+ 	TCLLIBDIR=/usr/lib/sqlite$pkgver
++  sed -i '/+= -I\/usr\/include/d' Makefile
+   make
+   # build additional tools
+   make showdb showjournal showstat4 showwal sqldiff sqlite3_analyzer

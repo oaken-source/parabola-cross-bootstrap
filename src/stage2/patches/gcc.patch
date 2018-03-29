@@ -1,45 +1,54 @@
---- a/PKGBUILD	2018-03-05 14:47:11.525693335 +0100
-+++ b/PKGBUILD	2018-03-07 05:34:24.951028232 +0100
-@@ -5,8 +5,9 @@
+--- a/PKGBUILD	2018-03-29 08:30:53.138894260 +0200
++++ b/PKGBUILD	2018-03-29 09:01:36.169719582 +0200
+@@ -5,7 +5,8 @@
  # toolchain build order: linux-api-headers->glibc->binutils->gcc->binutils->glibc
  # NOTE: libtool requires rebuilt with each new gcc version
  
 -pkgname=(gcc gcc-libs gcc-fortran gcc-objc gcc-ada gcc-go lib32-gcc-libs)
--pkgver=7.3.0
 +pkgname=(gcc gcc-libs gcc-fortran)
 +[ "x@MULTILIB@" == "xdisable" ] || pkgname+=(lib32-gcc-libs)
-+pkgver=7.3.1
+ pkgver=7.3.1+20180312
  _majorver=${pkgver:0:1}
  _islver=0.18
- pkgrel=1
-@@ -17,14 +18,14 @@ url='http://gcc.gnu.org'
- makedepends=(binutils libmpc gcc-ada doxygen lib32-glibc lib32-gcc-libs)
+@@ -14,6 +15,7 @@ pkgdesc='The GNU Compiler Collection'
+ arch=(x86_64)
+ license=(GPL LGPL FDL custom)
+ url='http://gcc.gnu.org'
++depends=(zlib)
+ makedepends=(binutils libmpc gcc-ada doxygen lib32-glibc lib32-gcc-libs python)
  checkdepends=(dejagnu inetutils)
  options=(!emptydirs)
-+_snapshot=7-20180215
- #source=(https://sources.archlinux.org/other/gcc/gcc-${pkgver/+/-}.tar.xz{,.sig}
--source=(https://ftp.gnu.org/gnu/gcc/gcc-$pkgver/gcc-$pkgver.tar.xz{,.sig}
-+source=(ftp://gcc.gnu.org/pub/gcc/snapshots/$_snapshot/gcc-$_snapshot.tar.xz
+@@ -21,7 +23,8 @@ source=(https://sources.archlinux.org/ot
+ #source=(https://ftp.gnu.org/gnu/gcc/gcc-$pkgver/gcc-$pkgver.tar.xz{,.sig}
          http://isl.gforge.inria.fr/isl-${_islver}.tar.bz2
-         c89 c99)
+         c89 c99
+-        bz84080.patch)
++        bz84080.patch
++        0001-pthread-reentrant.patch)
  validpgpkeys=(F3691687D867B81B51CE07D9BBE43771487328A9  # bpiotrowski@archlinux.org
                13975A70E63C361C73AE69EF6EEB81F8981C74C7) # richard.guenther@gmail.com
--sha256sums=('832ca6ae04636adbb430e865a1451adf6979ab44ca1c8374f61fba65645ce15c'
--            'SKIP'
-+sha256sums=('bb276f6fce4822fc0806d1e87d21245854d1e41f2a7027c7288375084176c679'
+ sha256sums=('c52618f656f2102b3544419e7d0a8a4f4e6ff052783865202be73edf1a40e28b'
+@@ -29,7 +32,8 @@ sha256sums=('c52618f656f2102b3544419e7d0
              '6b8b0fd7f81d0a957beb3679c81bbb34ccc7568d5682844d8924424a0dadcb1b'
              'de48736f6e4153f03d0a5d38ceb6c6fdb7f054e8f47ddd6af0a3dbf14f27b931'
-             '2513c6d9984dd0a2058557bf00f06d8d5181734e41dcfe07be7ed86f2959622a')
-@@ -51,7 +52,7 @@ snapshot() {
+             '2513c6d9984dd0a2058557bf00f06d8d5181734e41dcfe07be7ed86f2959622a'
+-            'bce05807443558db55f0d6b4dae37a678ea1bb3388b541c876fe3d110e3717e7')
++            'bce05807443558db55f0d6b4dae37a678ea1bb3388b541c876fe3d110e3717e7'
++            'fc9c6f0edd615f2b39deff28b9626a08fd98ef8ce19f7e34281c0a5bd653ac3b')
+ 
+ _svnrev=258469
+ _svnurl=svn://gcc.gnu.org/svn/gcc/branches/gcc-${_majorver}-branch
+@@ -71,6 +75,9 @@ prepare() {
+   # hack! - some configure tests for header files using "$CPP $CPPFLAGS"
+   sed -i "/ac_cpp=/s/\$CPPFLAGS/\$CPPFLAGS -O2/" {libiberty,gcc}/configure
+ 
++  # fix -pthreads behavior on risc-v
++  patch -Np1 -i "$srcdir/0001-pthread-reentrant.patch"
++
+   mkdir -p "$srcdir/gcc-build"
  }
  
- prepare() {
--  ln -s gcc-${pkgver/+/-} gcc
-+  ln -s gcc-$_snapshot gcc
-   cd gcc
- 
-   # link isl for in-tree build
-@@ -77,16 +78,24 @@ build() {
+@@ -82,16 +89,24 @@ build() {
    CFLAGS=${CFLAGS/-pipe/}
    CXXFLAGS=${CXXFLAGS/-pipe/}
  
@@ -67,7 +76,7 @@
        --with-system-zlib \
        --with-isl \
        --enable-__cxa_atexit \
-@@ -101,16 +110,13 @@ build() {
+@@ -106,16 +121,13 @@ build() {
        --enable-install-libiberty \
        --with-linker-hash-style=gnu \
        --enable-gnu-indirect-function \
@@ -85,7 +94,16 @@
  }
  
  check() {
-@@ -134,25 +140,17 @@ package_gcc-libs() {
+@@ -129,7 +141,7 @@ check() {
+ package_gcc-libs() {
+   pkgdesc='Runtime libraries shipped by GCC'
+   groups=(base)
+-  depends=('glibc>=2.26')
++  depends=('glibc>=2.26' libmpc)
+   options+=(!strip)
+   provides=($pkgname-multilib libgo.so libgfortran.so)
+   replaces=($pkgname-multilib)
+@@ -139,25 +151,17 @@ package_gcc-libs() {
    rm -f "$pkgdir/$_libdir/libgcc_eh.a"
  
    for lib in libatomic \
@@ -112,7 +130,7 @@
               libquadmath; do
      make -C $CHOST/$lib DESTDIR="$pkgdir" install-info
    done
-@@ -183,22 +181,22 @@ package_gcc() {
+@@ -188,22 +192,22 @@ package_gcc() {
    install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
@@ -140,7 +158,7 @@
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -208,26 +206,16 @@ package_gcc() {
+@@ -213,26 +217,16 @@ package_gcc() {
    ln -s /${_libdir}/liblto_plugin.so \
      "$pkgdir/usr/lib/bfd-plugins/"
  
@@ -170,7 +188,7 @@
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -239,9 +227,6 @@ package_gcc() {
+@@ -244,9 +238,6 @@ package_gcc() {
    install -Dm755 "$srcdir/c89" "$pkgdir/usr/bin/c89"
    install -Dm755 "$srcdir/c99" "$pkgdir/usr/bin/c99"
  
@@ -180,7 +198,7 @@
    # remove files provided by lib32-gcc-libs
    rm -f "$pkgdir"/usr/lib32/lib{stdc++,gcc_s}.so
  
-@@ -260,7 +245,7 @@ package_gcc-fortran() {
+@@ -269,7 +260,7 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS}
@@ -189,3 +207,17 @@
      install-{toolexeclibDATA,nodist_fincludeHEADERS}
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_fincludeHEADERS
    make -C gcc DESTDIR="$pkgdir" fortran.install-{common,man,info}
+--- /dev/null	2018-03-20 11:36:27.102196685 +0100
++++ b/0001-pthread-reentrant.patch	2018-03-29 09:01:25.248720617 +0200
+@@ -0,0 +1,11 @@
++--- trunk/gcc/config/riscv/linux.h	2018/01/03 10:03:58	256169
+++++ trunk/gcc/config/riscv/linux.h	2018/02/13 11:21:01	257621
++@@ -47,6 +47,8 @@
++ 
++ #define ICACHE_FLUSH_FUNC "__riscv_flush_icache"
++ 
+++#define CPP_SPEC "%{pthread:-D_REENTRANT}"
+++
++ #define LINK_SPEC "\
++ -melf" XLEN_SPEC "lriscv \
++ %{shared} \
