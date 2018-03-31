@@ -49,7 +49,7 @@ check_cross_toolchain() {
 
 stage1_makepkg() {
   # produce pkgfiles
-  for f in "$SRCDIR"/toolchain-pkgbuilds/$pkg/*.in; do
+  for f in "$SRCDIR"/toolchain-pkgbuilds/$1/*.in; do
     sed "s#@CHOST@#$CHOST#g; \
          s#@CARCH@#$CARCH#g; \
          s#@LINUX_ARCH@#$LINUX_ARCH#g; \
@@ -63,7 +63,7 @@ stage1_makepkg() {
       "$f" > ./"$(basename "${f%.in}")"
   done
 
-  import_keys || return
+  package_import_keys "$1" || return
 
   runas "$SUDO_USER" makepkg -LC --config "$BUILDDIR"/makepkg.conf || return
 }
