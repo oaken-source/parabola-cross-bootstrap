@@ -59,7 +59,7 @@ packages_build_all() {
   while [ -s "$DEPTREE" ]; do
     local pkgname pkgarch
     pkgname=$(deptree_next) \
-      || { error "could not resolve dependencies"; return "$ERROR_MISSING"; }
+      || { error -n "could not resolve dependencies"; return "$ERROR_MISSING"; }
 
     package_build "$1" "$2" "$pkgname" || return
   done
