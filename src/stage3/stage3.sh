@@ -18,144 +18,133 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -euo pipefail
+# shellcheck source=src/stage3/makepkg.sh
+. "$TOPSRCDIR"/stage3/makepkg.sh
+# shellcheck source=src/stage3/chroot.sh
+. "$TOPSRCDIR"/stage3/chroot.sh
 
-msg "Entering Stage 3"
-notify "*Bootstrap Entering Stage 3*"
+stage3_makepkg() {
+  local pkgname="${1%-decross}"
+  local prefix=()
+  [ "x$1" != "x$pkgname" ] && prefix=(-p decross)
 
-# set a bunch of convenience variables
-_builddir="$topbuilddir"/stage3
-_srcdir="$topsrcdir"/stage3
-_makepkgdir="$_builddir"/$CARCH-makepkg
-_deptree="$_builddir"/DEPTREE
-_groups="base-devel"
-_pkgdest="$_builddir"/packages/$CARCH
-_logdest="$_builddir"/makepkglogs
+  package_fetch_upstream_pkgfiles "$pkgname" || return
+  package_import_keys "$pkgname" || return
+  package_patch "${prefix[@]}" "$pkgname" || return
 
-export PKGDEST="$_pkgdest"
-export LOGDEST="$_logdest"
+  # substitute common variables
+  sed "s#@MULTILIB@#${MULTILIB:-disable}#g" \
+    PKGBUILD.in > PKGBUILD
 
-check_exe librechroot
-check_exe libremakepkg
-check_exe makepkg
+  package_enable_arch "$CARCH"
 
-# make sure that binfmt is *enabled* for stage3 build
-echo 1 > /proc/sys/fs/binfmt_misc/status
+  # check built dependencies
+  local dep
+  for dep in $(srcinfo_builddeps -n); do
+    deptree_check_depend "$1" "$dep" || return
+  done
+  for dep in $(srcinfo_rundeps "$1"); do
+    deptree_check_depend "$1" "$dep" || return
+  done
 
-# prepare for the build
-. "$_srcdir"/prepare_chroot.sh
-. "$_srcdir"/prepare_deptree.sh
-. "$_srcdir"/prepare_decross.sh
+  # postpone build if necessary
+  deptree_is_satisfyable "$1" || return 0
 
-msg "starting $CARCH native build"
+  # don't rebuild if already exists
+  check_pkgfile "$PKGDEST" "$1" && return
 
-# keep building packages until the deptree is empty
-while [ -s "$_deptree" ]; do
-  # grab one without unfulfilled dependencies
-  _pkgname=$(grep '\[ *\]' "$_deptree" | head -n1 | awk '{print $1}') || true
-  [ -n "$_pkgname" ] || die "could not resolve dependencies. exiting."
+  # disable checkdepends
+  echo "checkdepends=()" >> PKGBUILD
 
-  _pkgarch=$(pacman -Si $_pkgname | grep '^Architecture' | awk '{print $3}')
+  if [ "x$1" != "x$pkgname" ]; then
+    # a bit of magic for -decross builds
+    PKGDEST=. "$BUILDDIR/libremakepkg-$CARCH.sh" -n "$CHOST"-stage3 || return
+    local pkgfiles pkgfile
+    pkgfiles=("$pkgname"-*.pkg.tar.xz); pkgfile="${pkgfiles[0]}"
+    mv -v "$pkgfile" "$PKGDEST/${pkgfile/$pkgname/$1}"
+  else
+    # regular build otherwise
+    "$BUILDDIR/libremakepkg-$CARCH.sh" -n "$CHOST"-stage3 || return
+  fi
+}
 
-  # set arch to $CARCH, unless it is any
-  [ "x$_pkgarch" == "xany" ] || _pkgarch=$CARCH
+stage3_package_build() {
+  local pkgarch
+  pkgarch=$(pkgarch "${1%-decross}") || return
 
-  msg "makepkg: $_pkgname"
-  msg "  remaining packages: $(cat "$_deptree" | wc -l)"
-
-  echo -n "checking for built $_pkgname package ... "
-  _pkgfile=$(find $_pkgdest -regex "^.*/$_pkgname-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$")
-  [ -n "$_pkgfile" ] && _have_pkg=yes || _have_pkg=no
-  echo $_have_pkg
-
-  if [ "x$_have_pkg" == "xno" ]; then
-    prepare_makepkgdir
-
-    _pkgdir="$_makepkgdir"/$_pkgname/pkg/$_pkgname
-
-    if [ "x$_pkgarch" == "xany" ]; then
-      # repackage arch=(any) packages
-      _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
-      pacman -Sddw --noconfirm --cachedir "$_pkgdest" $_pkgname
-    elif [ "x$_pkgname" == "xca-certificates-mozilla" ]; then
-      # repackage ca-certificates-mozilla to avoid building nss
-      _pkgver=$(pacman -Si $_pkgname | grep '^Version' | awk '{print $3}')
-      pacman -Sw --noconfirm --cachedir . $_pkgname
-      mkdir tmp && bsdtar -C tmp -xf $_pkgname-$_pkgver-*.pkg.tar.xz
-      mkdir -p "$_pkgdir"/usr/share/
-      cp -rv tmp/usr/share/ca-certificates/ "$_pkgdir"/usr/share/
-      cat > "$_pkgdir"/.PKGINFO << EOF
-pkgname = $_pkgname
-pkgver = $_pkgver
-pkgdesc = Mozilla's set of trusted CA certificates
-url = https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS
-builddate = $(date '+%s')
-size = 0
-arch = $_pkgarch
-EOF
-      cd "$_pkgdir"
-      env LANG=C bsdtar -czf .MTREE \
-        --format=mtree \
-        --options='!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link' \
-        .PKGINFO *
-      env LANG=C bsdtar -cf - .MTREE .PKGINFO * | xz -c -z - > \
-        "$_pkgdest"/$_pkgname-$_pkgver-$_pkgarch.pkg.tar.xz
-    else
-      fetch_pkgfiles $_pkgname
-      import_keys
-
-      # patch if necessary
-      cp PKGBUILD{,.old}
-      [ -f "$_srcdir"/patches/$_pkgname.patch ] && \
-        patch -Np1 -i "$_srcdir"/patches/$_pkgname.patch
-      cp PKGBUILD{,.in}
-
-      # substitute common variables
-      sed -i \
-          "s#@MULTILIB@#${MULTILIB:-disable}#g" \
-        PKGBUILD
-
-      # enable the target CARCH in arch array
-      sed -i "s/arch=([^)]*/& $CARCH/" PKGBUILD
-
-      # build the package
-      chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
-      "$_builddir"/libremakepkg-$CARCH.sh -n $CHOST-stage3 || failed_build
-    fi
-
-    popd >/dev/null
-
-    # update pacman cache
-    rm -rf /var/cache/pacman/pkg-$CARCH/*
-    rm -rf "$_pkgdest"/native.{db,files}*
-    repo-add -q -R "$_pkgdest"/{native.db.tar.gz,*.pkg.tar.xz}
-
-    # install in chroot
-    _pkgfile=$(find $_pkgdest -regex "^.*/$_pkgname-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$" | head -n1)
-    set +o pipefail
-    yes | librechroot \
-        -n "$CHOST-stage3" \
-        -C "$_builddir"/config/pacman.conf \
-        -M "$_builddir"/config/makepkg.conf \
-      run pacman -Udd /native/$CARCH/"$(basename "$_pkgfile")"
-    yes | librechroot \
-        -n "$CHOST-stage3" \
-        -C "$_builddir"/config/pacman.conf \
-        -M "$_builddir"/config/makepkg.conf \
-      run pacman -Syyuu
-    set -o pipefail
+  if [ "x$pkgarch" == "xany" ] || [ "x$1" == "xca-certificates-mozilla" ]; then
+    package_reuse_upstream "$1" || return
+  else
+    stage3_makepkg "$1" || return
   fi
 
-  # remove pkg from deptree
-  sed -i "/^$_pkgname :/d; s/ /  /g; s/ $_pkgname / /g; s/  */ /g" "$_deptree"
+  # postpone on unmet dependencies
+  deptree_is_satisfyable "$1" || return 0
 
-  full=$(cat "$_deptree".FULL | wc -l)
-  curr=$(expr $full - $(cat "$_deptree" | wc -l))
-  notify -c success -u low "*$curr/$full* $_pkgname"
-done
+  # update repo
+  rm -rf /var/cache/pacman/pkg-"$CARCH"/*
+  rm -rf "$PKGDEST"/native.{db,files}*
+  repo-add -q -R "$PKGDEST"/{native.db.tar.gz,*.pkg.tar.xz}
+}
 
-# unmount
-umount "$_chrootdir"/native/$CARCH
-umount "$_chrootdir"/cross/$CARCH
+stage3_package_install() {
+  local pkgfile
+  pkgfile=$(find "$PKGDEST" -regex "^.*/$1-[^-]*-[^-]*-[^-]*\\.pkg\\.tar\\.xz\$" | head -n1)
+  [ -n "$pkgfile" ] || { error "$1: pkgfile not found"; return "$ERROR_MISSING"; }
 
-echo "all packages built."
+  yes | librechroot \
+      -n "$CHOST-stage3" \
+      -C "$BUILDDIR"/config/pacman.conf \
+      -M "$BUILDDIR"/config/makepkg.conf \
+    run pacman -Udd /repos/native/"$CARCH"/"$(basename "$pkgfile")" || return
+  yes | librechroot \
+      -n "$CHOST-stage3" \
+      -C "$BUILDDIR"/config/pacman.conf \
+      -M "$BUILDDIR"/config/makepkg.conf \
+    run pacman -Syyuu || return
+}
+
+stage3() {
+  msg -n "Entering Stage 3"
+
+  local groups=(base-devel)
+  local decross=(bash make)
+
+  export BUILDDIR="$TOPBUILDDIR"/stage3
+  export SRCDIR="$TOPSRCDIR"/stage3
+  export MAKEPKGDIR="$BUILDDIR"/$CARCH-makepkg
+  export DEPTREE="$BUILDDIR"/DEPTREE
+  export PKGDEST="$BUILDDIR"/packages/$CARCH
+  export PKGPOOL="$PKGDEST"
+  export LOGDEST="$BUILDDIR"/makepkglogs
+  export DEPPATH=("$PKGDEST" "${PKGDEST/stage3/stage2}")
+
+  mkdir -p "$PKGDEST" "$PKGPOOL" "$LOGDEST"
+  chown "$SUDO_USER" "$PKGDEST" "$PKGPOOL" "$LOGDEST"
+
+  binfmt_enable
+
+  prepare_stage3_makepkg || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH makepkg"
+  prepare_stage3_chroot || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH chroot"
+  prepare_deptree "${groups[@]}" || die -e "$ERROR_BUILDFAIL" "failed to prepare DEPTREE"
+
+  local pkg
+  for pkg in "${decross[@]}"; do
+    deptree_add_entry "$pkg-decross"
+  done
+
+  echo "remaining pkges: $(wc -l < "$DEPTREE") / $(wc -l < "$DEPTREE".FULL)"
+  if [ -s "$DEPTREE" ]; then
+    check_exe -r librechroot libremakepkg
+
+    for pkg in "${decross[@]}"; do
+      package_build stage3_package_build stage3_package_install "$pkg-decross" || return
+    done
+
+    # build packages from deptree
+    packages_build_all stage3_package_build stage3_package_install || return
+  fi
+
+  # cleanup
+  umount_stage3_chrootdir
+}

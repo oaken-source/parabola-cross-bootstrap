@@ -59,7 +59,7 @@
        --with-system-zlib \
        --with-isl \
        --enable-__cxa_atexit \
-@@ -106,24 +113,13 @@ build() {
+@@ -106,16 +113,13 @@ build() {
        --enable-install-libiberty \
        --with-linker-hash-style=gnu \
        --enable-gnu-indirect-function \
@@ -74,18 +74,10 @@
 -
 -  # make documentation
 -  make -C $CHOST/libstdc++-v3/doc doc-man-doxygen
--}
--
--check() {
--  cd gcc-build
--
--  # do not abort on error as some are "expected"
--  make -k check || true
--  "$srcdir/gcc/contrib/test_summary"
  }
  
- package_gcc-libs() {
-@@ -139,25 +135,17 @@ package_gcc-libs() {
+ check() {
+@@ -139,25 +143,17 @@ package_gcc-libs() {
    rm -f "$pkgdir/$_libdir/libgcc_eh.a"
  
    for lib in libatomic \
@@ -112,7 +104,7 @@
               libquadmath; do
      make -C $CHOST/$lib DESTDIR="$pkgdir" install-info
    done
-@@ -188,22 +176,21 @@ package_gcc() {
+@@ -188,22 +184,18 @@ package_gcc() {
    install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
@@ -132,15 +124,15 @@
 +  [ "x@MULTILIB@" == "xdisable" ] || make -C $CHOST/32/libstdc++-v3/libsupc++ DESTDIR="$pkgdir" install
  
    make DESTDIR="$pkgdir" install-libcc1
-   install -d "$pkgdir/usr/share/gdb/auto-load/usr/lib"
-   mv "$pkgdir"/usr/lib/libstdc++.so.6.*-gdb.py \
-     "$pkgdir/usr/share/gdb/auto-load/usr/lib/"
+-  install -d "$pkgdir/usr/share/gdb/auto-load/usr/lib"
+-  mv "$pkgdir"/usr/lib/libstdc++.so.6.*-gdb.py \
+-    "$pkgdir/usr/share/gdb/auto-load/usr/lib/"
 -  rm "$pkgdir"/usr/lib{,32}/libstdc++.so*
 +  rm -f "$pkgdir"/usr/lib{,32}/libstdc++.so*
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -213,26 +200,16 @@ package_gcc() {
+@@ -213,26 +205,16 @@ package_gcc() {
    ln -s /${_libdir}/liblto_plugin.so \
      "$pkgdir/usr/lib/bfd-plugins/"
  
@@ -170,7 +162,7 @@
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -244,16 +221,9 @@ package_gcc() {
+@@ -244,16 +226,9 @@ package_gcc() {
    install -Dm755 "$srcdir/c89" "$pkgdir/usr/bin/c89"
    install -Dm755 "$srcdir/c99" "$pkgdir/usr/bin/c99"
  
@@ -187,7 +179,7 @@
    # Install Runtime Library Exception
    install -d "$pkgdir/usr/share/licenses/$pkgname/"
    ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
-@@ -269,7 +239,7 @@ package_gcc-fortran() {
+@@ -269,7 +244,7 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS}

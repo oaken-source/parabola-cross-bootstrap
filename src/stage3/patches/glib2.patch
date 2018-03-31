@@ -1,16 +1,15 @@
 --- a/PKGBUILD	2018-03-15 18:28:02.907566766 +0100
 +++ b/PKGBUILD	2018-03-15 18:30:17.106683685 +0100
-@@ -10,8 +10,7 @@ url="https://wiki.gnome.org/Projects/GLi
+@@ -10,7 +10,7 @@ url="https://wiki.gnome.org/Projects/GLi
  license=(LGPL2.1)
  arch=(x86_64)
  depends=(pcre libffi libutil-linux zlib)
 -makedepends=(gettext gtk-doc shared-mime-info python libelf git util-linux dbus)
--checkdepends=(desktop-file-utils)
 +makedepends=(gettext python libelf git util-linux dbus)
+ checkdepends=(desktop-file-utils)
  optdepends=('python: gdbus-codegen, glib-genmarshal, glib-mkenums, gtester-report'
              'libelf: gresource inspection tool')
- options=(!emptydirs)
-@@ -49,21 +48,15 @@ build() {
+@@ -49,7 +48,7 @@ build() {
      --sysconfdir=/etc \
      --with-pcre=system \
      --enable-debug=$debug \
@@ -19,13 +18,7 @@
      --disable-fam
    sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
    make
- }
- 
--check() {
--  cd glib
--  make check
--}
--
+@@ -49,7 +48,6 @@ build() {
  package_glib2() {
    cd glib
    make DESTDIR="$pkgdir" install

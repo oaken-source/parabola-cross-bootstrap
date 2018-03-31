@@ -18,18 +18,6 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-import_keys() {
-  local keys k
-  keys="$(srcinfo_validpgpkeys)"
-  for k in $keys; do
-    check_gpgkey "$k" && continue
-    if ! retry -n 5 -s 60 sudo -u "$SUDO_USER" gpg --recv-keys "$k"; then
-      error -n "failed to import key '$k'"
-      return "$ERROR_KEYFAIL"
-    fi
-  done
-}
-
 pkgdeps() {
   pacman -Si "$1" | grep '^Depends' | cut -d':' -f2 | sed 's/None//'
 }
@@ -49,6 +37,20 @@ pkgver() {
   pkgver=$(pacman -Si "$1" | grep '^Version' | awk '{print $3}') || return
   [ -n "$pkgver" ] || return
   echo "$pkgver"
+}
+
+pkgdesc() {
+  local pkgdesc
+  pkgdesc=$(pacman -Si "$1" | grep '^Descr' | cut -d':' -f2 | sed 's/^ *//') || return
+  [ -n "$pkgdesc" ] || return
+  echo "$pkgdesc"
+}
+
+pkgurl() {
+  local pkgurl
+  pkgurl=$(pacman -Si "$1" | grep '^URL' | cut -d':' -f2 | sed 's/^ *//') || return
+  [ -n "$pkgurl" ] || return
+  echo "$pkgurl"
 }
 
 make_realpkg() {

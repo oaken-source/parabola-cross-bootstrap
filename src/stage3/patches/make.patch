@@ -9,12 +9,3 @@
    patch -p1 -i ${srcdir}/guile-2.2.patch
    autoreconf -fi
  }
-@@ -32,7 +34,7 @@ build() {
- 
- check() {
-   cd ${pkgname}-${pkgver}
--  make -k check
-+  make -k check || true
- }
- 
- package() {

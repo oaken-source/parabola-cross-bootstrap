@@ -47,18 +47,39 @@ check_cross_toolchain() {
   [ "x$have_glibc" == "xyes" ] || return 1
 }
 
+stage1_makepkg() {
+  # produce pkgfiles
+  for f in "$SRCDIR"/toolchain-pkgbuilds/$pkg/*.in; do
+    sed "s#@CHOST@#$CHOST#g; \
+         s#@CARCH@#$CARCH#g; \
+         s#@LINUX_ARCH@#$LINUX_ARCH#g; \
+         s#@GCC_MARCH@#${GCC_MARCH:-}#g; \
+         s#@GCC_MABI@#${GCC_MABI:-}#g; \
+         s#@MULTILIB@#${MULTILIB:-disable}#g; \
+         s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#g; \
+         s#@GCC_32_MABI@#${GCC_32_MABI:-}#g; \
+         s#@CARCH32@#${CARCH32:-}#g; \
+         s#@CHOST32@#${CHOST32:-}#g" \
+      "$f" > ./"$(basename "${f%.in}")"
+  done
+
+  import_keys || return
+
+  runas "$SUDO_USER" makepkg -LC --config "$BUILDDIR"/makepkg.conf || return
+}
+
 stage1() {
   msg -n "Entering Stage 1"
 
   export BUILDDIR="$TOPBUILDDIR"/stage1
   export SRCDIR="$TOPSRCDIR"/stage1
+  export MAKEPKGDIR="$BUILDDIR"
   export PKGDEST="$BUILDDIR"/packages
   export LOGDEST="$BUILDDIR"/makepkglogs
-  export MAKEPKGDIR="$BUILDDIR"
 
   check_cross_toolchain && return
 
-  check_exe gpg makepkg pacman sed sudo || return
+  check_exe gpg makepkg pacman sed || return
 
   # create required directories
   mkdir -p "$LOGDEST" "$PKGDEST" "$SRCDEST"
@@ -67,9 +88,6 @@ stage1() {
   # create a sane makepkg.conf
   cat "$SRCDIR"/makepkg.conf.in > "$BUILDDIR"/makepkg.conf
   cat >> "$BUILDDIR"/makepkg.conf << EOF
-LOGDEST="$LOGDEST"
-PKGDEST="$PKGDEST"
-SRCDEST="$SRCDEST"
 MAKEFLAGS="-j$(($(nproc) + 1))"
 EOF
 
@@ -80,35 +98,17 @@ EOF
     if ! check_pkgfile "$PKGDEST" "$CHOST-$pkg"; then
       prepare_makepkgdir "$MAKEPKGDIR/$CHOST-$pkg" || return
 
-      # produce pkgfiles
-      for f in "$SRCDIR"/toolchain-pkgbuilds/$pkg/*.in; do cp "$f" "$(basename "${f%.in}")"; done
-      sed -i "s#@CHOST@#$CHOST#g; \
-              s#@CARCH@#$CARCH#g; \
-              s#@LINUX_ARCH@#$LINUX_ARCH#g; \
-              s#@GCC_MARCH@#${GCC_MARCH:-}#g; \
-              s#@GCC_MABI@#${GCC_MABI:-}#g; \
-              s#@MULTILIB@#${MULTILIB:-disable}#g; \
-              s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#g; \
-              s#@GCC_32_MABI@#${GCC_32_MABI:-}#g; \
-              s#@CARCH32@#${CARCH32:-}#g; \
-              s#@CHOST32@#${CHOST32:-}#g" \
-        PKGBUILD
-
-      import_keys || return
-
-      if ! sudo -u "$SUDO_USER" makepkg -LC --config "$BUILDDIR"/makepkg.conf; then
-        local log phase
-        log=$(find_lastlog "$LOGDEST" "$CHOST-$pkg")
-        if [ -z "$log" ]; then
-          error -n "$CHOST-$pkg: error in makepkg"
-        else
-          phase=$(sed 's/.*\(pkgver\|prepare\|build\|package\).*/\1/' <<< "$log")
-          error -n -d "$log" "$CHOST-$pkg: error in $phase"
-        fi
-        return "$ERROR_BUILDFAIL"
-      fi
+      local res=0
+      stage1_makepkg "$pkg" 2>&1 | tee .MAKEPKGLOG
+      res="${PIPESTATUS[0]}"
 
       popd >/dev/null || return
+
+      if [ "$res" -ne 0 ]; then
+        notify -c error "$CHOST-$pkg" -h string:document:"$(readlink -f .MAKEPKGLOG)"
+        return "$res"
+      fi
+
       notify -c success -u low "$CHOST-$pkg"
     fi
 

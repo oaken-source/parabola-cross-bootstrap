@@ -16,13 +16,3 @@
  		"${openssltarget}" \
  		"-Wa,--noexecstack ${CPPFLAGS} ${CFLAGS} ${LDFLAGS}"
  
-@@ -55,7 +58,8 @@ check() {
- 	# the test fails due to missing write permissions in /etc/ssl
- 	# revert this patch for make test
- 	patch -p0 -R -i "$srcdir/ca-dir.patch"
--	make test
-+	# benign test suite failure in cross-arch chroot
-+	make test || true
- 	patch -p0 -i "$srcdir/ca-dir.patch"
- }
- 

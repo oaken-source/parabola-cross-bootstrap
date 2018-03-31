@@ -18,61 +18,55 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-check_stage2_chroot() {
-  echo -n "checking for functional $CARCH skeleton chroot ... "
+check_stage3_chroot() {
+  echo -n "checking for $CARCH chroot ... "
 
-  local pacman_works=yes
-  pacman --config "$CHROOTDIR"/etc/pacman.conf -r "$CHROOTDIR" -Syyu &>/dev/null || pacman_works=no
-  echo $pacman_works
+  local have_chroot=yes
+  [ -e "$1" ] || have_chroot=no
+  echo $have_chroot
 
-  [ "x$pacman_works" == "xyes" ] || return "$ERROR_MISSING"
+  [ "x$have_chroot" == "xyes" ] || return "$ERROR_MISSING"
 }
 
-build_stage2_chroot() {
-  # create directories
-  rm -rf "$CHROOTDIR"
-  mkdir -pv "$CHROOTDIR"/etc/pacman.d/{gnupg,hooks} \
-            "$CHROOTDIR"/var/{lib/pacman,cache/pacman/pkg,log} \
-    | sed "s#$CHROOTDIR#\$CHROOTDIR#"
-
-  # create sane pacman config
-  cat > "$CHROOTDIR"/etc/pacman.conf << EOF
-[options]
-RootDir = $CHROOTDIR
-DBPath = $CHROOTDIR/var/cache/pacman/
-CacheDir = $CHROOTDIR/var/cache/pacman/pkg/
-LogFile = $CHROOTDIR/var/log/pacman.log
-GPGDir = $CHROOTDIR/etc/pacman.d/gnupg
-HookDir = $CHROOTDIR/etc/pacman.d/hooks
-Architecture = $CARCH
-
-[cross]
-SigLevel = Never
-Server = file://${PKGDEST%/$CARCH}/\$arch
-EOF
-
-  # copy toolchain sysroot to chroot
-  cp -ar "$SYSROOT"/usr "$CHROOTDIR"/
-
-  # final sanity check
-  check_stage2_chroot || return
+build_stage3_chroot() {
+  rm -rf /var/cache/pacman/pkg-"$CARCH"/*
+  librechroot -n "$CHOST-stage3" \
+              -C "$BUILDDIR"/config/pacman-bootstrap.conf \
+              -M "$BUILDDIR"/config/makepkg.conf \
+    make || return
 }
 
-umount_stage2_chrootdir() {
-  umount "$SYSROOT"/usr
+umount_stage3_chrootdir() {
+  local chrootdir
+  chrootdir="$(librechroot -n "$CHOST-stage3" 2>&1 | grep "copydir.*:" | awk '{print $3}')"
+
+  umount "$chrootdir"/repos/native/"$CARCH"
+  umount "$chrootdir"/repos/cross/"$CARCH"
 
   trap - INT TERM EXIT
 }
 
-mount_stage2_chrootdir() {
-  if mount | grep -q "$SYSROOT/usr"; then umount_stage2_chrootdir; fi
-  mount -o bind "$CHROOTDIR"/usr "$SYSROOT"/usr
+mount_stage3_chrootdir() {
+  mkdir -p "$1"/repos/{native,cross}/"$CARCH"
+  for repo in native cross; do
+    if mount | grep -q "$1/repos/$repo/$CARCH"; then umount "$1/repos/$repo/$CARCH"; fi
+  done
+  mount -o bind "$PKGDEST" "$1"/repos/native/"$CARCH"
+  mount -o bind "${PKGDEST//stage3/stage2}" "$1"/repos/cross/"$CARCH"
 
-  trap 'umount_stage2_chrootdir' INT TERM EXIT
+  trap 'umount_stage3_chrootdir' INT TERM EXIT
 }
 
-prepare_stage2_chroot() {
-  check_stage2_chroot || build_stage2_chroot || return
+prepare_stage3_chroot() {
+  local chrootdir
+  chrootdir="$(librechroot -n "$CHOST-stage3" 2>&1 | grep "copydir.*:" | awk '{print $3}')"
 
-  mount_stage2_chrootdir
+  check_stage3_chroot "$chrootdir" || build_stage3_chroot "$chrootdir" || return
+
+  mount_stage3_chrootdir "$chrootdir"
+
+  librechroot -n "$CHOST-stage3" \
+              -C "$BUILDDIR"/config/pacman.conf \
+              -M "$BUILDDIR"/config/makepkg.conf \
+    update || return
 }

@@ -1,6 +1,6 @@
 --- a/PKGBUILD	2018-03-12 18:02:55.550559093 +0100
 +++ b/PKGBUILD	2018-03-12 18:19:24.997339010 +0100
-@@ -10,27 +10,24 @@ arch=('x86_64')
+@@ -10,17 +10,19 @@ arch=('x86_64')
  url="http://www.hboehm.info/gc/"
  license=('GPL')
  depends=('gcc-libs' 'libatomic_ops')
@@ -22,13 +22,9 @@
    ./configure --prefix=/usr --enable-cplusplus --disable-static
    sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
    make
+@@ -10,7 +10,7 @@ arch=('x86_64')
  }
  
--check() {
--  cd ${pkgname}-${pkgver}
--  make check
--}
--
  package() {
 -  cd ${pkgname}-${pkgver}
 +  cd bdwgc

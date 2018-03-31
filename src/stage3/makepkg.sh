@@ -18,41 +18,29 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-check_stage2_makepkg() {
-  echo -n "checking for makepkg-$CARCH.sh ... "
+prepare_stage3_makepkg() {
+  mkdir -p "$BUILDDIR"/config
 
-  local have_stage2_makepkg=yes
-  [ -f "$BUILDDIR"/makepkg-"$CARCH".sh ] || have_stage2_makepkg=no
-  echo $have_stage2_makepkg
+  cat > "$BUILDDIR"/config/pacman-bootstrap.conf << EOF
+[options]
+Architecture = $CARCH
+[native]
+Server = file://$TOPBUILDDIR/stage3/packages/\$arch
+[cross]
+Server = file://$TOPBUILDDIR/stage2/packages/\$arch
+EOF
 
-  [ "x$have_stage2_makepkg" == "xyes" ] || return "$ERROR_MISSING"
-}
+  cat > "$BUILDDIR"/config/pacman.conf << EOF
+[options]
+Architecture = $CARCH
+[native]
+Server = file:///repos/native/\$arch
+[cross]
+Server = file:///repos/cross/\$arch
+EOF
 
-build_stage2_makepkg() {
-  check_exe bsdtar pacman || return
-
-  prepare_makepkgdir "$MAKEPKGDIR/makepkg-$CARCH" || return
-
-  # fetch pacman package to excract makepkg
-  pacman -Sw --noconfirm --cachedir . pacman
-  mkdir tmp && bsdtar -C tmp -xf pacman-*.pkg.tar.xz
-
-  # install makepkg
-  cp -Lv tmp/usr/bin/makepkg "$BUILDDIR"/makepkg-"$CARCH".sh
-
-  # patch run_pacman in makepkg, we cannot pass the pacman root to it as parameter ATM
-  sed -i "s#\"\$PACMAN_PATH\"#& --config $CHROOTDIR/etc/pacman.conf -r $CHROOTDIR#" \
-    "$BUILDDIR"/makepkg-"$CARCH".sh
-
-  popd >/dev/null || return
-}
-
-prepare_stage2_makepkg() {
-  check_stage2_makepkg || build_stage2_makepkg || return
-
-  # create a sane makepkg.conf
-  cat "$SRCDIR"/makepkg.conf.in > "$BUILDDIR"/makepkg-"$CARCH".conf
-  cat >> "$BUILDDIR"/makepkg-"$CARCH".conf << EOF
+  cat "$SRCDIR"/makepkg.conf.in > "$BUILDDIR"/config/makepkg.conf
+  cat >> "$BUILDDIR"/config/makepkg.conf << EOF
 CARCH="$CARCH"
 CHOST="$CHOST"
 CFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
@@ -60,5 +48,22 @@ CXXFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -
 MAKEFLAGS="-j$(($(nproc) + 1))"
 EOF
 
-  check_repo "$PKGDEST" cross || make_repo "$PKGDEST" cross
+  check_repo "$PKGDEST" native || make_repo "$PKGDEST" native
+
+  # patch libremakepkg to update config.sub/config.guess
+  cat "$(which libremakepkg)" > "$BUILDDIR/libremakepkg-$CARCH.sh"
+  chmod +x "$BUILDDIR/libremakepkg-$CARCH.sh"
+
+  if [ "x${REGEN_CONFIG_FRAGMENTS:-no}" == "xyes" ]; then
+	  local url="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
+    sed -i "/Boring\\/mundane/i \\
+update_config_fragments() {\\
+	find \$1/build -iname config.sub -exec curl \"$url;f=config.sub;hb=HEAD\" -o {} \\\\;\\
+	find \$1/build -iname config.guess -exec curl \"$url;f=config.guess;hb=HEAD\" -o {} \\\\;\\
+}\\
+hook_pre_build+=(update_config_fragments)" "$BUILDDIR/libremakepkg-$CARCH.sh"
+  fi
+
+  # patch libremakepkg to disable checks
+  sed -i 's/makepkg_args=(.*noconfirm[^)]*/& --nocheck/' "$BUILDDIR/libremakepkg-$CARCH.sh"
 }

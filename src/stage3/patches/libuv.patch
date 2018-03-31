@@ -8,7 +8,7 @@
  source=("https://github.com/libuv/libuv/archive/v$pkgver/$pkgname-$pkgver.tar.gz")
  sha512sums=('4fa879e34c51ae428ebf72ce80873b8d12994ae1560f9d3577a693653bfd5bd4b4fda7ff457b98b5e60fc82546658300401d6545d677f31d2cd66be3d82e02da')
  
-@@ -18,12 +17,11 @@ build() {
+@@ -18,7 +17,6 @@ build() {
  	./autogen.sh
  	./configure --prefix=/usr
  	make
@@ -16,12 +16,6 @@
  }
  
  check() {
- 	cd $pkgname-$pkgver
--	make check
-+	make check || true
- }
- 
- package() {
 @@ -39,6 +37,4 @@ package() {
  		"$pkgdir"/usr/share/doc/$pkgname/README.md
  	install -Dm644 ChangeLog \

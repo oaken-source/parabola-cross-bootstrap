@@ -10,7 +10,7 @@
  source=(ftp://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.bz2{,.sig}
          guile-2.2.patch)
  md5sums=('15b012617e7c44c0ed482721629577ac'
-@@ -20,19 +21,21 @@ validpgpkeys=('3D2554F0A15338AB9AF1BB9D9
+@@ -20,13 +21,15 @@ validpgpkeys=('3D2554F0A15338AB9AF1BB9D9
  
  prepare() {
    cd ${pkgname}-${pkgver}
@@ -27,10 +27,3 @@
    make
  }
  
- check() {
-   cd ${pkgname}-${pkgver}
--  make -k check
-+  make -k check || true
- }
- 
- package() {

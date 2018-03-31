@@ -32,21 +32,18 @@ build_deptree() {
   check_exe ed pacman sed || return
 
   # create empty deptree
-  truncate -s0 "$DEPTREE".FULL
+  truncate -s0 "$DEPTREE".FULL || return
 
   # add the packages listed in the given groups
   local g p r
   for g in "$@"; do
     for p in $(pacman -Sg "$g" | awk '{print $2}'); do
       r=$(make_realpkg "$p") || return "$ERROR_MISSING"
-
-      if ! grep -q "^$r :" "$DEPTREE".FULL; then
-        echo "$r : [ ] # $g" >> "$DEPTREE".FULL
-      else
-        sed -i "s/^$r : \\[.*/&, $g/" "$DEPTREE".FULL
-      fi
+      deptree_add_entry "$r" "$g"
     done
   done
+
+  return 0
 }
 
 prepare_deptree() {
@@ -67,7 +64,11 @@ deptree_remove() {
   sed -i "/^$1 :/d; s/ /  /g; s/ $1 / /g; s/  */ /g" "$DEPTREE"
 }
 
-deptree_check_depends() {
+deptree_is_satisfyable() {
+  grep -q "^$1 : \\[ *\\]" "$DEPTREE"
+}
+
+deptree_check_depend() {
   local OPTIND o needed=yes
   while getopts "n" o; do
     case "$o" in
@@ -80,24 +81,28 @@ deptree_check_depends() {
   local pkg="$1"
   shift
 
-  local dep r res=0
-  # shellcheck disable=SC2068
-  for dep in $@; do
-    r=$(make_realpkg "$dep") || { res="$ERROR_MISSING"; continue; }
+  local r
+  r=$(make_realpkg "$1") || return
+  deptree_add_entry "$r" "$pkg"
 
-    local have_pkg=yes
-    check_pkgfile "$PKGDEST" "$r" || have_pkg=no
-
-    if ! grep -q "^$r :" "$DEPTREE".FULL; then
-      echo "$r : [ ] # $pkg" >> "$DEPTREE".FULL
-      echo "$r : [ ] # $pkg" >> "$DEPTREE"
-    else
-      sed -i "/#.* $pkg\\(\\$\\|[ ,]\\)/! s/^$r : \\[.*/&, $pkg/" "$DEPTREE"{,.FULL}
-    fi
-    if [ "x$needed" == "xyes" ] && [ "x$have_pkg" == "xno" ]; then
-      sed -i "s/^$pkg : \\[/& $r/" "$DEPTREE"{,.FULL}
-    fi
+  local have_pkg=no
+  local path
+  for path in "${DEPPATH[@]}"; do
+    check_pkgfile "$path" "$r" && have_pkg=yes
   done
 
-  return "$res"
+  if [ "x$needed" == "xyes" ] && [ "x$have_pkg" == "xno" ]; then
+    sed -i "s/^$pkg : \\[/& $r/" "$DEPTREE"{,.FULL}
+  fi
+}
+
+deptree_add_entry() {
+  local r="${2:-<cmd>}"
+
+  if ! grep -q "^$1 :" "$DEPTREE".FULL; then
+    echo "$1 : [ ] # $r" >> "$DEPTREE".FULL
+    [ -f "$DEPTREE" ] && echo "$1 : [ ] # $r" >> "$DEPTREE"
+  else
+    sed -i "/#.* $r\\(\$\\|[ ,]\\)/! s/^$1 : \\[.*/&, $r/" "$DEPTREE"*
+  fi
 }

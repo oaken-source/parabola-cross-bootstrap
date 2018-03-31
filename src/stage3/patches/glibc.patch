@@ -54,23 +54,6 @@
    cd "$srcdir/lib32-glibc-build"
    export CC="gcc -m32 -mstackrealign"
    export CXX="g++ -m32 -mstackrealign"
-@@ -117,16 +120,6 @@ build() {
- 
- }
- 
--check() {
--  cd glibc-build
--
--  # remove fortify in preparation to run test-suite
--  sed -i '/FORTIFY/d' configparms
--
--  # some failures are "expected"
--  make check || true
--}
--
- package_glibc() {
-   pkgdesc='GNU C Library'
-   depends=('linux-api-headers>=4.10' tzdata filesystem)
 @@ -177,7 +170,7 @@ package_glibc() {
      strip $STRIP_STATIC usr/lib/lib{anl,BrokenLocale,c{,_nonshared},crypt}.a \
                          usr/lib/lib{dl,g,ieee,mcheck,nsl,pthread{,_nonshared}}.a \

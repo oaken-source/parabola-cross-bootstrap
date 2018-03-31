@@ -9,7 +9,7 @@
  _commit=f6b7a992e442218a5afdbf8ae1697c53f3f03991  # tags/0.23.10^0
  source=("git+https://github.com/p11-glue/p11-kit#commit=$_commit"
          0001-Build-and-install-libnssckbi-p11-kit.so.patch)
-@@ -41,17 +41,12 @@ build() {
+@@ -41,7 +41,7 @@ build() {
      --sysconfdir=/etc \
      --localstatedir=/var \
      --libexecdir=/usr/lib \
@@ -18,13 +18,3 @@
      --with-module-path=/usr/lib/pkcs11 \
      --with-trust-paths=/etc/ca-certificates/trust-source:/usr/share/ca-certificates/trust-source
    make
- }
- 
--check() {
--  cd $pkgname
--  make check
--}
--
- package() {
-   cd $pkgname
-   make DESTDIR="$pkgdir" install

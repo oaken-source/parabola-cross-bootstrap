@@ -5,7 +5,7 @@
  makedepends_i686=('gnu-efi-libs')
  makedepends_x86_64=('gnu-efi-libs')
 -options=('strip')
-+depends=('libutil-linux' 'pcre2')
++depends=('libutil-linux' 'pcre2' 'libidn' 'libseccomp' 'kmod')
  validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
                '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
  source=('git+https://github.com/systemd/systemd-stable'

@@ -1,16 +1,15 @@
 --- a/PKGBUILD	2018-03-17 22:43:27.776000901 +0100
 +++ b/PKGBUILD	2018-03-17 22:45:57.506623741 +0100
-@@ -20,9 +20,7 @@ groups=('base' 'base-devel' 'base-openrc
+@@ -20,8 +20,7 @@ groups=('base' 'base-devel' 'base-openrc
  depends=('bash' 'glibc' 'libarchive' 'curl' 'gpgme'
           'pacman-mirrorlist' 'archlinux-keyring' 'parabola-keyring'
           'archlinuxarm-keyring' 'archlinux32-keyring')
 -makedepends=('asciidoc')
 -makedepends+=('openssl>=1.1' 'openssl-1.0') # for during openssl 1.0->1.1 rebuild; remove on next rebuild
--checkdepends=('python2' 'fakechroot')
 +makedepends+=('openssl>=1.1')
+ checkdepends=('python2' 'fakechroot')
  optdepends=('cron: run specified programs at scheduled times and related tools')
  provides=("$pkgname-contrib")
- conflicts=("$pkgname-contrib" "$pkgname-parabola" 'cacert-dot-org')
 @@ -45,6 +43,7 @@ sha256sums=('dfd36086ad68564bcd977f4a1fa
              '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
              '1b2c8f4ec84d0dc496516880a54b5e4deb78798618c9cf5e284a45303f156e58'
@@ -39,17 +38,6 @@
 +        ;;
      esac
      myldflags="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
- 
-@@ -108,10 +112,6 @@ build() {
-   done
- }
- 
--check() {
--  make -C "$pkgname-$pkgver" check
--}
--
- package() {
-   cd "$pkgname-$pkgver"
  
 --- /dev/null	2018-03-05 07:42:50.020223709 +0100
 +++ b/pacman.conf.riscv64	2018-03-17 22:43:27.778000923 +0100

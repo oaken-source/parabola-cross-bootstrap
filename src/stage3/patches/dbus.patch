@@ -18,12 +18,3 @@
  _commit=a723baa2bc7e91fc9b1926cda1ce53e9301de4d8  # tags/dbus-1.12.6^0
  source=("git+https://anongit.freedesktop.org/git/dbus/dbus#commit=$_commit"
          'dbus.sysusers')
-@@ -53,7 +53,7 @@ build() {
- 
- check() {
-   cd $pkgbase
--  make check
-+  make check || true
- }
- 
- package_dbus() {

@@ -29,9 +29,8 @@
  
  check() {
 -  cd "$srcdir/$pkgname-$pkgver"
--  make partcheck
 +  cd "$srcdir/$pkgname"
-+  make partcheck || true
+   make partcheck
  }
  
  package() {

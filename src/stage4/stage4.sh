@@ -18,205 +18,123 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -euo pipefail
+# shellcheck source=src/stage4/makepkg.sh
+. "$TOPSRCDIR"/stage4/makepkg.sh
+# shellcheck source=src/stage4/chroot.sh
+. "$TOPSRCDIR"/stage4/chroot.sh
 
-msg "Entering Stage 4"
-notify "*Bootstrap Entering Stage 4*"
-
-# set a bunch of convenience variables
-_builddir="$topbuilddir"/stage4
-_srcdir="$topsrcdir"/stage4
-_makepkgdir="$_builddir"/$CARCH-makepkg
-_deptree="$_builddir"/DEPTREE
-_groups="base base-devel"
-_pkgdest="$_builddir"/packages
-_logdest="$_builddir"/makepkglogs
-
-export PKGDEST="$_pkgdest/staging"
-export LOGDEST="$_logdest"
-
-check_exe librechroot
-check_exe libremakepkg
-
-# make sure that binfmt is *enabled* for stage4 build
-echo 1 > /proc/sys/fs/binfmt_misc/status
-
-# prepare for the build
-. "$_srcdir"/prepare_chroot.sh
-. "$_srcdir"/prepare_deptree.sh
-
-msg "starting $CARCH native build (phase 2)"
-
-# keep building packages until the deptree is empty
-while [ -s "$_deptree" ]; do
-  # grab one without unfulfilled dependencies
-  _pkgname=$(grep '\[ *\]' "$_deptree" | head -n1 | awk '{print $1}') || true
-  [ -n "$_pkgname" ] || die "could not resolve dependencies. exiting."
-
-  msg "makepkg: $_pkgname"
-  msg "  remaining packages: $(cat "$_deptree" | wc -l)"
-
-  prepare_makepkgdir
-  fetch_pkgfiles $_pkgname
-  import_keys
-
-  # produce pkgbase
-  echo -n "checking for pkgbase ... "
-  _srcinfo=$(sudo -u $SUDO_USER makepkg --config "$_builddir"/config/makepkg.conf --printsrcinfo)
-  _pkgbase=$(echo "$_srcinfo" | grep '^pkgbase =' | awk '{print $3}')
-  [ -n "$_pkgbase" ] || _pkgbase=$_pkgname
-  echo "$_pkgbase"
-
-  # patch if necessary
-  cp PKGBUILD{,.old}
-  [ -f "$_srcdir"/patches/$_pkgbase.patch ] && \
-    patch -Np1 -i "$_srcdir"/patches/$_pkgbase.patch
-  cp PKGBUILD{,.in}
-  chown -R $SUDO_USER "$_makepkgdir"/$_pkgname
+stage4_makepkg() {
+  package_fetch_upstream_pkgfiles "$1" || return
+  package_import_keys "$1" || return
+  package_patch "$1" || return
 
   # substitute common variables
-  sed -i \
-      "s#@MULTILIB@#${MULTILIB:-disable}#g" \
-    PKGBUILD
+  sed "s#@MULTILIB@#${MULTILIB:-disable}#g" \
+    PKGBUILD.in > PKGBUILD
 
-  # enable the target CARCH in arch array, unless it is already 'any'
-  sed -i "/arch=(.*\bany\b.*)/!s/arch=([^)]*/& $CARCH/" PKGBUILD
+  package_enable_arch "$CARCH"
 
-  # scan dependencies and update deptree
-  set +o pipefail
-  _needs_postpone=no
-  _srcinfo=$(sudo -u $SUDO_USER makepkg --config "$_builddir"/config/makepkg.conf --printsrcinfo)
-  _builddeps=$(echo "$_srcinfo" | awk '/^pkgbase = /,/^$/{print}' \
-      | grep '	\(make\|check\|\)depends =' | awk '{print $3}')
-  _rundeps=$(echo "$_srcinfo" | awk '/^pkgname = '$_pkgname'$/,/^$/{print}' \
-      | grep '	depends =' | awk '{print $3}')
-  # make sure all deps (build-time and run-time) are in deptree
-  for _dep in $_builddeps $_rundeps; do
-    _realdep=""
-    make_realdep "$_dep"
-    if [ -z "$_realdep" ]; then
-      if [ "x$KEEP_GOING" == "xyes" ]; then
-        notify -c error "$_pkgname: failed to translate dependency string '$_dep'"
-        _needs_postpone=yes
-        break
-      else
-        die "$_pkgname: failed to translate dependency string '$_dep'"
-      fi
-    fi
-
-    case $_realdep in
-      gcc-ada|gcc-go|gdb|valgrind|lib32*)
-        if [ "x$KEEP_GOING" == "xyes" ]; then
-          notify -c error "$_pkgname: known bad package pulled in : '$_realdep'"
-          _needs_postpone=yes
-          break
-        else
-          die "$_pkgname: known bad package pulled in : '$_realdep'"
-        fi ;;
-    esac
-
-    if ! grep -q "^$_realdep :" "$_deptree".FULL; then
-      echo "$_realdep : [ ] # $_pkgname" >> "$_deptree".FULL
-      echo "$_realdep : [ ] # $_pkgname" >> "$_deptree"
-    else
-      sed -i "/#.* $_pkgname\(\$\|[ ,]\)/! s/^$_realdep : \[.*/&, $_pkgname/" "$_deptree"{,.FULL}
-    fi
+  # check built dependencies
+  local dep
+  for dep in $(srcinfo_builddeps -n); do
+    deptree_check_depend "$1" "$dep" || return
+  done
+  for dep in $(srcinfo_rundeps "$1"); do
+    deptree_check_depend "$1" "$dep" || return
   done
 
-  # bad package was pulled in, postpone
-  if [ "x$_needs_postpone" == "xyes" ]; then
-    sed -i "s/^$_pkgname : \[/& FIXME/" "$_deptree"
-    popd >/dev/null
-    continue
+  # postpone build if necessary
+  deptree_is_satisfyable "$1" || return 0
+
+  # don't rebuild if already exists
+  check_pkgfile "$PKGPOOL" "$1" && return
+
+  # disable checkdepends
+  echo "checkdepends=()" >> PKGBUILD
+
+  # regular build otherwise
+  "$BUILDDIR/libremakepkg-$CARCH.sh" -n "$CHOST"-stage4 || return
+}
+
+stage4_package_build() {
+  local pkgarch
+  pkgarch=$(pkgarch "$1") || return
+
+  # clean staging
+  rm -f "$PKGDEST"/*
+
+  if [ "x$pkgarch" == "xany" ] || [ "x$1" == "xca-certificates-mozilla" ]; then
+    package_reuse_upstream "$1" || return
+  else
+    stage4_makepkg "$1" || return
   fi
 
-  # postpone build on missing build-time deps
-  for _dep in $_builddeps; do
-    _realdep=""
-    make_realdep "$_dep"
-    [ -n "$_realdep" ] || die "failed to translate dependency string '$_dep'"
+  # postpone on unmet dependencies
+  deptree_is_satisfyable "$1" || return 0
 
-    echo -n "checking for built dependency $_realdep ... "
-    _depfile=$(find $_pkgdest/pool $topbuilddir/stage3/packages/ \
-      -regex "^.*/$_realdep-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$")
-    [ -n "$_depfile" ] && _have_dep=yes || _have_dep=no
-    echo $_have_dep
+  # release the package
+  local pkgfile pkgname pkgrepo
+  for pkgfile in "$PKGDEST"/*; do
+    pkgname="${pkgfile%-*-*-*}"
+    pkgrepo=$(package_get_upstream_repo "$pkgname")
+    pushd "$PKGDEST/../$pkgrepo/os/$CARCH" >/dev/null || return
 
-    if [ "x$_have_dep" == "xno" ]; then
-      sed -i "s/^$_pkgname : \[/& $_realdep/" "$_deptree"{,.FULL}
-      _needs_postpone=yes
-    fi
+    ln -fs ../../../pool/"$(basename "$pkgfile")" "$(basename "$pkgfile")"
+    mv "$pkgfile" "$PKGPOOL"
+    repo-add -qR "$pkgrepo.db.tar.gz" "$(basename "$pkgfile")"
+
+    popd >/dev/null || return
   done
-  set -o pipefail
+}
 
-  # missing stuff - put back to deptree and try again.
-  if [ "x$_needs_postpone" == "xyes" ]; then
-    popd >/dev/null
-    continue
+stage4_package_install() {
+  local pkgfile
+  pkgfile=$(find "$PKGPOOL" -regex "^.*/$1-[^-]*-[^-]*-[^-]*\\.pkg\\.tar\\.xz\$" | head -n1)
+  [ -n "$pkgfile" ] || { error "$1: pkgfile not found"; return "$ERROR_MISSING"; }
+
+  yes | librechroot \
+      -n "$CHOST-stage4" \
+      -C "$BUILDDIR"/config/pacman.conf \
+      -M "$BUILDDIR"/config/makepkg.conf \
+    run pacman -Udd /repos/pool/"$(basename "$pkgfile")" || return
+  yes | librechroot \
+      -n "$CHOST-stage4" \
+      -C "$BUILDDIR"/config/pacman.conf \
+      -M "$BUILDDIR"/config/makepkg.conf \
+    run pacman -Syyuu || return
+}
+
+stage4() {
+  msg -n "Entering Stage 4"
+
+  local groups=(base-devel)
+
+  export BUILDDIR="$TOPBUILDDIR"/stage4
+  export SRCDIR="$TOPSRCDIR"/stage4
+  export MAKEPKGDIR="$BUILDDIR"/$CARCH-makepkg
+  export DEPTREE="$BUILDDIR"/DEPTREE
+  export PKGDEST="$BUILDDIR"/packages/staging
+  export PKGPOOL="$BUILDDIR"/packages/pool
+  export LOGDEST="$BUILDDIR"/makepkglogs
+  export DEPPATH=("$PKGPOOL" "${BUILDDIR/stage4/stage3}/packages/$CARCH")
+
+  mkdir -p "$PKGDEST" "$PKGPOOL" "$LOGDEST"
+  chown "$SUDO_USER" "$PKGDEST" "$PKGPOOL" "$LOGDEST"
+
+  binfmt_enable
+
+  prepare_stage4_makepkg || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH makepkg"
+  prepare_stage4_chroot || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH chroot"
+  prepare_deptree "${groups[@]}" || die -e "$ERROR_BUILDFAIL" "failed to prepare DEPTREE"
+
+  echo "remaining pkges: $(wc -l < "$DEPTREE") / $(wc -l < "$DEPTREE".FULL)"
+  if [ -s "$DEPTREE" ]; then
+    check_exe -r librechroot libremakepkg
+
+    # build packages from deptree
+    packages_build_all stage4_package_build stage4_package_install || return
   fi
 
-  echo -n "checking for built $_pkgname package ... "
-  _pkgfile=$(find $_pkgdest/pool -regex "^.*/$_pkgname-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$")
-  [ -n "$_pkgfile" ] && _have_pkg=yes || _have_pkg=no
-  echo $_have_pkg
-
-  if [ "x$_have_pkg" == "xno" ]; then
-    # clean staging
-    rm -f "$_pkgdest"/staging/*
-
-    # clean package cache
-    rm -rfv /var/cache/pacman/pkg/*
-    rm -rfv /var/cache/pacman/pkg-$CARCH/*
-    # build the package
-    _build_failed=no
-    "$_builddir"/libremakepkg-$CARCH.sh -n $CHOST-stage4 || failed_build $_pkgbase
-
-    # if we continued after a failed build, mark the entry in the deptree and continue
-    if [ "x$_build_failed" == "xyes" ]; then
-      sed -i "s/^$_pkgname : \[/& FIXME/" "$_deptree"
-      popd >/dev/null
-      continue
-    fi
-
-    # release the package
-    _pkgrepo=$(cat .REPO)
-    for f in "$_pkgdest"/staging/*; do
-      ln -fs ../../../pool/$(basename "$f") "$_pkgdest"/$_pkgrepo/os/$CARCH/$(basename "$f")
-      mv $f "$_pkgdest"/pool/
-    done
-
-    rm -rf "$_pkgdest"/$_pkgrepo/os/$CARCH/$_pkgrepo.{db,files}*
-    repo-add -q -R "$_pkgdest"/$_pkgrepo/os/$CARCH/{$_pkgrepo.db.tar.gz,*.pkg.tar.xz}
-
-    # install in chroot
-    _pkgfile=$(find $_pkgdest/pool -regex "^.*/$_pkgname-[^-]*-[^-]*-[^-]*\.pkg\.tar\.xz\$" \
-      | head -n1)
-    set +o pipefail
-    yes | librechroot \
-        -n "$CHOST-stage4" \
-        -C "$_builddir"/config/pacman.conf \
-        -M "$_builddir"/config/makepkg.conf \
-      run pacman -Udd /repos/pool/"$(basename "$_pkgfile")"
-    yes | librechroot \
-        -n "$CHOST-stage4" \
-        -C "$_builddir"/config/pacman.conf \
-        -M "$_builddir"/config/makepkg.conf \
-      run pacman -Syyuu
-    set -o pipefail
-  fi
-
-  # remove pkg from deptree
-  sed -i "/^$_pkgname :/d; s/ /  /g; s/ $_pkgname / /g; s/  */ /g" "$_deptree"
-
-  # full=$(cat "$_deptree".FULL | wc -l)
-  # curr=$(expr $full - $(cat "$_deptree" | wc -l))
-  # notify -c success -u low "*$curr/$full* $_pkgname"
-
-  popd >/dev/null
-done
-
-# unmount
-umount "$_chrootdir"/native
-umount "$_chrootdir"/repos
-
-echo "all packages built."
+  # cleanup
+  umount_stage4_chrootdir
+}

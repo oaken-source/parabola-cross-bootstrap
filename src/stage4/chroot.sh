@@ -18,32 +18,54 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-set -euo pipefail
+check_stage4_chroot() {
+  echo -n "checking for $CARCH chroot ... "
 
-msg "preparing transitive dependency tree for $_groups (Stage 4)"
+  local have_chroot=yes
+  [ -e "$1" ] || have_chroot=no
+  echo $have_chroot
 
-echo -n "checking for complete deptree ... "
-[ -f "$_deptree".FULL ] && _have_deptree=yes || _have_deptree=no
-echo $_have_deptree
+  [ "x$have_chroot" == "xyes" ] || return "$ERROR_MISSING"
+}
 
-if [ "x$_have_deptree" == "xno" ]; then
-  truncate -s0 "$_deptree".FULL
+build_stage4_chroot() {
+  rm -rf /var/cache/pacman/pkg-"$CARCH"/*
+  librechroot -n "$CHOST-stage4" \
+              -C "$BUILDDIR"/config/pacman-bootstrap.conf \
+              -M "$BUILDDIR"/config/makepkg.conf \
+    make || return
+}
 
-  for _group in $_groups; do
-    for _pkg in $(pacman -Sg $_group | awk '{print $2}'); do
-      _realpkg=$(pacman --noconfirm -Sddw "$_pkg" | grep '^Packages' | awk '{print $3}')
-      _realpkg="${_realpkg%-*-*}"
-      if ! grep -q "^$_realpkg :" "$_deptree".FULL; then
-        echo "$_realpkg : [ ] # $_group" >> "$_deptree".FULL
-      else
-        sed -i "s/^$_realpkg : \[.*/&, $_group/" "$_deptree".FULL
-      fi
-    done
-  done
-fi
+umount_stage4_chrootdir() {
+  local chrootdir
+  chrootdir="$(librechroot -n "$CHOST-stage4" 2>&1 | grep "copydir.*:" | awk '{print $3}')"
 
-[ -f "$_deptree" ] || cp "$_deptree"{.FULL,}
-chown $SUDO_USER "$_deptree"
+  umount "$chrootdir"/repos/repos/
+  umount "$chrootdir"/repos/native/
 
-echo "  total pkges:      $(cat "$_deptree".FULL | wc -l)"
-echo "  remaining pkges:  $(cat "$_deptree" | wc -l)"
+  trap - INT TERM EXIT
+}
+
+mount_stage4_chrootdir() {
+  mkdir -p "$1"/{repos,native}
+  if mount | grep -q "$1"/repos; then umount "$1"/repos; fi
+  if mount | grep -q "$1"/native; then umount "$1"/native; fi
+  mount -o bind "$TOPBUILDDIR/stage4/packages" "$1"/repos
+  mount -o bind "$TOPBUILDDIR/stage3/packages" "$1"/native
+
+  trap 'umount_stage4_chrootdir' INT TERM EXIT
+}
+
+prepare_stage4_chroot() {
+  local chrootdir
+  chrootdir="$(librechroot -n "$CHOST-stage4" 2>&1 | grep "copydir.*:" | awk '{print $3}')"
+
+  check_stage4_chroot "$chrootdir" || build_stage4_chroot "$chrootdir" || return
+
+  mount_stage3_chrootdir "$chrootdir"
+
+  librechroot -n "$CHOST-stage4" \
+              -C "$BUILDDIR"/config/pacman.conf \
+              -M "$BUILDDIR"/config/makepkg.conf \
+    update || return
+}

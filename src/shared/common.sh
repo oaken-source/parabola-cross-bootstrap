@@ -30,6 +30,8 @@
 . "$TOPSRCDIR"/shared/upstream.sh
 # shellcheck source=src/shared/deptree.sh
 . "$TOPSRCDIR"/shared/deptree.sh
+# shellcheck source=src/shared/package.sh
+. "$TOPSRCDIR"/shared/package.sh
 
 retry() {
   local OPTIND o n=5 s=60
@@ -49,19 +51,16 @@ retry() {
   "$@" || return
 }
 
+runas() {
+  sudo -u "$1" --preserve-env=PKGDEST,LOGDEST,SRCDEST "${@:2}"
+}
+
 prepare_makepkgdir() {
   rm -rf "$1"
   mkdir -p "$1"
   chown -R "$SUDO_USER" "$1"
 
   pushd "$1" >/dev/null || return 1
-}
-
-find_lastlog() {
-  local log
-  # shellcheck disable=SC2010
-  log=$(ls -t "$1" | grep -P "^$2(-[^-]*){3}-(pkgver|prepare|build|package)" | head -n1)
-  [ -n "$log" ] && echo "$log"
 }
 
 binfmt_enable() {
@@ -71,22 +70,3 @@ binfmt_enable() {
 binfmt_disable() {
   echo 0 > /proc/sys/fs/binfmt_misc/status
 }
-
-#failed_build() {
-#  # FIXME
-#  _log=$(find "$_logdest" -type f -iname "$1-*" -printf "%T@ %p\n" \
-#      | sort -n | tail -n1 | cut -d' ' -f2-)
-#  set +o pipefail
-#  _phase=""
-#  [ -z "$_log" ] || _phase=$(cat $_log | grep '==>.*occurred in' \
-#      | awk '{print $7}' | sed 's/().*//')
-#  set -o pipefail
-#  if [ -n "${_phase:-}" ]; then
-#    notify -c error "$_pkgname: error in $_phase()" -h string:document:"$_log"
-#  else
-#    notify -c error "$_pkgname: error in makepkg"
-#  fi
-#  [ "x$KEEP_GOING" == "xyes" ] || die "error building $_pkgname"
-#  _build_failed=yes
-#}
-

@@ -1,15 +1,14 @@
 --- a/PKGBUILD	2018-03-17 08:59:41.689090995 +0100
 +++ b/PKGBUILD	2018-03-17 09:05:37.822823499 +0100
-@@ -13,8 +13,6 @@ url='http://packages.debian.org/fakeroot
+@@ -13,7 +13,6 @@ url='http://packages.debian.org/fakeroot
  groups=(base-devel)
  install=fakeroot.install
  depends=(glibc filesystem sed util-linux sh)
 -makedepends=(po4a)
--checkdepends=(sharutils)
+ checkdepends=(sharutils)
  source=(http://ftp.debian.org/debian/pool/main/f/$pkgname/${pkgname}_${pkgver}.orig.tar.bz2
          silence-dlerror.patch)
- md5sums=('fae64c9aeb2c895ead8e1b99bf50c631'
-@@ -36,14 +34,11 @@ build() {
+@@ -36,9 +34,6 @@ build() {
      --with-ipc=sysv
  
    make
@@ -19,9 +18,3 @@
  }
  
  check() {
-   cd $pkgname-$pkgver
--  make check
-+  make check || true
- }
- 
- package() {

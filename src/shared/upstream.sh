@@ -19,17 +19,11 @@
  ##############################################################################
 
 package_get_upstream_repo() {
-  local repo url response target=
-  for repo in core extra community; do
-    url=https://www.archlinux.org/packages/$repo/x86_64/$1/
-    response=$(retry -n 5 -s 60 curl -sL "$url") || die "failed to retrieve url $url"
-    grep -iq "Arch Linux - $1" <<< "$response" || continue
-
-    target=$repo
-    break
-  done
-  [ -z "$target" ] || target=libre
-  echo $target
+  local repo repoinfo
+  repoinfo=$(asp list-repos "$1") || repoinfo=""
+  repo=$(grep -P '^(core|extra|community)' <<< "$repoinfo" | head -n1)
+  [ -z "$repo" ] && repo=libre
+  echo "$repo"
 }
 
 package_fetch_upstream_pkgfiles() {
@@ -66,28 +60,3 @@ package_fetch_upstream_pkgfiles() {
     return "$ERROR_MISSING"
   fi
 }
-
-#package_fetch_upstream_pkgfiles() {
-#  FIXME
-#  # acquire the pkgbuild and auxiliary files
-#  local url=https://www.parabola.nu/packages/libre/x86_64/$1/
-#  _fetch_pkgfiles_from $url && echo "libre" > .REPO && return
-#
-#  local repo
-#  for repo in core extra community; do
-#    url=https://www.archlinux.org/packages/$repo/x86_64/$1/
-#    _fetch_pkgfiles_from $url && echo "$repo" > .REPO && return
-#  done
-#  die "$1: failed to fetch pkgfiles"
-#}
-#
-#_fetch_pkgfiles_from() {
-#  curl -sL $url | grep -iq 'not found' && return 1
-#  local src=$(curl -sL $url | grep -i 'source files' | cut -d'"' -f2 | sed 's#/tree/#/plain/#')
-#  for link in $(curl -sL $src | grep '^  <li><a href' | cut -d"'" -f2 \
-#      | sed "s#^#$(echo $src | awk -F/ '{print $3}')#"); do
-#    wget -q $link -O $(basename ${link%\?*});
-#  done
-#  [ -f PKGBUILD ] || return 1
-#}
-

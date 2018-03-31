@@ -34,16 +34,6 @@
    # apply FSDG patches
    local _patch
    for _patch in "$srcdir"/????-FSDG-*.patch; do
-@@ -224,7 +233,8 @@ build() {
- 
- check() {
-   cd build
--  meson test
-+  # cross-arch chroot is a bit weird again
-+  meson test || true
- }
- 
- package_systemd() {
 --- /dev/null	2018-03-21 10:59:45.661284739 +0100
 +++ b/0001-rename-noreturn-into-_noreturn_.patch	2018-03-24 19:42:11.766029988 +0100
 @@ -0,0 +1,198 @@
