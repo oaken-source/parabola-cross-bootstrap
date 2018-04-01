@@ -6,10 +6,10 @@
  depends=('libidn2' 'libunistring')
 -makedepends=('libxslt' 'python' 'publicsuffix-list' 'gtk-doc')
 +makedepends=('libxslt' 'python' 'publicsuffix-list')
+ provides=('libpsl.so')
  source=(https://github.com/rockdaboot/libpsl/releases/download/${pkgname}-${pkgver}/${pkgname}-${pkgver}.tar.gz)
  sha512sums=('5a6c54c3a0aafef3eaa309bf3147179d41393fb63d7e6276a3e02705ae5c4005c61b3f8b13636eac0570ac20033c1c9b1a51937a06b56a30a4461ff9b1f955be')
- 
-@@ -26,7 +26,7 @@ build() {
+@@ -27,7 +27,7 @@ build() {
      --disable-static \
      --disable-dependency-tracking \
      --enable-man \
