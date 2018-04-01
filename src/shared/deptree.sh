@@ -55,7 +55,7 @@ prepare_deptree() {
 
 deptree_next() {
   local pkg
-  pkg=$(grep '\[ *\]' "$DEPTREE" | tail -n1 | awk '{print $1}')
+  pkg=$(grep '\[ *\]' "$DEPTREE" | head -n1 | awk '{print $1}')
   [ -n "$pkg" ] || return "$ERROR_MISSING"
   echo "$pkg"
 }
@@ -97,12 +97,20 @@ deptree_check_depend() {
 }
 
 deptree_add_entry() {
-  local r="${2:-<cmd>}"
+  local r="${2:-<cmdline>}"
 
-  if ! grep -q "^$1 :" "$DEPTREE".FULL; then
+  if grep -q "^$1 :" "$DEPTREE".FULL; then
+    # if pkg is in deptree, append requestee to list
+    sed -i "/#.* $r\\(\$\\|[ ,]\\)/! s/^$1 : \\[.*/&, $r/" "$DEPTREE"*
+  elif grep -q "^$r :" "$DEPTREE".FULL; then
+    # elif requestee is in deptree, insert after requestee
+    sed -i "/^$r :/a $1 : [ ] # $r" "$DEPTREE"*
+  elif [ "x$r" == "x<cmdline>" ]; then
+    # elif requested directly, add to top of file
+    sed -i "1i $1 : [ ] # $r" "$DEPTREE"*
+  else
+    # else append to deptree
     echo "$1 : [ ] # $r" >> "$DEPTREE".FULL
     [ -f "$DEPTREE" ] && echo "$1 : [ ] # $r" >> "$DEPTREE"
-  else
-    sed -i "/#.* $r\\(\$\\|[ ,]\\)/! s/^$1 : \\[.*/&, $r/" "$DEPTREE"*
   fi
 }
