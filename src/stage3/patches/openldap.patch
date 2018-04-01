@@ -1,15 +1,33 @@
 --- a/PKGBUILD	2018-03-16 12:55:07.765361033 +0100
 +++ b/PKGBUILD	2018-03-16 13:42:59.760946917 +0100
 @@ -8,7 +8,7 @@ pkgrel=4
- arch=('x86_64')
+ arch=('i686' 'x86_64')
  url="https://www.openldap.org/"
  license=('custom')
 -makedepends=('libltdl' 'libsasl' 'e2fsprogs' 'util-linux' 'chrpath' 'unixodbc')
-+makedepends=('libltdl' 'libsasl' 'e2fsprogs' 'util-linux' 'unixodbc')
++makedepends=('libltdl' 'e2fsprogs' 'util-linux' 'unixodbc')
  options=('!makeflags' 'emptydirs')
  source=(https://www.openldap.org/software/download/OpenLDAP/openldap-release/${pkgbase}-${pkgver}.tgz
          slapd.service openldap.tmpfiles openldap.sysusers openldap-ntlm.patch)
-@@ -82,7 +84,7 @@ package_openldap() {
+@@ -40,7 +40,7 @@ build() {
+     --enable-dynamic --enable-syslog --enable-ipv6 --enable-local \
+     --enable-crypt --enable-spasswd --enable-modules \
+     --enable-backends --disable-ndb --enable-overlays=mod \
+-    --with-cyrus-sasl --with-threads
++    --with-threads
+   make
+ 
+   make -C contrib/slapd-modules/nssov OPT="$CFLAGS $CPPFLAGS" prefix=/usr libexecdir=/usr/lib sysconfdir=/etc/openldap
+@@ -56,7 +56,7 @@ check() {
+ 
+ package_libldap() {
+   pkgdesc="Lightweight Directory Access Protocol (LDAP) client libraries"
+-  depends=('libsasl' 'e2fsprogs')
++  depends=('e2fsprogs')
+   backup=('etc/openldap/ldap.conf')
+ 
+   cd ${pkgbase}-${pkgver}
+@@ -82,7 +82,7 @@ package_openldap() {
    backup=('etc/openldap/slapd.conf' 'etc/openldap/slapd.ldif')
  
    cd ${pkgbase}-${pkgver}
@@ -18,7 +36,7 @@
      pushd ${dir}
      make DESTDIR="${pkgdir}" install
      popd
-@@ -99,6 +101,8 @@ package_openldap() {
+@@ -99,6 +99,8 @@ package_openldap() {
    rm "${pkgdir}"/usr/share/man/man5/ldap.conf.5
    rm -r "${pkgdir}"/run
  

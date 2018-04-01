@@ -1,6 +1,6 @@
 --- a/PKGBUILD	2018-03-15 22:28:13.742085702 +0100
 +++ b/PKGBUILD	2018-03-16 08:33:19.888281296 +0100
-@@ -3,14 +3,14 @@
+@@ -3,14 +3,13 @@
  # Maintainer: Felix Yan <felixonmars@archlinux.org>
  
  pkgbase=python-lxml
@@ -12,13 +12,12 @@
  license=('BSD' 'custom')
  url="http://lxml.de/"
 -makedepends=('libxslt' 'python-setuptools' 'python2-setuptools' 'epydoc' 'python2-pygments'
--             'python2-docutils' 'cython' 'cython2')
-+makedepends=('libxslt' 'python-setuptools' 'python2-setuptools'
-+             'cython' 'cython2')
+-             'python2-docutils')
++makedepends=('libxslt' 'python-setuptools' 'python2-setuptools')
  checkdepends=('python-cssselect' 'python2-cssselect' 'python-html5lib' 'python2-html5lib'
-               'python-beautifulsoup4' 'python2-beautifulsoup4')
+               'python-beautifulsoup4' 'python2-beautifulsoup4' 'cython' 'cython2')
  source=("https://github.com/lxml/lxml/archive/lxml-$pkgver.tar.gz")
-@@ -30,7 +28,6 @@ build() {
+@@ -30,7 +29,6 @@ build() {
  
    cd "$srcdir"/lxml-$pkgver-py2
    python2 setup.py build
