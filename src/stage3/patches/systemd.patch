@@ -1,15 +1,17 @@
 --- a/PKGBUILD	2018-03-16 18:23:58.112034593 +0100
 +++ b/PKGBUILD	2018-03-16 18:59:17.686017180 +0100
-@@ -85,6 +85,8 @@ sha512sums=('SKIP'
+@@ -85,6 +85,10 @@ sha512sums=('SKIP'
  _backports=(
    # core: do not free heap-allocated strings (#8391) (FS#57741)
    '5cbaad2f6795088db56063d20695c6444595822f'
 +  # basic/macros: rename noreturn into _noreturn_ (#8456)
 +  '848e863acc51ecfb0f3955c498874588201d9130'
++  # libmount: include sys/mount.h only if necessary (#8507)
++  '061d1a51097c3c025ff46173f10aa135f9a610d4'
  )
  
  _reverts=(
-@@ -261,7 +262,7 @@ package_systemd() {
+@@ -261,7 +265,7 @@ package_systemd() {
    rm -rv "$pkgdir"/etc/systemd/system/*
  
    # we'll create this on installation

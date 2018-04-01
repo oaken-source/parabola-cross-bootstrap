@@ -120,6 +120,13 @@ package_patch() {
 
   local patch="$SRCDIR/patches/$pkgbase$p".patch
 
+  # FIXME: this is temporary to fix bad patch names
+  local badpatch="$SRCDIR/patches/$pkgname".patch
+  if [ "x$pkgname" != "x$pkgbase" ] && [ -f "$badpatch" ]; then
+    error -n "$pkgname: $pkgname.patch should be $pkgbase.patch. renaming..."
+    mv "$badpatch" "$patch"
+  fi
+
   if [ "x$r" == "xyes" ] && [ ! -e "$patch" ]; then
     error -n "$pkgname: missing $pkgbase$p.patch"
     return "$ERROR_MISSING"
