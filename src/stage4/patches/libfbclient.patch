@@ -1,0 +1,131 @@
+diff -rupN a/0001-Port-to-RISC-V-64-bit-riscv64.patch b/0001-Port-to-RISC-V-64-bit-riscv64.patch
+--- a/0001-Port-to-RISC-V-64-bit-riscv64.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/0001-Port-to-RISC-V-64-bit-riscv64.patch	2018-04-06 20:40:00.933237852 +0200
+@@ -0,0 +1,98 @@
++diff -rupN Firebird-2.5.7.27050-0.orig/builds/posix/prefix.linux_riscv64 Firebird-2.5.7.27050-0/builds/posix/prefix.linux_riscv64
++--- Firebird-2.5.7.27050-0.orig/builds/posix/prefix.linux_riscv64	1970-01-01 01:00:00.000000000 +0100
+++++ Firebird-2.5.7.27050-0/builds/posix/prefix.linux_riscv64	2018-04-05 08:41:10.459514408 +0200
++@@ -0,0 +1,26 @@
+++# The contents of this file are subject to the Interbase Public
+++# License Version 1.0 (the "License"); you may not use this file
+++# except in compliance with the License. You may obtain a copy
+++# of the License at http://www.Inprise.com/IPL.html
+++#
+++# Software distributed under the License is distributed on an
+++# "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express
+++# or implied. See the License for the specific language governing
+++# rights and limitations under the License.
+++#
+++# The Original Code was created by Inprise Corporation
+++# and its predecessors. Portions created by Inprise Corporation are
+++# Copyright (C) Inprise Corporation.
+++#
+++# All Rights Reserved.
+++# Contributor(s): ______________________________________.
+++# Start of file prefix.linux:  $(VERSION)  $(PLATFORM)
+++#
+++# Richard W.M. Jones, Red Hat Inc.
+++
+++WARN_FLAGS=-Wall -Wno-switch -Wno-parentheses -Wno-unknown-pragmas -Wno-unused-variable -Wno-invalid-offsetof -Wno-narrowing -Wno-unused-local-typedefs
+++
+++PROD_FLAGS=-O3 -DLINUX -DRISCV64 -pipe -p -MMD -fPIC -fsigned-char -fmessage-length=0
+++DEV_FLAGS=-ggdb -DLINUX -DRISCV64 -pipe -p -MMD -fPIC -Wall -fsigned-char -fmessage-length=0 $(WARN_FLAGS)
+++
+++CXXFLAGS := $(CXXFLAGS) -std=c++11
++diff -rupN Firebird-2.5.7.27050-0.orig/configure.in Firebird-2.5.7.27050-0/configure.in
++--- Firebird-2.5.7.27050-0.orig/configure.in	2018-04-05 08:39:49.919522041 +0200
+++++ Firebird-2.5.7.27050-0/configure.in	2018-04-05 08:42:22.818507550 +0200
++@@ -251,6 +251,18 @@ dnl CPU_TYPE=ppc64
++     SHRLIB_EXT=so
++     ;;
++ 
+++  riscv64*-*-linux*)
+++    MAKEFILE_PREFIX=linux_riscv64
+++    INSTALL_PREFIX=linux
+++    PLATFORM=LINUX
+++    AC_DEFINE(LINUX, 1, [Define this if OS is Linux])
+++    EDITLINE_FLG=Y
+++    SHRLIB_EXT=so
+++    STD_EDITLINE=true
+++    STD_ICU=true
+++    libdir=/usr/lib64
+++    ;;
+++
++   powerpc64le-*-linux*)
++     MAKEFILE_PREFIX=linux_powerpc64el
++     INSTALL_PREFIX=linux
++diff -rupN Firebird-2.5.7.27050-0.orig/src/jrd/common.h Firebird-2.5.7.27050-0/src/jrd/common.h
++--- Firebird-2.5.7.27050-0.orig/src/jrd/common.h	2018-04-05 08:39:49.923522041 +0200
+++++ Firebird-2.5.7.27050-0/src/jrd/common.h	2018-04-05 08:48:51.674470695 +0200
++@@ -200,7 +200,9 @@
++ #define IMPLEMENTATION  isc_info_db_impl_linux_ppc64el	/* 85  */
++ #endif /* PPC64EL */
++ 
++-
+++#ifdef __riscv
+++#define IMPLEMENTATION  isc_info_db_impl_linux_riscv64 /* 86 */
+++#endif /* __riscv */
++ 
++ #endif /* LINUX */
++ 
++diff -rupN Firebird-2.5.7.27050-0.orig/src/jrd/inf_pub.h Firebird-2.5.7.27050-0/src/jrd/inf_pub.h
++--- Firebird-2.5.7.27050-0.orig/src/jrd/inf_pub.h	2018-04-05 08:39:49.931522040 +0200
+++++ Firebird-2.5.7.27050-0/src/jrd/inf_pub.h	2018-04-05 08:43:48.035499473 +0200
++@@ -218,6 +218,8 @@ enum  info_db_implementations
++ 	isc_info_db_impl_linux_arm64 = 84,
++ 	isc_info_db_impl_linux_ppc64el = 85,
++ 
+++	isc_info_db_impl_linux_riscv64 = 86,
+++
++ 	isc_info_db_impl_last_value   // Leave this LAST!
++ };
++ 
++diff -rupN Firebird-2.5.7.27050-0.orig/src/jrd/pag.cpp Firebird-2.5.7.27050-0/src/jrd/pag.cpp
++--- Firebird-2.5.7.27050-0.orig/src/jrd/pag.cpp	2018-04-05 08:39:49.927522040 +0200
+++++ Firebird-2.5.7.27050-0/src/jrd/pag.cpp	2018-04-06 20:37:56.333249661 +0200
++@@ -165,6 +165,7 @@ static const int CLASS_LINUX_HPPA = 40;
++ static const int CLASS_LINUX_ALPHA = 41;	// LINUX/ALPHA
++ static const int CLASS_LINUX_ARM64 = 42;	// LINUX/ARM64
++ static const int CLASS_LINUX_PPC64EL = 43;	// LINUX/PowerPc64EL
+++static const int CLASS_LINUX_RISCV64 = 44;	// LINUX/PowerPc64EL
++ 
++ 
++ static const int CLASS_MAX10 = CLASS_LINUX_AMD64;	// This should not be changed, no new ports with ODS10
++@@ -338,6 +339,8 @@ const SSHORT CLASS		= CLASS_LINUX_ALPHA;
++ const SSHORT CLASS		= CLASS_LINUX_ARM64;
++ #elif defined(PPC64EL)
++ const SSHORT CLASS		= CLASS_LINUX_PPC64EL;
+++#elif defined(__riscv)
+++const SSHORT CLASS		= CLASS_LINUX_RISCV64;
++ #else
++ #error no support on other hardware for Linux
++ #endif
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-06 20:40:00.930237852 +0200
++++ b/PKGBUILD	2018-04-06 20:40:00.931237852 +0200
+@@ -9,19 +9,22 @@ pkgdesc="Client library for Firebird."
+ arch=('x86_64')
+ url="http://www.firebirdsql.org/"
+ license=('custom')
+-depends=('gcc-libs' 'icu')
++depends=('gcc-libs' 'icu' 'libatomic_ops')
+ options=('!makeflags')
+ source=(http://downloads.sourceforge.net/firebird/Firebird-$pkgver-0.tar.bz2
+         firebird-c++11.patch
+         firebird-c++14.patch
+-        LICENSE)
++        LICENSE
++        0001-Port-to-RISC-V-64-bit-riscv64.patch)
+ md5sums=('fb34241e96f9707604bf6cd78357d5a2'
+          '5094347a8298143ca147edd49b552fe9'
+          'a02710203cee81b4f48b7bdca3b1b33f'
+-         '0d61798861e159c85dbdf0f30fe2f2ce')
++         '0d61798861e159c85dbdf0f30fe2f2ce'
++         '8f364177ea80030ca6cb1bad2189c9ec')
+ 
+ prepare() {
+   cd $srcdir/Firebird-$pkgver-0
++  patch -Np1 -i ../0001-Port-to-RISC-V-64-bit-riscv64.patch
+   patch -Np1 -i ../firebird-c++11.patch
+   patch -Np0 -i ../firebird-c++14.patch
+ }

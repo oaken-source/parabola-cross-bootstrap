@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-05 08:19:33.480637332 +0200
++++ b/PKGBUILD	2018-04-05 08:19:33.481637332 +0200
+@@ -11,7 +11,7 @@ arch=(i686 x86_64)
+ url="http://gypsy.freedesktop.org/"
+ license=(GPL)
+ depends=(dbus-glib bluez bluez-libs libgudev)
+-makedepends=(libxslt)
++makedepends=(libxslt python)
+ source=("http://gypsy.freedesktop.org/releases/$pkgname-$pkgver.tar.gz"
+         g_type_init_deprecation.patch)
+ md5sums=('e2d186df9c2cc3b70a027043e22acf1a'

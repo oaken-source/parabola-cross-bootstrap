@@ -1,0 +1,14 @@
+--- a/PKGBUILD	2018-04-04 20:37:47.115628062 +0200
++++ b/PKGBUILD	2018-04-04 20:50:44.504554383 +0200
+@@ -12,9 +12,8 @@ url="http://www.webdav.org/neon/"
+ license=('GPL' 'LGPL')
+ depends=('krb5' 'expat' 'ca-certificates' 'zlib')
+ options=('libtool') # FS#16067
+-source=(http://www.webdav.org/${pkgname}/${pkgname}-${pkgver}.tar.gz{,.asc})
+-sha1sums=('d1c020f96731135263476ebaa72b2da07c4727cd'
+-          'SKIP')
++source=(http://www.webdav.org/${pkgname}/${pkgname}-${pkgver}.tar.gz)
++sha1sums=('d1c020f96731135263476ebaa72b2da07c4727cd')
+ validpgpkeys=('190555472DCC589BEF01609C608A86DF9833CC49') # Joe Orton
+ 
+ build() {

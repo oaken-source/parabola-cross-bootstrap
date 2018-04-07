@@ -105,7 +105,7 @@ EOF
       popd >/dev/null || return
 
       if [ "$res" -ne 0 ]; then
-        notify -c error "$CHOST-$pkg" -h string:document:"$(readlink -f .MAKEPKGLOG)"
+        notify -c error "$CHOST-${pkg//_/\\_}" -h string:document:"$(readlink -f .MAKEPKGLOG)"
         return "$res"
       fi
 

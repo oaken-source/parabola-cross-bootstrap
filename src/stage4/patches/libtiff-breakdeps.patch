@@ -1,0 +1,13 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-06 21:06:26.440087582 +0200
++++ b/PKGBUILD	2018-04-06 21:06:26.441087582 +0200
+@@ -9,8 +9,7 @@ arch=('x86_64')
+ url="http://www.simplesystems.org/libtiff/"
+ license=('custom')
+ depends=('libjpeg' 'zlib' 'xz')
+-makedepends=('freeglut' 'glu' 'mesa' 'jbigkit')
+-optdepends=('freeglut: for using tiffgt')
++makedepends=('jbigkit')
+ source=(http://download.osgeo.org/libtiff/tiff-${pkgver}.tar.gz)
+ sha256sums=('6e7bdeec2c310734e734d19aae3a71ebe37a4d842e0e23dbb1b8921c0026cfcd')
+ 

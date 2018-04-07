@@ -36,14 +36,16 @@ stage3_makepkg() {
   sed "s#@MULTILIB@#${MULTILIB:-disable}#g" \
     PKGBUILD.in > PKGBUILD
 
+  # prepare the pkgbuild
   package_enable_arch "$CARCH"
+  echo "checkdepends=()" >> PKGBUILD
 
   # check built dependencies
   local dep
   for dep in $(srcinfo_builddeps -n); do
     deptree_check_depend "$1" "$dep" || return
   done
-  for dep in $(srcinfo_rundeps "$1"); do
+  for dep in $(srcinfo_rundeps "$pkgname"); do
     deptree_check_depend "$1" "$dep" || return
   done
 
@@ -52,9 +54,6 @@ stage3_makepkg() {
 
   # don't rebuild if already exists
   check_pkgfile "$PKGDEST" "$1" && return
-
-  # disable checkdepends
-  echo "checkdepends=()" >> PKGBUILD
 
   if [ "x$1" != "x$pkgname" ]; then
     # a bit of magic for -decross builds
@@ -88,15 +87,16 @@ stage3_package_build() {
 }
 
 stage3_package_install() {
-  local pkgfile
-  pkgfile=$(find "$PKGDEST" -regex "^.*/$1-[^-]*-[^-]*-[^-]*\\.pkg\\.tar\\.xz\$" | head -n1)
+  local esc pkgfile
+  esc=$(printf '%s\n' "$1" | sed 's:[][\/.^$*]:\\&:g')
+  pkgfile=$(find "$PKGPOOL" -regex "^.*/$esc-[^-]*-[^-]*-[^-]*\\.pkg\\.tar\\.xz\$" | head -n1)
   [ -n "$pkgfile" ] || { error "$1: pkgfile not found"; return "$ERROR_MISSING"; }
 
   yes | librechroot \
       -n "$CHOST-stage3" \
       -C "$BUILDDIR"/config/pacman.conf \
       -M "$BUILDDIR"/config/makepkg.conf \
-    run pacman -Udd /repos/native/"$CARCH"/"$(basename "$pkgfile")" || return
+    run pacman -U /repos/native/"$CARCH"/"$(basename "$pkgfile")" || return
   yes | librechroot \
       -n "$CHOST-stage3" \
       -C "$BUILDDIR"/config/pacman.conf \
@@ -124,26 +124,25 @@ stage3() {
 
   binfmt_enable
 
-  prepare_stage3_makepkg || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH makepkg"
-  prepare_stage3_chroot || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH chroot"
   prepare_deptree "${groups[@]}" || die -e "$ERROR_BUILDFAIL" "failed to prepare DEPTREE"
-
   local pkg
   for pkg in "${decross[@]}"; do
     deptree_add_entry "$pkg-decross"
   done
-
   echo "remaining pkges: $(wc -l < "$DEPTREE") / $(wc -l < "$DEPTREE".FULL)"
-  if [ -s "$DEPTREE" ]; then
-    check_exe -r librechroot libremakepkg
+  [ -s "$DEPTREE" ] || return 0
 
-    for pkg in "${decross[@]}"; do
-      package_build stage3_package_build stage3_package_install "$pkg-decross" || return
-    done
+  prepare_stage3_makepkg || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH makepkg"
+  prepare_stage3_chroot || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH chroot"
 
-    # build packages from deptree
-    packages_build_all stage3_package_build stage3_package_install || return
-  fi
+  check_exe -r librechroot libremakepkg
+
+  for pkg in "${decross[@]}"; do
+    package_build stage3_package_build stage3_package_install "$pkg-decross" || return
+  done
+
+  # build packages from deptree
+  packages_build_all stage3_package_build stage3_package_install || return
 
   # cleanup
   umount_stage3_chrootdir

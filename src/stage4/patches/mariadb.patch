@@ -1,0 +1,12 @@
+--- a/PKGBUILD	2018-04-04 07:50:18.882992391 +0200
++++ b/PKGBUILD	2018-04-04 07:52:20.382980876 +0200
+@@ -37,6 +37,9 @@ prepare() {
+   # mroonga after-merge CMakeLists.txt fixes
+   patch -Np1 -R < "${srcdir}"/0002-mroonga-after-merge-CMakeLists.txt-fixes.patch
+ 
++  # remove _init and _fini references from libmysql
++  sed -i '/ _\(init\|fini\)/d' libmysql/CMakeLists.txt
++
+   # let's create the datadir from tmpfiles
+   echo 'd @MYSQL_DATADIR@ 0700 @MYSQLD_USER@ @MYSQLD_USER@ -' >> support-files/tmpfiles.conf.in
+ }

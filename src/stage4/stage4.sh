@@ -24,47 +24,65 @@
 . "$TOPSRCDIR"/stage4/chroot.sh
 
 stage4_makepkg() {
-  package_fetch_upstream_pkgfiles "$1" || return
-  package_import_keys "$1" || return
-  package_patch "$1" || return
+  local pkgname="${1%-breakdeps}"
+  local prefix=()
+  [ "x$1" != "x$pkgname" ] && prefix=(-r -p breakdeps)
+
+  package_fetch_upstream_pkgfiles "$pkgname" || return
+  package_import_keys "$pkgname" || return
+  package_patch "${prefix[@]}" "$pkgname" || return
 
   # substitute common variables
   sed "s#@MULTILIB@#${MULTILIB:-disable}#g" \
     PKGBUILD.in > PKGBUILD
 
+  # prepare the pkgbuild
   package_enable_arch "$CARCH"
+  echo "checkdepends=()" >> PKGBUILD
 
   # check built dependencies
   local dep
   for dep in $(srcinfo_builddeps -n); do
     deptree_check_depend "$1" "$dep" || return
   done
-  for dep in $(srcinfo_rundeps "$1"); do
+  for dep in $(srcinfo_rundeps "$pkgname"); do
     deptree_check_depend "$1" "$dep" || return
   done
 
-  # postpone build if necessary
-  deptree_is_satisfyable "$1" || return 0
+  if ! deptree_is_satisfyable "$1"; then
+    # add a temporary -breakdeps build, if a patch exists
+    if [ "x$1" == "x$pkgname" ] && package_has_patch -p breakdeps "$1"; then
+      deptree_add_entry "$1-breakdeps" "$1"
+      sed -i "s/ $pkgname / $pkgname-breakdeps /g" "$DEPTREE"
+    fi
+    # postpone actual build
+    return 0
+  fi
 
   # don't rebuild if already exists
   check_pkgfile "$PKGPOOL" "$1" && return
 
-  # disable checkdepends
-  echo "checkdepends=()" >> PKGBUILD
+  # prepare the chroot
+  yes | librechroot \
+      -n "$CHOST-stage4" \
+      -C "$BUILDDIR"/config/pacman.conf \
+      -M "$BUILDDIR"/config/makepkg.conf \
+    run pacman -Scc || return
 
-  # regular build otherwise
+  # build the package
   "$BUILDDIR/libremakepkg-$CARCH.sh" -n "$CHOST"-stage4 || return
 }
 
 stage4_package_build() {
+  local pkgname="${1%-breakdeps}"
   local pkgarch
-  pkgarch=$(pkgarch "$1") || return
+  pkgarch=$(pkgarch "$pkgname") || return
 
   # clean staging
   rm -f "$PKGDEST"/*
 
-  if [ "x$pkgarch" == "xany" ] || [ "x$1" == "xca-certificates-mozilla" ]; then
-    package_reuse_upstream "$1" || return
+  if [ "x$pkgarch" == "xany" ]; then
+    package_reuse_upstream "$pkgname" || return
   else
     stage4_makepkg "$1" || return
   fi
@@ -72,31 +90,49 @@ stage4_package_build() {
   # postpone on unmet dependencies
   deptree_is_satisfyable "$1" || return 0
 
-  # release the package
-  local pkgfile pkgname pkgrepo
-  for pkgfile in "$PKGDEST"/*; do
-    pkgname="${pkgfile%-*-*-*}"
-    pkgrepo=$(package_get_upstream_repo "$pkgname")
-    pushd "$PKGDEST/../$pkgrepo/os/$CARCH" >/dev/null || return
+  # release built packages
+  shopt -s nullglob
+  local pkgfiles=("$PKGDEST"/*)
+  shopt -u nullglob
 
-    ln -fs ../../../pool/"$(basename "$pkgfile")" "$(basename "$pkgfile")"
-    mv "$pkgfile" "$PKGPOOL"
-    repo-add -qR "$pkgrepo.db.tar.gz" "$(basename "$pkgfile")"
+  local file name repo
+  for file in "${pkgfiles[@]}"; do
+    file="$(basename "$file")"
+    name="${file%-*-*-*}"
+    echo -n "checking for $name upstream repo ..."
+    repo=$(package_get_upstream_repo "$name")
+    echo "$repo"
+
+    if [ "x$1" != "x$pkgname" ]; then
+      mv "$PKGDEST/$file" "$PKGDEST/${file/$name/$name-breakdeps}" || return
+      file="${file/$name/$name-breakdeps}"
+      name="$name-breakdeps"
+    else
+      rm -f "$PKGPOOL/${file/$name/$name-breakdeps}" \
+            "$PKGPOOL/../$repo/os/$CARCH/${file/$name/$name-breakdeps}"
+    fi
+
+    pushd "$PKGDEST/../$repo/os/$CARCH" >/dev/null || return
+
+    ln -fs ../../../pool/"$file" "$file" || return
+    mv "$PKGDEST/$file" "$PKGPOOL" || return
+    repo-add -q -R "$repo.db.tar.gz" "$PKGPOOL/$file" || return
 
     popd >/dev/null || return
   done
 }
 
 stage4_package_install() {
-  local pkgfile
-  pkgfile=$(find "$PKGPOOL" -regex "^.*/$1-[^-]*-[^-]*-[^-]*\\.pkg\\.tar\\.xz\$" | head -n1)
-  [ -n "$pkgfile" ] || { error "$1: pkgfile not found"; return "$ERROR_MISSING"; }
+  local esc pkgfile
+  esc=$(printf '%s\n' "$1" | sed 's:[][\/.+^$*]:\\&:g')
+  pkgfile=$(find "$PKGPOOL" -regex "^.*/$esc-[^-]*-[^-]*-[^-]*\\.pkg\\.tar\\.xz\$" | head -n1)
+  [ -n "$pkgfile" ] || { error -n "$1: pkgfile not found"; return "$ERROR_MISSING"; }
 
   yes | librechroot \
       -n "$CHOST-stage4" \
       -C "$BUILDDIR"/config/pacman.conf \
       -M "$BUILDDIR"/config/makepkg.conf \
-    run pacman -Udd /repos/pool/"$(basename "$pkgfile")" || return
+    run pacman -U /repos/pool/"$(basename "$pkgfile")" || return
   yes | librechroot \
       -n "$CHOST-stage4" \
       -C "$BUILDDIR"/config/pacman.conf \
@@ -123,17 +159,17 @@ stage4() {
 
   binfmt_enable
 
+  prepare_deptree "${groups[@]}" || die -e "$ERROR_BUILDFAIL" "failed to prepare DEPTREE"
+  echo "remaining pkges: $(wc -l < "$DEPTREE") / $(wc -l < "$DEPTREE".FULL)"
+  [ -s "$DEPTREE" ] || return 0
+
   prepare_stage4_makepkg || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH makepkg"
   prepare_stage4_chroot || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH chroot"
-  prepare_deptree "${groups[@]}" || die -e "$ERROR_BUILDFAIL" "failed to prepare DEPTREE"
 
-  echo "remaining pkges: $(wc -l < "$DEPTREE") / $(wc -l < "$DEPTREE".FULL)"
-  if [ -s "$DEPTREE" ]; then
-    check_exe -r librechroot libremakepkg
+  check_exe -r librechroot libremakepkg
 
-    # build packages from deptree
-    packages_build_all stage4_package_build stage4_package_install || return
-  fi
+  # build packages from deptree
+  packages_build_all stage4_package_build stage4_package_install || return
 
   # cleanup
   umount_stage4_chrootdir

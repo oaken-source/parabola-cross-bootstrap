@@ -1,0 +1,56 @@
+diff -rupN a/0001-nss-riscv-support.patch b/0001-nss-riscv-support.patch
+--- a/0001-nss-riscv-support.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/0001-nss-riscv-support.patch	2018-04-05 08:28:21.522587285 +0200
+@@ -0,0 +1,22 @@
++--- a/nss/build.sh	2018-03-05 16:58:32.000000000 +0100
+++++ b/nss/build.sh	2018-04-05 07:27:59.516930570 +0200
++@@ -58,7 +58,7 @@ ninja_params=()
++ 
++ # try to guess sensible defaults
++ arch=$(python "$cwd"/coreconf/detect_host_arch.py)
++-if [ "$arch" = "x64" -o "$arch" = "aarch64" ]; then
+++if [ "$arch" = "x64" -o "$arch" = "aarch64" -o "$arch" = "riscv64" ]; then
++     build_64=1
++ elif [ "$arch" = "arm" ]; then
++     armhf=1
++--- a/nss/coreconf/config.gypi	2018-03-05 16:58:32.000000000 +0100
+++++ b/nss/coreconf/config.gypi	2018-04-05 08:25:11.442605301 +0200
++@@ -174,7 +174,7 @@
++           },
++         },
++       }],
++-      [ 'target_arch=="arm64" or target_arch=="aarch64" or target_arch=="sparc64" or target_arch=="ppc64" or target_arch=="ppc64le" or target_arch=="s390x" or target_arch=="mips64"', {
+++      [ 'target_arch=="arm64" or target_arch=="aarch64" or target_arch=="sparc64" or target_arch=="ppc64" or target_arch=="ppc64le" or target_arch=="s390x" or target_arch=="mips64" or target_arch=="riscv64"', {
++         'defines': [
++           'NSS_USE_64',
++         ],
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-05 08:28:21.520587286 +0200
++++ b/PKGBUILD	2018-04-05 08:28:21.521587285 +0200
+@@ -14,14 +14,16 @@ depends=("nspr>=${_nsprver}" sqlite zlib
+ makedepends=(perl python2 xmlto docbook-xsl gyp)
+ options=(!strip !makeflags staticlibs)
+ source=("https://ftp.mozilla.org/pub/security/nss/releases/NSS_${pkgver//./_}_RTM/src/nss-${pkgver}.tar.gz"
+-        certdata2pem.py bundle.sh nss.pc.in nss-config.in nss-config.xml enable-libpkix.patch)
++        certdata2pem.py bundle.sh nss.pc.in nss-config.in nss-config.xml enable-libpkix.patch
++        0001-nss-riscv-support.patch)
+ sha256sums=('a33cc7b8299b5ce3acf03f617c7896932ae26927ff9fb7c71c1b69a200c30095'
+             '512b12a2f13129be62c008b4df0153f527dd7d71c2c5183de99dfa2a1c49dd8a'
+             '3bfadf722da6773bdabdd25bdf78158648043d1b7e57615574f189a88ca865dd'
+             'f2208c4f70373ff9b60f53d733f8071d4e390c384b776dfc04bf26c306882faf'
+             'e44ac5095b4d88f24ec7b2e6a9f1581560bd3ad41a3d198596d67ef22f67adb9'
+             '98ace873c63e8e870286bce3ed53249aa2655cc1f53e7049061476e650ab06f1'
+-            '0b68c5ffbfeec090e950e5703e6b0519eafcb7eaf4fe2f64c355d0ddf17eed30')
++            '0b68c5ffbfeec090e950e5703e6b0519eafcb7eaf4fe2f64c355d0ddf17eed30'
++            '3f61d77d9fc596c600fbe5c4cd90cb52a90a74c81ff046200eb8e1a1fc5243fe')
+ 
+ prepare() {
+   mkdir certs path
+@@ -34,6 +36,7 @@ prepare() {
+ 
+   cd nss-$pkgver
+ 
++  patch -Np1 -i ../0001-nss-riscv-support.patch
+   patch -Np1 -i ../enable-libpkix.patch
+ 
+   ln -sr nss/lib/ckfw/builtins/certdata.txt ../certs/

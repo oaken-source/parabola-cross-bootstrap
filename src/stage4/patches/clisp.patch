@@ -1,0 +1,23 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-06 04:59:13.746587767 +0200
++++ b/PKGBUILD	2018-04-06 04:59:13.746587767 +0200
+@@ -9,7 +9,6 @@ license=('GPL')
+ url="http://clisp.cons.org/"
+ depends=('readline' 'libsigsegv')
+ provides=('common-lisp')
+-makedepends=('ffcall')
+ options=('!makeflags' '!emptydirs')
+ source=("http://downloads.sourceforge.net/sourceforge/clisp/clisp-${pkgver}.tar.bz2"
+         "clisp-gcc5.patch"
+@@ -30,9 +29,9 @@ prepare() {
+ 
+ build() {
+   cd $srcdir/${pkgname}-${pkgver}
+-  ./configure --prefix=/usr --with-readline --with-ffcall src
++  ./configure --prefix=/usr --with-readline src
+   cd src
+-  ./makemake --prefix=/usr --with-readline --with-ffcall --with-dynamic-ffi > Makefile
++  ./makemake --prefix=/usr --with-readline --with-dynamic-ffi > Makefile
+   make
+   sed -i 's,http://www.lisp.org/HyperSpec/,http://www.lispworks.com/reference/HyperSpec/,g' config.lisp
+   make

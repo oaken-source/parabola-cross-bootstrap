@@ -1,0 +1,26 @@
+apache-ant:depends on java-environment
+clisp:no port exists
+ffcall:no port exists
+gdb:no port exists
+gcc-ada:bootstrap needed
+gcc-go:libffi patch needed
+gcc-objc:libffi patch needed
+gcc-objc++:libffi patch needed
+go:bootstrap needed
+jdk7-openjdk:build broken
+jre7-openjdk:build broken
+jre7-openjdk-headless:build broken
+jdk8-openjdk:build broken
+jre8-openjdk:build broken
+jre8-openjdk-headless:build broken
+jdk9-openjdk:build broken
+jre9-openjdk:build broken
+jre9-openjdk-headless:build broken
+lib32-gcc-libs:no multilib
+lib32-glibc:no multilib
+libreoffice-fresh:depends on java-environment
+libreoffice-still:depends on java-environment
+maven:depends on java-environment (and is a pita)
+rust:bootstrap needed
+unoconv:depends on libreoffice-fresh
+valgrind:no port exists

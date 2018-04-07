@@ -1,0 +1,52 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-05 20:31:07.519477171 +0200
++++ b/PKGBUILD	2018-04-05 20:31:07.520477171 +0200
+@@ -10,40 +10,27 @@ pkgdesc="Compiler for the GObject type s
+ url="https://wiki.gnome.org/Projects/Vala"
+ arch=(x86_64)
+ license=(LGPL)
+-depends=(glib2 gtk-doc graphviz ttf-font pkg-config gcc)
+-makedepends=(libxslt vala git help2man)
++depends=(glib2 gtk-doc ttf-font pkg-config gcc)
++makedepends=(libxslt git help2man)
+ checkdepends=(dbus libx11 gobject-introspection)
+ provides=(valadoc)
+ conflicts=(valadoc)
+ replaces=(valadoc)
+ _commit=3a11e70aefae4f2344b6352440e82cab0963f4f7  # tags/0.40.2^0
+-source=("git+https://git.gnome.org/browse/vala#commit=$_commit")
++source=("git://git.gnome.org/vala-bootstrap")
+ sha256sums=('SKIP')
+ 
+-pkgver() {
+-  cd $pkgname
+-  git describe --tags | sed 's/-/+/g'
+-}
+-
+-prepare() {
+-  cd $pkgname
+-  NOCONFIGURE=1 ./autogen.sh
+-}
+-
+ build() {
+-  cd $pkgname
+-  ./configure --prefix=/usr
++  cd $pkgname-bootstrap
++  ./autogen.sh
++  ./configure --prefix=/usr --disable-build-from-vala \
++    --disable-vapigen --disable-silent-rules
+   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+   make
+ }
+ 
+-check() {
+-  cd $pkgname
+-  make check
+-}
+-
+ package() {
+-  cd $pkgname
++  cd $pkgname-bootstrap
+   make DESTDIR="$pkgdir" install
+ }
+ 

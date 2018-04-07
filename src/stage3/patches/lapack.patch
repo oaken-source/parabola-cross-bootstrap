@@ -12,7 +12,7 @@
  pkgdesc="Linear Algebra PACKage"
 -makedepends=('gcc-fortran' 'cmake' 'python' 'doxygen')
 +makedepends=('gcc-fortran' 'cmake' 'python')
- arch=('x86_64')
+ arch=('i686' 'x86_64')
  license=("custom")
  source=(http://www.netlib.org/${pkgbase}/${pkgbase}-${pkgver}.tar.gz LICENSE.blas)
 @@ -32,10 +32,6 @@ build() {

@@ -39,7 +39,6 @@ mkdir -p "$TOPBUILDDIR" "$SRCDEST"
 chown "$SUDO_USER" "$TOPBUILDDIR"
 
 # options
-export KEEP_GOING=${KEEP_GOING:-no}
 export REGEN_CONFIG_FRAGMENTS=${REGEN_CONFIG_FRAGMENTS:-yes}
 
 # shellcheck source=src/shared/common.sh

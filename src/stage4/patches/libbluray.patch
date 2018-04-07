@@ -1,0 +1,21 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-07 07:13:46.970633845 +0200
++++ b/PKGBUILD	2018-04-07 07:13:46.971633845 +0200
+@@ -12,8 +12,6 @@ arch=('x86_64')
+ url='http://www.videolan.org/developers/libbluray.html'
+ license=('LGPL2.1')
+ depends=('fontconfig' 'glibc' 'libfreetype.so' 'libxml2')
+-makedepends=('apache-ant' 'java-environment=8')
+-optdepends=('java-runtime=8: BD-J library')
+ provides=('libbluray.so')
+ source=("ftp://ftp.videolan.org/pub/videolan/libbluray/${pkgver}/libbluray-${pkgver}.tar.bz2")
+ sha256sums=('6d9e7c4e416f664c330d9fa5a05ad79a3fb39b95adfc3fd6910cbed503b7aeff')
+@@ -22,7 +20,7 @@ build() {
+   cd libbluray-${pkgver}
+ 
+   ./configure \
+-    --prefix='/usr'
++    --prefix='/usr' --disable-bdjava-jar
+   make
+ }
+ 

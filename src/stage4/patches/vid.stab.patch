@@ -1,0 +1,12 @@
+--- a/PKGBUILD	2018-04-04 11:40:28.747683529 +0200
++++ b/PKGBUILD	2018-04-04 17:23:24.062733455 +0200
+@@ -24,6 +24,9 @@ prepare() {
+     rm -rf build
+   fi
+   mkdir build
++
++  # disable sse support
++  sed -i '/FindSSE/d' CMakeLists.txt
+ }
+ 
+ build() {

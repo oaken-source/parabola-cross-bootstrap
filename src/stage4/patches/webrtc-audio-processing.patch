@@ -1,0 +1,40 @@
+--- a/PKGBUILD	2018-04-04 01:48:45.544048429 +0200
++++ b/PKGBUILD	2018-04-04 08:31:13.560759744 +0200
+@@ -11,8 +11,10 @@ license=(custom)
+ depends=(gcc-libs)
+ makedepends=(git)
+ _commit=fc0e76139404e08cc5b8024daafa1ddf576a4e21  # tags/v0.3^0
+-source=("git+https://anongit.freedesktop.org/git/pulseaudio/webrtc-audio-processing#commit=$_commit")
+-sha256sums=('SKIP')
++source=("git+https://anongit.freedesktop.org/git/pulseaudio/webrtc-audio-processing#commit=$_commit"
++        "webrtc-audio-processing-riscv.patch")
++sha256sums=('SKIP'
++            '4eaed1caef3af5995f52044692c111e5fccd6209b16ab78847e28d4ae51256a1')
+ 
+ pkgver() {
+   cd $pkgname
+@@ -21,6 +23,7 @@ pkgver() {
+ 
+ prepare() {
+   cd $pkgname
++  patch -Np1 -i ../webrtc-audio-processing-riscv.patch
+   NOCONFIGURE=1 ./autogen.sh
+ }
+ 
+--- /dev/null	2018-03-20 11:36:27.102196685 +0100
++++ b/webrtc-audio-processing-riscv.patch	2018-04-04 08:30:10.946765678 +0200
+@@ -0,0 +1,14 @@
++diff --git a/webrtc/typedefs.h b/webrtc/typedefs.h
++index d875490..ed1e9a4 100644
++--- a/webrtc/typedefs.h
+++++ b/webrtc/typedefs.h
++@@ -47,6 +47,9 @@
++ #elif defined(__pnacl__)
++ #define WEBRTC_ARCH_32_BITS
++ #define WEBRTC_ARCH_LITTLE_ENDIAN
+++#elif defined(__riscv)
+++#define WEBRTC_ARCH_64_BITS
+++#define WEBRTC_ARCH_LITTLE_ENDIAN
++ #else
++ #error Please add support for your architecture in typedefs.h
++ #endif

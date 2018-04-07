@@ -100,26 +100,28 @@ check_gpgkey() {
 }
 
 check_pkgfile() {
-  local OPTIND o r=
-  while getopts "r" o; do
+  local OPTIND o r=no p=''
+  while getopts "p:r" o; do
     case "$o" in
       r) r=yes ;;
-      *) die -e "$ERROR_INVOCATION" "Usage: ${FUNCNAME[0]} [-r] key" ;;
+      p) p="-$OPTARG" ;;
+      *) die -e "$ERROR_INVOCATION" "Usage: ${FUNCNAME[0]} [-r] [-p string] key" ;;
     esac
   done
   shift $((OPTIND-1))
 
   echo -n "checking for built package $2 ... "
 
-  local pkgfile have_pkgfile=yes
-  pkgfile=$(find "$1" -regex "^.*/$2-[^-]*-[^-]*-[^-]*\\.pkg\\.tar\\.xz\$")
+  local esc pkgfile have_pkgfile=yes
+  esc=$(printf '%s\n' "$2" | sed 's:[][\/.^$*]:\\&:g')
+  pkgfile=$(find "$1" -regex "^.*/$esc$p-[^-]*-[^-]*-[^-]*\\.pkg\\.tar\\.xz\$")
   [ -n "$pkgfile" ] || have_pkgfile=no
   echo $have_pkgfile
 
-  if [ "x$have_pkgfile" != "xyes" ]; then
-    [ "x$r" == "xyes" ] && die -e "$ERROR_MISSING" "missing package $2 in $1"
-    return "$ERROR_MISSING"
-  fi
+  [ "x$have_pkgfile" == "xyes" ] && return
+
+  [ "x$r" == "xyes" ] && die -e "$ERROR_MISSING" "missing package $2 in $1"
+  return "$ERROR_MISSING"
 }
 
 check_repo() {

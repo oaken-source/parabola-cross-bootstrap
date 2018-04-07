@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-05 10:50:53.694776733 +0200
++++ b/PKGBUILD	2018-04-05 10:50:53.695776733 +0200
+@@ -11,7 +11,7 @@ license=('GPL')
+ url="https://www.freetype.org/"
+ # adding harfbuzz for improved OpenType features auto-hinting
+ # introduces a cycle dep to harfbuzz depending on freetype wanted by upstream
+-depends=('zlib' 'bzip2' 'sh' 'libpng' 'harfbuzz')
++depends=('zlib' 'bzip2' 'sh' 'libpng')
+ makedepends=('libx11')
+ source=(https://download-mirror.savannah.gnu.org/releases/freetype/freetype-${pkgver}.tar.bz2{,.sig}
+         https://download-mirror.savannah.gnu.org/releases/freetype/freetype-doc-${pkgver}.tar.bz2{,.sig}

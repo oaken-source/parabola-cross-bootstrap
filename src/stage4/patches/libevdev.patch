@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-05 20:52:13.278357206 +0200
++++ b/PKGBUILD	2018-04-05 20:52:13.278357206 +0200
+@@ -9,7 +9,7 @@ arch=(x86_64)
+ url="http://www.freedesktop.org/wiki/Software/libevdev/"
+ license=(custom:X11)
+ depends=('glibc')
+-makedepends=('python2' 'check' 'valgrind' 'doxygen')
++makedepends=('python2' 'check' 'doxygen')
+ #checkdepends=('kmod')
+ source=(https://freedesktop.org/software/$pkgname/$pkgname-$pkgver.tar.xz{,.sig})
+ sha512sums=('4496ab4d9dc165f416a574c21a7fcee54ae104c21ef4785a4dd0311fff428020cdbb5da7bf3f835e78dae05effdb1a557d189347f6e62dd6be2d8bcdc845850c'

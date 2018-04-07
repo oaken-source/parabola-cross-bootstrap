@@ -1,0 +1,18 @@
+--- a/PKGBUILD	2018-04-04 19:52:04.012888046 +0200
++++ b/PKGBUILD	2018-04-04 20:28:28.093681044 +0200
+@@ -14,10 +14,14 @@ makedepends=(git cmake python-lxml libx1
+ source=("https://github.com/KhronosGroup/${_pkgname}/archive/sdk-${pkgver}.tar.gz")
+ sha256sums=('bd30ffe25a0723775ea8427d65e96bbad6f5130674ac6577ec639b54ce811397')
+ 
+-build() {
++prepare() {
+   cd "${srcdir}/${_pkgname}-sdk-${pkgver}"
+ 
+   ./update_external_sources.sh
++}
++
++build() {
++  cd "${srcdir}/${_pkgname}-sdk-${pkgver}"
+ 
+   rm -rf build ; mkdir build ; cd build
+   cmake -DCMAKE_INSTALL_PREFIX=/usr \

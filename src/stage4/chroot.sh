@@ -40,8 +40,8 @@ umount_stage4_chrootdir() {
   local chrootdir
   chrootdir="$(librechroot -n "$CHOST-stage4" 2>&1 | grep "copydir.*:" | awk '{print $3}')"
 
-  umount "$chrootdir"/repos/repos/
-  umount "$chrootdir"/repos/native/
+  umount "$chrootdir"/repos/
+  umount "$chrootdir"/native/
 
   trap - INT TERM EXIT
 }
@@ -62,7 +62,7 @@ prepare_stage4_chroot() {
 
   check_stage4_chroot "$chrootdir" || build_stage4_chroot "$chrootdir" || return
 
-  mount_stage3_chrootdir "$chrootdir"
+  mount_stage4_chrootdir "$chrootdir"
 
   librechroot -n "$CHOST-stage4" \
               -C "$BUILDDIR"/config/pacman.conf \

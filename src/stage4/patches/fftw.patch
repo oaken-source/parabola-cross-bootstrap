@@ -1,0 +1,29 @@
+--- a/PKGBUILD	2018-04-04 10:16:24.430161616 +0200
++++ b/PKGBUILD	2018-04-04 10:20:03.465140856 +0200
+@@ -29,7 +29,7 @@ build() {
+   
+ 
+   # use upstream default CFLAGS while keeping our -march/-mtune
+-  CFLAGS+=" -O3 -fomit-frame-pointer -malign-double -fstrict-aliasing -ffast-math"
++  CFLAGS+=" -O3 -fomit-frame-pointer -fstrict-aliasing -ffast-math"
+ 
+   CONFIGURE="./configure F77=gfortran --prefix=/usr \
+                  --enable-shared --enable-threads \
+@@ -37,7 +37,7 @@ build() {
+ 
+   # build double precision
+   cd ${srcdir}/${pkgname}-${pkgver}-double
+-  $CONFIGURE --enable-sse2 --enable-avx
++  $CONFIGURE
+   make
+ 
+   # build & install long double precission
+@@ -47,7 +47,7 @@ build() {
+ 
+   # build & install single precision
+   cd ${srcdir}/${pkgname}-${pkgver}-single
+-  $CONFIGURE --enable-float --enable-sse --enable-avx
++  $CONFIGURE --enable-float
+   make
+ }
+ 

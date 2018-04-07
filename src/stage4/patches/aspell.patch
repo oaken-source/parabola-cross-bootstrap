@@ -1,0 +1,23 @@
+--- a/PKGBUILD	2018-04-04 12:52:35.771273425 +0200
++++ b/PKGBUILD	2018-04-04 17:35:11.302666425 +0200
+@@ -15,9 +15,17 @@ url="http://aspell.net/"
+ license=('LGPL')
+ depends=('gcc-libs' 'ncurses')
+ optdepends=('perl: to import old dictionaries')
+-source=(ftp://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz)
+-md5sums=('e66a9c9af6a60dc46134fdacf6ce97d7')
+-sha1sums=('ff1190db8de279f950c242c6f4c5d5cdc2cbdc49')
++source=(ftp://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz
++        https://github.com/GNUAspell/aspell/commit/8089fa02122fed0a6394eba14bbedcb1d18e238.patch)
++md5sums=('e66a9c9af6a60dc46134fdacf6ce97d7'
++         '5f81982bf5ba10d8f23e8086dfcca867')
++sha1sums=('ff1190db8de279f950c242c6f4c5d5cdc2cbdc49'
++          'df5364a8472154452f4e1fe9db0891df457949e0')
++
++prepare() {
++  cd "${srcdir}/${pkgname}-${pkgver}"
++  patch -Np1 -i ../8089fa02122fed0a6394eba14bbedcb1d18e238.patch
++}
+ 
+ build() {
+   cd "${srcdir}/${pkgname}-${pkgver}"

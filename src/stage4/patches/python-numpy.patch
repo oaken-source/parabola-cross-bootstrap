@@ -1,0 +1,24 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-05 08:13:41.324670708 +0200
++++ b/PKGBUILD	2018-04-05 08:13:41.325670708 +0200
+@@ -15,12 +15,18 @@ url="http://www.numpy.org/"
+ makedepends=('cblas' 'lapack' 'python' 'python2' 'python-setuptools' 'python2-setuptools' 'gcc-fortran'
+ 	'python-nose' 'python2-nose' 'cython' 'cython2')
+ options=('staticlibs')
+-source=("$pkgbase-$pkgver.tar.gz::https://github.com/numpy/numpy/archive/v$pkgver.tar.gz" 'site.cfg')
++source=("$pkgbase-$pkgver.tar.gz::https://github.com/numpy/numpy/archive/v$pkgver.tar.gz" 'site.cfg'
++        "http://oirase.annexia.org/tmp/numpy-add-riscv64.patch")
+ sha512sums=('65b10462011e033669b700f0688df2e8630a097323fc7d72e71549fdfc2258546fe6f1317e0d51e1a0c9ab86451e0998ccbc7daa9af690652a96034571d5b76b'
+-            '03a0f161be4963625f110a26167efbd300a12bd4cf99c8250c47ac865466d03fc8640e7e4fb6a59c39bf8b797609f5ed50afbc720d1fcbd2c4c57263cf8b406b')
++            '03a0f161be4963625f110a26167efbd300a12bd4cf99c8250c47ac865466d03fc8640e7e4fb6a59c39bf8b797609f5ed50afbc720d1fcbd2c4c57263cf8b406b'
++            'd8aed46906740527a0f9f501480c73616b1e38483db38a08009addbed4fa9ac786b65cf2e8ad125283373dc9577fa1227248c52b1bef96f617cc61a8dda4137c')
+ 
+ prepare() {
+   cp site.cfg numpy-$pkgver
++  cd numpy-$pkgver
++  patch -Np1 -i ../numpy-add-riscv64.patch
++  cd ..
++
+   cp -a numpy-$pkgver numpy-py2-$pkgver
+   cd numpy-py2-$pkgver
+ 

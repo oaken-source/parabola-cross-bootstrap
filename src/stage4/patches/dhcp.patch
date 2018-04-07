@@ -1,0 +1,43 @@
+diff -rupN a/0001-bind-use-main-config-fragments.patch b/0001-bind-use-main-config-fragments.patch
+--- a/0001-bind-use-main-config-fragments.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/0001-bind-use-main-config-fragments.patch	2018-04-05 09:00:27.700404727 +0200
+@@ -0,0 +1,10 @@
++--- a/bind/Makefile.in	2018-02-21 16:52:47.000000000 +0100
+++++ b/bind/Makefile.in.new	2018-04-05 08:04:27.335723214 +0200
++@@ -55,6 +55,7 @@ bind1:
++ 	else                                                            \
++ 		echo Configuring BIND libraries for DHCP. ;             \
++ 		rm -rf ${cleandirs} ${cleanfiles} ;                     \
+++		cp ../config.{sub,guess} ${bindsrcdir} ;		\
++ 		(cd ${bindsrcdir} &&                                    \
++                  ./configure ${bindconfig} > ${binddir}/configure.log); \
++ 	fi
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-05 09:00:27.698404728 +0200
++++ b/PKGBUILD	2018-04-05 09:00:27.699404727 +0200
+@@ -19,7 +19,8 @@ source=("ftp://ftp.isc.org/isc/${pkgbase
+         'dhcpd4.service'
+         'dhcpd6.service'
+         'dhclient@.service'
+-        '0002-iproute2.patch')
++        '0002-iproute2.patch'
++        '0001-bind-use-main-config-fragments.patch')
+ sha256sums=('2a22508922ab367b4af4664a0472dc220cc9603482cf3c16d9aff14f3a76b608'
+             'SKIP'
+             'b16083e6bb572ffacaa7cd97e7fde5fcfa1b6dbeb166f162e2ec6e8ec4b928d6'
+@@ -27,11 +28,14 @@ sha256sums=('2a22508922ab367b4af4664a047
+             '03fce30efab819b2d928085b0bab962a33ce56fc376acae98ad9b30aa278c9c8'
+             'f98a4438f4f69cab7cc5cce6927df4790ee993ebc8f88a169e63043c53d25625'
+             '86cd0b1e0ea1d47ab096f6ee925eee60545116fb887a155761eda589b30e4f0e'
+-            '837a64189b949afae951655546967cc8f17f2f2cf370faabff00575364f0fcf7')
++            '837a64189b949afae951655546967cc8f17f2f2cf370faabff00575364f0fcf7'
++            '8df89ff933ba9f6da61ca0cdc40af3fe4711feac3c755c97de3eebf78a8e8834')
+ 
+ prepare() {
+   cd "${srcdir}/${pkgbase}-${pkgver}"
+ 
++  patch -Np1 -i ../0001-bind-use-main-config-fragments.patch
++
+   # no ifconfig, use ip from iproute2
+   patch -Np1 -i ../0002-iproute2.patch
+ }

@@ -83,12 +83,22 @@ deptree_check_depend() {
 
   local r
   r=$(make_realpkg "$1") || return
+
+  local blacklist
+  blacklist=$(grep "^$r:" "$TOPSRCDIR"/blacklist.txt)
+
+  if [ -n "$blacklist" ]; then
+    error -n "$pkg: bad dependency $r: $(cut -d':' -f2 <<< "$blacklist")"
+    return "$ERROR_MISSING"
+  fi
+
   deptree_add_entry "$r" "$pkg"
 
   local have_pkg=no
   local path
   for path in "${DEPPATH[@]}"; do
-    check_pkgfile "$path" "$r" && have_pkg=yes
+    check_pkgfile "$path" "$r" && { have_pkg=yes; break; }
+    check_pkgfile -p "breakdeps" "$path" "$r" && { have_pkg=yes; break; }
   done
 
   if [ "x$needed" == "xyes" ] && [ "x$have_pkg" == "xno" ]; then

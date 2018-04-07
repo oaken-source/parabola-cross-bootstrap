@@ -51,6 +51,7 @@ Server = file:///repos/\$repo/os/\$arch
 Server = file:///native/\$arch
 EOF
 
+  cat "$SRCDIR"/makepkg.conf.in > "$BUILDDIR"/config/makepkg.conf
   cat >> "$BUILDDIR"/config/makepkg.conf << EOF
 CARCH="$CARCH"
 CHOST="$CHOST"
@@ -73,8 +74,8 @@ EOF
 	  local url="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
     sed -i "/Boring\\/mundane/i \\
 update_config_fragments() {\\
-	find \$1/build -iname config.sub -exec curl \"$url;f=config.sub;hb=HEAD\" -o {} \\\\;\\
-	find \$1/build -iname config.guess -exec curl \"$url;f=config.guess;hb=HEAD\" -o {} \\\\;\\
+	find \$1/build -iname 'config*.sub' -print -exec curl \"$url;f=config.sub;hb=HEAD\" -o {} \\\\;\\
+	find \$1/build -iname 'config*.guess' -print -exec curl \"$url;f=config.guess;hb=HEAD\" -o {} \\\\;\\
 }\\
 hook_pre_build+=(update_config_fragments)" "$BUILDDIR/libremakepkg-$CARCH.sh"
   fi

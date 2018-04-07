@@ -1,0 +1,54 @@
+--- a/PKGBUILD	2018-04-04 20:24:00.120706442 +0200
++++ b/PKGBUILD	2018-04-04 20:45:17.585585367 +0200
+@@ -11,11 +11,20 @@ license=(MPL)
+ depends=(nspr gcc-libs readline zlib)
+ makedepends=(python2 zip libffi)
+ options=(!staticlibs)
+-source=(http://ftp.mozilla.org/pub/mozilla.org/js/mozjs-$pkgver.tar.bz2)
+-md5sums=('5db79c10e049a2dc117a6e6a3bc78a8e')
++source=(http://ftp.mozilla.org/pub/mozilla.org/js/mozjs-$pkgver.tar.bz2
++        0001-mozjs-riscv-support.patch
++        0002-jsoptparse-pointer-comparison.patch)
++md5sums=('5db79c10e049a2dc117a6e6a3bc78a8e'
++         'b2a2ddfd0b02e4534d312f4073b46dd8'
++         '512c30df5c120423e3090d6693a791df')
+ 
+ prepare() {
+-  cd mozjs-$pkgver/js/src
++  cd mozjs-$pkgver
++
++  patch -Np1 -i ../0001-mozjs-riscv-support.patch
++  patch -Np1 -i ../0002-jsoptparse-pointer-comparison.patch
++
++  cd js/src
+ 
+   rm -r editline
+   rm -r ctypes/libffi
+--- /dev/null	2018-03-20 11:36:27.102196685 +0100
++++ b/0001-mozjs-riscv-support.patch	2018-04-04 19:17:27.400084862 +0200
+@@ -0,0 +1,11 @@
++--- mozjs-24.2.0/mfbt/double-conversion/utils.h	2013-10-29 21:40:19.000000000 +0100
+++++ mozjs-24.2.0/mfbt/double-conversion/utils.h.new	2018-04-04 19:16:44.622088916 +0200
++@@ -57,7 +57,7 @@
++     defined(__hppa__) || defined(__ia64__) || \
++     defined(__mips__) || defined(__powerpc__) || \
++     defined(__sparc__) || defined(__sparc) || defined(__s390__) || \
++-    defined(__SH4__) || defined(__alpha__) || \
+++    defined(__SH4__) || defined(__alpha__) || defined(__riscv) || \
++     defined(_MIPS_ARCH_MIPS32R2)
++ #define DOUBLE_CONVERSION_CORRECT_DOUBLE_OPERATIONS 1
++ #elif defined(_M_IX86) || defined(__i386__) || defined(__i386)
+--- /dev/null	2018-03-20 11:36:27.102196685 +0100
++++ b/0002-jsoptparse-pointer-comparison.patch	2018-04-04 20:45:03.322586719 +0200
+@@ -0,0 +1,11 @@
++--- a/js/src/shell/jsoptparse.cpp	2013-10-29 21:40:20.000000000 +0100
+++++ b/js/src/shell/jsoptparse.cpp	2018-04-04 20:43:06.534597788 +0200
++@@ -253,7 +253,7 @@ OptionParser::extractValue(size_t argc,
++     char *eq = strchr(argv[*i], '=');
++     if (eq) {
++         *value = eq + 1;
++-        if (value[0] == '\0')
+++        if (*(value[0]) == '\0')
++             return error("A value is required for option %.*s", eq - argv[*i], argv[*i]);
++         return Okay;
++     }

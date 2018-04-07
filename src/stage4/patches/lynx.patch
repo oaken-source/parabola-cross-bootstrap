@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-04-04 18:02:02.433513726 +0200
++++ b/PKGBUILD	2018-04-04 18:13:56.226446075 +0200
+@@ -27,6 +27,7 @@ prepare() {
+   
+ build() {
+   cd ${srcdir}/${pkgname}${pkgver//./-}
++  export CPPFLAGS="$CPPFLAGS -DNCURSES_INTERNALS"
+   ./configure --prefix=/usr \
+     --sysconfdir=/etc \
+     --with-ssl=/usr \

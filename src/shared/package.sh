@@ -35,8 +35,8 @@ package_build() {
   popd >/dev/null || return
 
   if [ "$res" -ne 0 ]; then
-    notify -c error "$pkgname" -h string:document:"$MAKEPKGDIR/$pkgname/.MAKEPKGLOG"
-    if [ "x$KEEP_GOING" == "xyes" ]; then
+    notify -c error "${pkgname//_/\\_}" -h string:document:"$MAKEPKGDIR/$pkgname/.MAKEPKGLOG"
+    if [ -f "$TOPBUILDDIR/.KEEP_GOING" ]; then
       sed -i "s/^$pkgname : \\[/& FIXME/" "$DEPTREE"
     else
       return "$res"
@@ -52,7 +52,7 @@ package_build() {
   local full curr
   full=$(wc -l < "$DEPTREE".FULL)
   curr=$((full - $(wc -l < "$DEPTREE")))
-  notify -c success -u low "*$curr/$full* $pkgname"
+  notify -c success -u low "*$curr/$full* ${pkgname//_/\\_}"
 }
 
 packages_build_all() {
@@ -88,9 +88,15 @@ package_reuse_upstream() {
       pkgfiles=( "$1"-*.pkg.tar.xz ); pkgfile="${pkgfiles[0]}"
       mkdir -p "$pkgdir"
       bsdtar -C "$pkgdir" -xf "$pkgfile" || return
+      rm "$pkgdir"/.{MTREE,BUILDINFO}
       sed -i "s/arch = .*/arch = $CARCH/" "$pkgdir"/.PKGINFO
       pushd "$pkgdir" >/dev/null || return
-      env LANG=C bsdtar -cf - .MTREE .PKGINFO .BUILDINFO ./* | xz -c -z - > \
+      # shellcheck disable=SC2035
+      env LANG=C bsdtar -vczf .MTREE --format=mtree \
+          --options='!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link' \
+        .PKGINFO *
+      # shellcheck disable=SC2035
+      env LANG=C bsdtar -vcf - .MTREE .PKGINFO * | xz -c -z - > \
         "$PKGDEST/${pkgfile%-*}-$CARCH.pkg.tar.xz" || return
       popd >/dev/null || return
       ;;
@@ -102,6 +108,23 @@ package_enable_arch() {
 
   # force regeneration of .SRCINFO
   rm -f .SRCINFO
+}
+
+package_has_patch() {
+  local OPTIND o p=''
+  while getopts "p:" o; do
+    case "$o" in
+      p) p="-$OPTARG" ;;
+      *) die -e "$ERROR_INVOCATION" "Usage: ${FUNCNAME[0]} [-p prefix] pkgname" ;;
+    esac
+  done
+  shift $((OPTIND-1))
+
+  local pkgbase
+  pkgbase=$(srcinfo_pkgbase) || return
+
+  local patch="$SRCDIR/patches/$pkgbase$p".patch
+  [ -f "$patch" ] || return "$ERROR_MISSING"
 }
 
 package_patch() {
@@ -119,18 +142,22 @@ package_patch() {
   pkgbase=$(srcinfo_pkgbase) || return
 
   local patch="$SRCDIR/patches/$pkgbase$p".patch
+  local badpatch="$SRCDIR/patches/$pkgname$p".patch
 
-  # FIXME: this is temporary to fix bad patch names
-  local badpatch="$SRCDIR/patches/$pkgname".patch
-  if [ "x$pkgname" != "x$pkgbase" ] && [ -f "$badpatch" ]; then
-    error -n "$pkgname: $pkgname.patch should be $pkgbase.patch. renaming..."
-    mv "$badpatch" "$patch"
-  fi
+  ln -s "$patch" .PATCH
 
-  if [ "x$r" == "xyes" ] && [ ! -e "$patch" ]; then
-    error -n "$pkgname: missing $pkgbase$p.patch"
-    return "$ERROR_MISSING"
+  echo -n "checking for $(basename "$patch") ... "
+  local have_patch=yes
+  if [ ! -f "$patch" ]; then
+    have_patch=no
+    if [ -f "$badpatch" ]; then
+      have_patch="$(basename "$badpatch") (renaming...)"
+      mv "$badpatch" "$patch" || return
+    fi
   fi
+  echo "$have_patch (needed: $r)"
+
+  [ "x$r" == "xyes" ] && [ ! -e "$patch" ] && return "$ERROR_MISSING"
 
   cp PKGBUILD{,.orig}
   [ ! -e "$patch" ] || patch -Np1 -i "$patch" || return

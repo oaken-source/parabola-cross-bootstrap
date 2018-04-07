@@ -1,0 +1,36 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-05 20:56:55.018330503 +0200
++++ b/PKGBUILD	2018-04-05 20:56:55.019330503 +0200
+@@ -2,15 +2,15 @@
+ # Maintainer: Dan McGee <dan@archlinux.org>
+ 
+ pkgbase=doxygen
+-pkgname=('doxygen' 'doxygen-docs')
++pkgname=('doxygen')
+ pkgver=1.8.14
+ pkgrel=1
+ pkgdesc='Documentation system for C++, C, Java, IDL and PHP'
+ url='http://www.doxygen.org/'
+ arch=('x86_64')
+ license=('GPL')
+-makedepends=('cmake' 'gcc-libs' 'flex' 'qt5-base' 'texlive-core' 'ghostscript'
+-             'texlive-latexextra' 'graphviz' 'python2')
++makedepends=('cmake' 'gcc-libs' 'flex'
++             'python2')
+ source=(${pkgbase}-${pkgver}.tar.gz::https://github.com/doxygen/doxygen/archive/Release_${pkgver//./_}.tar.gz)
+ sha256sums=('18bc3790b4d5f4d57cb8ee0a77dd63a52518f3f70d7fdff868a7ce7961a6edc3')
+ sha512sums=('e19d706be64f8c1d35d3cd12b8c35f09503213bb3f5a4aa311ef0a6a953843ebed5ac4eca52ca908222543fb9794d545bb6d88c9fc8f39e66ef22c1919c120b0')
+@@ -32,11 +32,10 @@ build() {
+     -DCMAKE_INSTALL_PREFIX:PATH=/usr \
+     -DDOC_INSTALL_DIR:PATH=share/doc/doxygen \
+     -DPYTHON_EXECUTABLE:FILE=/usr/bin/python2 \
+-    -Dbuild_doc:BOOL=ON \
+-    -Dbuild_wizard:BOOL=ON
++    -Dbuild_doc:BOOL=OFF \
++    -Dbuild_wizard:BOOL=OFF
+ 
+   make
+-  make docs
+ }
+ 
+ check(){

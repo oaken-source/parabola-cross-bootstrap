@@ -46,7 +46,7 @@ msg() {
   done
   shift $((OPTIND-1))
 
-  [ "x$n" == "xyes" ] && notify "${d[@]}" "$*"
+  [ "x$n" == "xyes" ] && notify "${d[@]}" "${@//_/\\_}"
   echo "$(tput bold)$(tput setf 2)==>$(tput setf 7) $*$(tput sgr0)";
 }
 
@@ -61,7 +61,7 @@ error() {
   done
   shift $((OPTIND-1))
 
-  [ "x$n" == "xyes" ] && notify -c error "${d[@]}" "$*"
+  [ "x$n" == "xyes" ] && notify -c error "${d[@]}" "${@//_/\\_}"
   echo "$(tput bold)$(tput setf 4)==> ERROR:$(tput setf 7) $*$(tput sgr0)" 1>&2
 }
 
@@ -76,7 +76,7 @@ die() {
   done
   shift $((OPTIND-1))
 
-  error -n "${d[@]}" "$*"
+  error -n "${d[@]}" "$@"
   trap - ERR
   exit "$e"
 }

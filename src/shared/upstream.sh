@@ -20,7 +20,7 @@
 
 package_get_upstream_repo() {
   local repo repoinfo
-  repoinfo=$(asp list-repos "$1") || repoinfo=""
+  repoinfo=$(asp list-repos "$1" 2>/dev/null) || repoinfo=""
   repo=$(grep -P '^(core|extra|community)' <<< "$repoinfo" | head -n1)
   [ -z "$repo" ] && repo=libre
   echo "$repo"

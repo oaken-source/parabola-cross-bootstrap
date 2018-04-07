@@ -1,11 +1,12 @@
---- a/PKGBUILD	2018-03-22 09:21:46.483009873 +0100
-+++ b/PKGBUILD	2018-03-22 16:31:23.449831902 +0100
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-06 04:45:27.275666098 +0200
++++ b/PKGBUILD	2018-04-06 04:45:27.275666098 +0200
 @@ -5,7 +5,8 @@
  # toolchain build order: linux-api-headers->glibc->binutils->gcc->binutils->glibc
  # NOTE: libtool requires rebuilt with each new gcc version
  
 -pkgname=(gcc gcc-libs gcc-fortran gcc-objc gcc-ada gcc-go lib32-gcc-libs)
-+pkgname=(gcc gcc-libs gcc-fortran gcc-objc)
++pkgname=(gcc gcc-libs gcc-fortran)
 +[ "x@MULTILIB@" == "xdisable" ] || pkgname+=(lib32-gcc-libs)
  pkgver=7.3.1+20180312
  _majorver=${pkgver:0:1}
@@ -50,7 +51,7 @@
        --infodir=/usr/share/info \
        --with-bugurl=https://bugs.archlinux.org/ \
 -      --enable-languages=c,c++,ada,fortran,go,lto,objc,obj-c++ \
-+      --enable-languages=c,c++,fortran,go,lto \
++      --enable-languages=c,c++,fortran,lto \
        --enable-shared \
        --enable-threads=posix \
 -      --enable-libmpx \
@@ -67,7 +68,16 @@
        --disable-werror \
        --enable-checking=release \
        --enable-default-pie \
-@@ -139,25 +146,18 @@ package_gcc-libs() {
+@@ -131,7 +138,7 @@ package_gcc-libs() {
+   groups=(base)
+   depends=('glibc>=2.26')
+   options+=(!strip)
+-  provides=($pkgname-multilib libgo.so libgfortran.so)
++  provides=($pkgname-multilib libgfortran.so)
+   replaces=($pkgname-multilib)
+ 
+   cd gcc-build
+@@ -139,25 +146,17 @@ package_gcc-libs() {
    rm -f "$pkgdir/$_libdir/libgcc_eh.a"
  
    for lib in libatomic \
@@ -84,7 +94,7 @@
      make -C $CHOST/$lib DESTDIR="$pkgdir" install-toolexeclibLTLIBRARIES
    done
  
-   make -C $CHOST/libobjc DESTDIR="$pkgdir" install-libs
+-  make -C $CHOST/libobjc DESTDIR="$pkgdir" install-libs
    make -C $CHOST/libstdc++-v3/po DESTDIR="$pkgdir" install
 -  make -C $CHOST/libmpx DESTDIR="$pkgdir" install
    rm -f "$pkgdir/usr/lib/libmpx.spec"
@@ -152,7 +162,7 @@
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -262,7 +251,7 @@ package_gcc() {
+@@ -269,7 +258,7 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS}

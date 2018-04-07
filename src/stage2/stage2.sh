@@ -124,19 +124,18 @@ stage2() {
 
   binfmt_disable
 
+  prepare_deptree "${groups[@]}" || die -e "$ERROR_BUILDFAIL" "failed to prepare DEPTREE"
+  echo "remaining pkges: $(wc -l < "$DEPTREE") / $(wc -l < "$DEPTREE".FULL)"
+  [ -s "$DEPTREE" ] || return 0
+
   prepare_stage2_makepkg || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH makepkg"
   prepare_stage2_chroot || die -e "$ERROR_BUILDFAIL" "failed to prepare $CARCH chroot"
-  prepare_deptree "${groups[@]}" || die -e "$ERROR_BUILDFAIL" "failed to prepare DEPTREE"
 
-  echo "remaining pkges: $(wc -l < "$DEPTREE") / $(wc -l < "$DEPTREE".FULL)"
+  # pull in various tools required to run the scripts or build the packages
+  check_exe -r arch-meson asp awk bsdtar git gperf help2man pacman sed svn tar tclsh
 
-  if [ -s "$DEPTREE" ]; then
-    # pull in various tools required to run the scripts or build the packages
-    check_exe -r arch-meson asp awk bsdtar git gperf help2man pacman sed svn tar tclsh
-
-    # build packages from deptree
-    packages_build_all stage2_package_build stage2_package_install || return
-  fi
+  # build packages from deptree
+  packages_build_all stage2_package_build stage2_package_install || return
 
   # cleanup
   umount_stage2_chrootdir

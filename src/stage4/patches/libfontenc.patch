@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-04-04 00:37:07.332455802 +0200
++++ b/PKGBUILD	2018-04-04 08:22:28.712809487 +0200
+@@ -9,7 +9,7 @@ arch=('i686' 'x86_64')
+ url="https://xorg.freedesktop.org/"
+ license=('custom')
+ depends=('zlib')
+-makedepends=('pkgconfig' 'xproto>=7.0.18')
++makedepends=('pkgconfig' 'xorgproto')
+ source=(${url}/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2{,.sig})
+ sha256sums=('70588930e6fc9542ff38e0884778fbc6e6febf21adbab92fd8f524fe60aefd21'
+             'SKIP')

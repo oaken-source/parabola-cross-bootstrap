@@ -1,0 +1,26 @@
+--- a/PKGBUILD	2018-04-03 19:09:08.118320946 +0200
++++ b/PKGBUILD	2018-04-03 19:25:08.575229916 +0200
+@@ -15,19 +15,20 @@ depends=('glibc')
+ provides=('libjemalloc.so')
+ optdepends=('perl: for jeprof')
+ source=("https://github.com/jemalloc/jemalloc/releases/download/${pkgver}/${pkgname}-${pkgver}.tar.bz2"
+-        '0001-Add-the-mtls-dialect-gnu2-to-compile-flags.patch')
++        'https://github.com/jemalloc/jemalloc/commit/749caf14ae73a9ab1c48e538a8af09addbb35ee7.patch')
+ sha256sums=('4814781d395b0ef093b21a08e8e6e0bd3dab8762f9935bbfb71679b0dea7c3e9'
+-            'ac1570ab81c6545b8e994eab02239af67acdce682656c77802d090b0809176bf')
++            '176ca3dcbff7eaa43f2c368852bb01c2f4cd09d50296f8b64ca1888a55e13915')
+ 
+ prepare() {
+   cd $pkgname-$pkgver
+-  patch -p1 -i "$srcdir/0001-Add-the-mtls-dialect-gnu2-to-compile-flags.patch"
++  patch -Np1 -i "$srcdir/749caf14ae73a9ab1c48e538a8af09addbb35ee7.patch"
+   autoconf
+ }
+ 
+ build() {
+   cd $pkgname-$pkgver
+ 
++  export LDFLAGS="$LDFLAGS -latomic"
+   ./configure --enable-autogen --prefix=/usr
+   make
+ }

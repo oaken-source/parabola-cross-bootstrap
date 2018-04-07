@@ -7,7 +7,7 @@
 +  # basic/macros: rename noreturn into _noreturn_ (#8456)
 +  '848e863acc51ecfb0f3955c498874588201d9130'
 +  # core: don't include libmount.h in a header file (#8580)
-+  '4af61b251099b1fed4c816a464f8068972a7145c'
++  '227b8a762fea1458547be2cdf0e6e4aac0079730'
  )
  
  _reverts=(

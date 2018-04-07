@@ -1,0 +1,27 @@
+--- a/PKGBUILD	2018-04-04 19:01:38.057174838 +0200
++++ b/PKGBUILD	2018-04-04 19:04:58.052155883 +0200
+@@ -12,7 +12,7 @@ url="http://www.$pkgname.com/"
+ arch=('i686' 'x86_64' 'armv7h')
+ license=('BSD3')
+ depends=('zlib' 'ilmbase')
+-makedepends=('unoconv' 'libepoxy')
++makedepends=('libepoxy')
+ replaces=("$_pkgname")
+ conflicts=("$_pkgname")
+ source=("https://repo.parabola.nu/other/${_pkgname}/${_pkgname}-${pkgver}.tar.gz")
+@@ -36,15 +36,6 @@ mksource() {
+ 
+   # remove documentation with embedded nonfree fonts
+   rm -rv "doc/"{InterpretingDeepPixels,MultiViewOpenEXR,OpenEXRFileLayout,ReadingAndWritingImageFiles,TechnicalIntroduction,TheoryDeepPixels}.pdf
+-
+-  # add source documentation
+-  install -m644 -v "${srcdir}/"{InterpretingDeepPixels.docx,{MultiViewOpenEXR,OpenEXRFileLayout,ReadingAndWritingImageFiles,TechnicalIntroduction}.odt} doc
+-
+-  # convert source documentation to pdf format and clean source code
+-  cd doc
+-  unoconv -v -f pdf {InterpretingDeepPixels.docx,{MultiViewOpenEXR,OpenEXRFileLayout,ReadingAndWritingImageFiles,TechnicalIntroduction}.odt}
+-  echo "acaboo"
+-  rm -rv "${srcdir}/"{_rels,Configurations2,customXml,docProps,META-INF,ObjBFFFDCA{1,3,4,5,7},Object\ 1,ObjectReplacements,Pictures,Thumbnails,word}
+ }
+ 
+ prepare() {

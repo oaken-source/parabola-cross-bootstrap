@@ -19,7 +19,7 @@
  pkgbase=linux-libre         # Build stock kernel
  #pkgbase=linux-libre-custom # Build kernel with a different name
 -_pkgbasever=4.15-gnu
--_pkgver=4.15.9-gnu
+-_pkgver=4.15.15-gnu
 -
 -_replacesarchkernel=('linux%') # '%' gets replaced with _kernelname
 -_replacesoldkernels=() # '%' gets replaced with _kernelname
@@ -28,13 +28,12 @@
 -_srcname=linux-${_pkgbasever%-*}
 -_archpkgver=${_pkgver%-*}
 -pkgver=${_pkgver//-/_}
--pkgrel=3
--rcnrel=armv7-x1
--arch=('i686' 'x86_64' 'armv7h')
 +_srcname=linux-4.15
 +pkgver=4.15.11
 +pkgver+=_gnu
-+pkgrel=1
+ pkgrel=1
+-rcnrel=armv7-x1
+-arch=('i686' 'x86_64' 'armv7h')
 +arch=('x86_64')
  url="https://linux-libre.fsfla.org/"
  license=('GPL2')
@@ -94,7 +93,7 @@
 -sha512sums=('a55cc663c6fb1e1cfa7905282b368b5d5888bc2398f0acf37e5bb9a232ded04fd566b1980e654da26aaec005332e458581495184d6bd4cec669181085d4d78a5'
 +sha256sums=('e6556514286f9cd6b46f5d5769b2cc3c61ac7d6fa9c9c400e3c2fb5949490186'
              'SKIP'
--            '5b2ad5af70d432cf79eb11729ae39ed53e0b5b2a76688c35655c78538c1d0aa3852ad2c3244c2e0a4207d678919d806fa1903efdad6690e9679c9208d973bb73'
+-            'fe327c836db34fc9ea2e616d3cb57cd7a56b9de56e85ccb513936c926d178ba81669c1ebe3ba0599eb942a87a9883576c7e404aa33aa3968613f88c621563453'
 +            '52005a49f68f683e12b407216476ea5dcc1c6511fc0a927b029793c253036427'
              'SKIP'
 -            '13cb5bc42542e7b8bb104d5f68253f6609e463b6799800418af33eb0272cc269aaa36163c3e6f0aacbdaaa1d05e2827a4a7c4a08a029238439ed08b89c564bb3'
@@ -114,11 +113,11 @@
              'SKIP'
 -            '93cc2b304a116edb351d05a7b5c0a6b900fa4222474c26ac5dd15c754ddf0a0e2b7ec8bb40671fcb38c3be08c9279343456a3caf9d0b7ee4088b6afb4c465512'
 -            '0c90ff5cfe3ed0484603255437fb7b7d3450482ede164e139324c2761f3640797932b95e5d696b074c173ef472a5cdeca04c0a56198e54b47c9394f9efd94570'
--            'bd88e3f19be54f764e4066a00ef4a8df0a3d02f43d09cc4dc0beb27dd1df7d6efbc38c4a9528216c08c4451050ceeb18553b86685eb4f059078964697fa75243'
+-            '36e657c0a1c389b9f68afd0506116af8bb18ee58d2b846ab2176831b897c533bac703337644bf963879549a9fc45786b5b4b5e964305a934630d5c1fb3e8a39f'
 -            '7ad5be75ee422dda3b80edd2eb614d8a9181e2c8228cd68b3881e2fb95953bf2dea6cbe7900ce1013c9de89b2802574b7b24869fc5d7a95d3cc3112c4d27063a'
 -            '4a8b324aee4cccf3a512ad04ce1a272d14e5b05c8de90feb82075f55ea3845948d817e1b0c6f298f5816834ddd3e5ce0a0e2619866289f3c1ab8fd2f35f04f44'
 -            '2dc6b0ba8f7dbf19d2446c5c5f1823587de89f4e28e9595937dd51a87755099656f2acec50e3e2546ea633ad1bfd1c722e0c2b91eef1d609103d8abdc0a7cbaf'
--            'b2d123b84b33dbdaea28c3ea4517f962f3b1ec9b5318ebf33a3a10138a421641d25762a859d588b2ccb05f17804b3dad3e2e16ad5cfcd6dc77bbfe81d1ef642a'
+-            '7da8f3fbeb1b697f758ff6c09dd17384b931cebaa5f2f735998f8d30d088af3d6a1895dc741df3c94f3edaad80c01b588667558a82ed029ecec69dfa39706c16'
 -            'SKIP'
 -            'ba44aa1252aa1b172e0bc8bbbff864ff60cad6739b2aed2f6a2402848aa65cdb8a8ca6bb9341569b089d60dfd83c3bdd744b5810061ac76b19f0d337afe4cc8d'
 -            '738bc2874351d9e1b94319e6caf615b49753155c99dc9318a1ce9eced50f87627a7331762951f55e2bea8abdb97b80a617a08f3f0bc735e56ff831a8bbb19816'

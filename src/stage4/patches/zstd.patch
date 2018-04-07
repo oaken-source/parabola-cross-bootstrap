@@ -1,0 +1,10 @@
+--- a/PKGBUILD	2018-04-04 18:44:37.262271586 +0200
++++ b/PKGBUILD	2018-04-04 18:51:04.978234839 +0200
+@@ -17,6 +17,7 @@ sha1sums=('4bbdc23ab3d4fa18b3b7bd84900b7
+ 
+ build() {
+   cd $pkgname-$pkgver
++  export LDFLAGS="$LDFLAGS -latomic"
+   make
+   make zstdmt
+   make -C contrib/pzstd

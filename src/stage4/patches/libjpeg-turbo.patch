@@ -1,0 +1,20 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-05 08:07:49.768704028 +0200
++++ b/PKGBUILD	2018-04-05 08:07:49.769704028 +0200
+@@ -10,7 +10,7 @@ pkgdesc='JPEG image codec with accelerat
+ url='https://libjpeg-turbo.org/'
+ arch=('x86_64')
+ license=('custom')
+-makedepends=('nasm' 'jdk8-openjdk')
++makedepends=('nasm')
+ validpgpkeys=('7D6293CC6378786E1B5C496885C7044E033FDE16')
+ source=("https://downloads.sourceforge.net/project/${pkgname}/${pkgver}/${pkgname}-${pkgver}.tar.gz"{,.sig})
+ sha256sums=('b24890e2bb46e12e72a79f7e965f409f4e16466d00e1dd15d93d73ee6b592523'
+@@ -36,7 +36,6 @@ build() {
+ 		--prefix=/usr \
+ 		--mandir=/usr/share/man \
+ 		--with-jpeg8 \
+-		--with-java \
+ 		--with-build-date=$_build \
+ 
+ 	make

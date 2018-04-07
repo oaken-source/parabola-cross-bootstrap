@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-04-03 08:06:30.779089041 +0200
++++ b/PKGBUILD	2018-04-03 08:15:48.687036164 +0200
+@@ -36,7 +36,7 @@ prepare() {
+ 
+ build() {
+   cd libtool
+-  ./configure --prefix=/usr lt_cv_sys_lib_dlsearch_path_spec="/usr/lib /usr/lib32"
++  ./configure --prefix=/usr lt_cv_sys_lib_dlsearch_path_spec="/usr/lib"
+   make
+ }
+ 

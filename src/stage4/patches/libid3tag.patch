@@ -1,0 +1,42 @@
+diff -rupN a/0001-fix-compat-gperf-declarations.patch b/0001-fix-compat-gperf-declarations.patch
+--- a/0001-fix-compat-gperf-declarations.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/0001-fix-compat-gperf-declarations.patch	2018-04-05 07:46:59.310822543 +0200
+@@ -0,0 +1,11 @@
++--- a/compat.h	2004-01-23 10:41:32.000000000 +0100
+++++ b/compat.h	2018-04-05 07:44:23.720837289 +0200
++@@ -34,7 +34,7 @@ struct id3_compat {
++ };
++ 
++ struct id3_compat const *id3_compat_lookup(register char const *,
++-					   register unsigned int);
+++					   register size_t);
++ 
++ int id3_compat_fixup(struct id3_tag *);
++ 
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-05 07:46:59.308822543 +0200
++++ b/PKGBUILD	2018-04-05 07:46:59.309822543 +0200
+@@ -13,18 +13,21 @@ depends=('zlib')
+ makedepends=('gperf')
+ source=("ftp://ftp.mars.org/pub/mpeg/${pkgname}-${pkgver}.tar.gz"
+ 	'id3tag.pc'
+-	'10_utf16.diff' '11_unknown_encoding.diff' 'CVE-2008-2109.patch')
++	'10_utf16.diff' '11_unknown_encoding.diff' 'CVE-2008-2109.patch'
++	'0001-fix-compat-gperf-declarations.patch')
+ md5sums=('e5808ad997ba32c498803822078748c3'
+ 	'8bb41fd814fafcc37ec8bc88f5545a4a'
+ 	'4f9df4011e6a8c23240fff5de2d05f6e'
+ 	'3ca856b97924d48a0fdfeff0bd83ce7d'
+-	'c51822ea6301b1ca469975f0c9ee8e34')
++	'c51822ea6301b1ca469975f0c9ee8e34'
++	'cb6b886755e8a8e2020c7dea1d0b1cc0')
+ 
+ build() {
+   cd "${srcdir}/${pkgname}-${pkgver}"
+   patch -p1 -i ${srcdir}/10_utf16.diff
+   patch -p1 -i ${srcdir}/11_unknown_encoding.diff
+   patch -Np0 -i ${srcdir}/CVE-2008-2109.patch
++  patch -Np1 -i ${srcdir}/0001-fix-compat-gperf-declarations.patch
+ 
+   ./configure --prefix=/usr
+   make

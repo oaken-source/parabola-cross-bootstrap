@@ -1,0 +1,157 @@
+--- a/PKGBUILD	2018-04-03 23:48:05.851734588 +0200
++++ b/PKGBUILD	2018-04-04 08:19:54.478824105 +0200
+@@ -11,12 +11,16 @@ arch=(x86_64)
+ license=(MPL GPL)
+ depends=(glibc sh)
+ makedepends=(zip)
+-source=(https://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v${pkgver}/src/nspr-${pkgver}.tar.gz)
+-sha1sums=('907221d51a1f8cca0c3a9e1af93c53e02f5e203b')
+-sha256sums=('2ed95917fa2277910d1d1cf36030607dccc0ba522bba08e2af13c113dcd8f729')
++source=(https://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v${pkgver}/src/nspr-${pkgver}.tar.gz
++        nspr-riscv-packaging.patch)
++sha1sums=('907221d51a1f8cca0c3a9e1af93c53e02f5e203b'
++          'd6643bbae87696f67cb4b3caf5ac9bf159c68f95')
++sha256sums=('2ed95917fa2277910d1d1cf36030607dccc0ba522bba08e2af13c113dcd8f729'
++            '67e546550c872f2c5612eb3dfc5ad55831a37f3d7da5c1704b8efaeaab3a46e9')
+ 
+ prepare() {
+   cd nspr-$pkgver/nspr
++  patch -Np2 -i "$srcdir"/nspr-riscv-packaging.patch
+ }
+ 
+ build() {
+--- /dev/null	2018-03-20 11:36:27.102196685 +0100
++++ b/nspr-riscv-packaging.patch	2018-04-04 08:17:18.810838859 +0200
+@@ -0,0 +1,132 @@
++From d4b3321b5eeb7976a8ca2169128a3754e3b2a8bd Mon Sep 17 00:00:00 2001
++Add-type-definitions-for-the-RISC-V-architecture.patch
++From: Karsten Merker <merker@debian.org>
++Date: Fri, 9 Mar 2018 19:38:12 +0100
++Subject: [PATCH] Add type definitions for the RISC-V architecture.
++
++---
++ nspr/pr/include/md/_linux.cfg | 92 +++++++++++++++++++++++++++++++++++++++++++
++ nspr/pr/include/md/_linux.h   |  4 ++
++ 2 files changed, 96 insertions(+)
++
++diff --git a/nspr/pr/include/md/_linux.cfg b/nspr/pr/include/md/_linux.cfg
++index b4c0ed4..afc407c 100644
++--- a/nspr/pr/include/md/_linux.cfg
+++++ b/nspr/pr/include/md/_linux.cfg
++@@ -1020,6 +1020,98 @@
++ #define PR_BYTES_PER_WORD_LOG2   2
++ #define PR_BYTES_PER_DWORD_LOG2  3
++ 
+++#elif defined(__riscv) && (__riscv_xlen == 32)
+++
+++#undef  IS_BIG_ENDIAN
+++#define IS_LITTLE_ENDIAN 1
+++#undef  IS_64
+++
+++#define PR_BYTES_PER_BYTE   1
+++#define PR_BYTES_PER_SHORT  2
+++#define PR_BYTES_PER_INT    4
+++#define PR_BYTES_PER_INT64  8
+++#define PR_BYTES_PER_LONG   4
+++#define PR_BYTES_PER_FLOAT  4
+++#define PR_BYTES_PER_DOUBLE 8
+++#define PR_BYTES_PER_WORD   4
+++#define PR_BYTES_PER_DWORD  8
+++
+++#define PR_BITS_PER_BYTE    8
+++#define PR_BITS_PER_SHORT   16
+++#define PR_BITS_PER_INT     32
+++#define PR_BITS_PER_INT64   64
+++#define PR_BITS_PER_LONG    32
+++#define PR_BITS_PER_FLOAT   32
+++#define PR_BITS_PER_DOUBLE  64
+++#define PR_BITS_PER_WORD    32
+++
+++#define PR_BITS_PER_BYTE_LOG2   3
+++#define PR_BITS_PER_SHORT_LOG2  4
+++#define PR_BITS_PER_INT_LOG2    5
+++#define PR_BITS_PER_INT64_LOG2  6
+++#define PR_BITS_PER_LONG_LOG2   5
+++#define PR_BITS_PER_FLOAT_LOG2  5
+++#define PR_BITS_PER_DOUBLE_LOG2 6
+++#define PR_BITS_PER_WORD_LOG2   5
+++
+++#define PR_ALIGN_OF_SHORT   2
+++#define PR_ALIGN_OF_INT     4
+++#define PR_ALIGN_OF_LONG    4
+++#define PR_ALIGN_OF_INT64   8
+++#define PR_ALIGN_OF_FLOAT   4
+++#define PR_ALIGN_OF_DOUBLE  8
+++#define PR_ALIGN_OF_POINTER 4
+++#define PR_ALIGN_OF_WORD    4
+++
+++#define PR_BYTES_PER_WORD_LOG2  2
+++#define PR_BYTES_PER_DWORD_LOG2 3
+++
+++#elif defined(__riscv) && (__riscv_xlen == 64)
+++
+++#undef  IS_BIG_ENDIAN
+++#define IS_LITTLE_ENDIAN 1
+++#define IS_64
+++
+++#define PR_BYTES_PER_BYTE   1
+++#define PR_BYTES_PER_SHORT  2
+++#define PR_BYTES_PER_INT    4
+++#define PR_BYTES_PER_INT64  8
+++#define PR_BYTES_PER_LONG   8
+++#define PR_BYTES_PER_FLOAT  4
+++#define PR_BYTES_PER_DOUBLE 8
+++#define PR_BYTES_PER_WORD   8
+++#define PR_BYTES_PER_DWORD  8
+++
+++#define PR_BITS_PER_BYTE    8
+++#define PR_BITS_PER_SHORT   16
+++#define PR_BITS_PER_INT     32
+++#define PR_BITS_PER_INT64   64
+++#define PR_BITS_PER_LONG    64
+++#define PR_BITS_PER_FLOAT   32
+++#define PR_BITS_PER_DOUBLE  64
+++#define PR_BITS_PER_WORD    64
+++
+++#define PR_BITS_PER_BYTE_LOG2   3
+++#define PR_BITS_PER_SHORT_LOG2  4
+++#define PR_BITS_PER_INT_LOG2    5
+++#define PR_BITS_PER_INT64_LOG2  6
+++#define PR_BITS_PER_LONG_LOG2   6
+++#define PR_BITS_PER_FLOAT_LOG2  5
+++#define PR_BITS_PER_DOUBLE_LOG2 6
+++#define PR_BITS_PER_WORD_LOG2   6
+++
+++#define PR_ALIGN_OF_SHORT   2
+++#define PR_ALIGN_OF_INT     4
+++#define PR_ALIGN_OF_LONG    8
+++#define PR_ALIGN_OF_INT64   8
+++#define PR_ALIGN_OF_FLOAT   4
+++#define PR_ALIGN_OF_DOUBLE  8
+++#define PR_ALIGN_OF_POINTER 8
+++#define PR_ALIGN_OF_WORD    8
+++
+++#define PR_BYTES_PER_WORD_LOG2  3
+++#define PR_BYTES_PER_DWORD_LOG2 3
+++
++ #else
++ 
++ #error "Unknown CPU architecture"
++diff --git a/nspr/pr/include/md/_linux.h b/nspr/pr/include/md/_linux.h
++index b4b298b..2370ab8 100644
++--- a/nspr/pr/include/md/_linux.h
+++++ b/nspr/pr/include/md/_linux.h
++@@ -57,6 +57,10 @@
++ #define _PR_SI_ARCHITECTURE "m32r"
++ #elif defined(__or1k__)
++ #define _PR_SI_ARCHITECTURE "or1k"
+++#elif defined(__riscv) && (__riscv_xlen == 32)
+++#define _PR_SI_ARCHITECTURE "riscv32"
+++#elif defined(__riscv) && (__riscv_xlen == 64)
+++#define _PR_SI_ARCHITECTURE "riscv64"
++ #else
++ #error "Unknown CPU architecture"
++ #endif
++-- 
++2.11.0
++
