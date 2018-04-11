@@ -1,0 +1,53 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-10 13:28:52.668934524 +0200
++++ b/PKGBUILD	2018-04-10 13:28:52.669934524 +0200
+@@ -2,7 +2,7 @@
+ # Maintainer: Jan de Groot <jgc@archlinux.org>
+ 
+ pkgname=librsvg
+-pkgver=2.42.3
++pkgver=2.40.20
+ pkgrel=1
+ epoch=2
+ pkgdesc="SVG rendering library"
+@@ -10,34 +10,24 @@ url="https://wiki.gnome.org/Projects/Lib
+ arch=(x86_64)
+ license=(LGPL)
+ depends=(gdk-pixbuf2 pango libcroco)
+-makedepends=(intltool gobject-introspection vala python2 gtk-doc git rust)
++makedepends=(intltool gobject-introspection vala python2 gtk-doc git)
+ _commit=ca640d1185745665c61689b71c627e1d020a80b7  # tags/2.42.3^0
+-source=("git+https://gitlab.gnome.org/GNOME/librsvg.git#commit=$_commit")
+-sha256sums=('SKIP')
+-
+-pkgver() {
+-  cd $pkgname
+-  git describe --tags | sed 's/-/+/g'
+-}
+-
+-prepare() {
+-  cd $pkgname
+-  NOCONFIGURE=1 ./autogen.sh
+-}
++source=(https://ftp.gnome.org/pub/GNOME/sources/librsvg/${pkgver%.*}/librsvg-$pkgver.tar.xz)
++sha256sums=('cff4dd3c3b78bfe99d8fcfad3b8ba1eee3289a0823c0e118d78106be6b84c92b')
+ 
+ build() {
+-  cd $pkgname
++  cd $pkgname-$pkgver
+   ./configure --prefix=/usr --disable-static --enable-vala --enable-gtk-doc
+   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0 /g' libtool
+   make
+ }
+ 
+ check() {
+-  cd $pkgname
++  cd $pkgname-$pkgver
+   make check
+ }
+ 
+ package() {
+-  cd $pkgname
++  cd $pkgname-$pkgver
+   make DESTDIR="$pkgdir" install
+ }

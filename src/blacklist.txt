@@ -1,4 +1,6 @@
 apache-ant:depends on java-environment
+clang:no port exists
+compiler-rt:no port exists
 clisp:no port exists
 ffcall:no port exists
 gdb:no port exists
@@ -20,7 +22,9 @@ lib32-gcc-libs:no multilib
 lib32-glibc:no multilib
 libreoffice-fresh:depends on java-environment
 libreoffice-still:depends on java-environment
+libunwind:no port exists
 maven:depends on java-environment (and is a pita)
-rust:bootstrap needed
+mono:no port exists
+rust:no port exists
 unoconv:depends on libreoffice-fresh
 valgrind:no port exists

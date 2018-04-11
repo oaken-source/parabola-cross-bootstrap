@@ -1,0 +1,33 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-09 12:52:45.830328655 +0200
++++ b/PKGBUILD	2018-04-09 12:53:56.250321980 +0200
+@@ -10,9 +10,7 @@ url="https://github.com/silnrsi/graphite
+ pkgdesc='reimplementation of the SIL Graphite text processing engine'
+ license=('LGPL' 'GPL' 'custom')
+ depends=('gcc-libs')
+-makedepends=('cmake' 'freetype2' 'python2'
+-             # for documentation
+-             'doxygen' 'dblatex' 'graphviz' 'asciidoc')
++makedepends=('cmake' 'freetype2' 'python2')
+ checkdepends=('python2-fonttools')
+ options=('!emptydirs')
+ source=(https://github.com/silnrsi/graphite/releases/download/${pkgver}/graphite2-${pkgver}.tgz)
+@@ -39,7 +37,6 @@ build() {
+   find . -type f ! -name "rules" ! -name "changelog" -exec sed -i -e 's/\-O3//g' {} \;
+ 
+   make 
+-  make -j1 docs
+ }
+ 
+ check() {
+@@ -52,10 +49,6 @@ check() {
+ package() {
+   cd "${srcdir}"/build
+   make DESTDIR="$pkgdir/" install
+-  # install doc files
+-  mkdir -p "${pkgdir}"/usr/share/doc/graphite2/api
+-  cp -vrf doc/doxygen/{html,latex/refman.pdf} "${pkgdir}"/usr/share/doc/graphite2/api
+-  cp -vrf doc/{GTF,manual}.html "${pkgdir}"/usr/share/doc/graphite2
+ 
+   # licenses
+   mkdir -p "${pkgdir}"/usr/share/licenses/${pkgname}

@@ -1,11 +1,51 @@
---- a/PKGBUILD	2018-04-04 01:43:36.102077757 +0200
-+++ b/PKGBUILD	2018-04-04 08:23:33.783803320 +0200
-@@ -10,7 +10,7 @@ url="https://gstreamer.freedesktop.org/"
+diff -rupN a/0001-gstreamer-riscv-alignment.patch b/0001-gstreamer-riscv-alignment.patch
+--- a/0001-gstreamer-riscv-alignment.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/0001-gstreamer-riscv-alignment.patch	2018-04-11 08:32:21.811431931 +0200
+@@ -0,0 +1,13 @@
++diff --git a/gst/gstconfig.h.in b/gst/gstconfig.h.in
++index 6351c04da..33dfed1f6 100644
++--- a/gst/gstconfig.h.in
+++++ b/gst/gstconfig.h.in
++@@ -104,7 +104,7 @@
++  * http://docs.oracle.com/cd/E19205-01/820-4155/c++_faq.html#Vers6
++  * https://software.intel.com/en-us/node/583402
++  */
++-#if defined(__alpha__) || defined(__arc__) || defined(__arm__) || defined(__aarch64__) || defined(__bfin) || defined(__hppa__) || defined(__nios2__) || defined(__MICROBLAZE__) || defined(__mips__) || defined(__or1k__) || defined(__sh__) || defined(__SH4__) || defined(__sparc__) || defined(__sparc) || defined(__ia64__) || defined(_M_ALPHA) || defined(_M_ARM) || defined(_M_IA64) || defined(__xtensa__) || defined(__e2k__)
+++#if defined(__alpha__) || defined(__arc__) || defined(__arm__) || defined(__aarch64__) || defined(__bfin) || defined(__hppa__) || defined(__nios2__) || defined(__MICROBLAZE__) || defined(__mips__) || defined(__or1k__) || defined(__sh__) || defined(__SH4__) || defined(__sparc__) || defined(__sparc) || defined(__ia64__) || defined(_M_ALPHA) || defined(_M_ARM) || defined(_M_IA64) || defined(__xtensa__) || defined(__e2k__) || defined(__riscv)
++ #  define GST_HAVE_UNALIGNED_ACCESS 0
++ #elif defined(__i386__) || defined(__i386) || defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__ppc__) || defined(__ppc64__) || defined(__powerpc__) || defined(__powerpc64__) || defined(__m68k__) || defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64) || defined(__s390__) || defined(__s390x__) || defined(__zarch__)
++ #  define GST_HAVE_UNALIGNED_ACCESS 1
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-11 06:50:38.438010392 +0200
++++ b/PKGBUILD	2018-04-11 08:32:21.806431931 +0200
+@@ -9,15 +9,17 @@ pkgdesc="GStreamer open-source multimedi
+ url="https://gstreamer.freedesktop.org/"
  arch=(x86_64)
  license=(LGPL)
- depends=(libxml2 glib2 libunwind libcap libelf)
+-depends=(libxml2 glib2 libunwind libcap libelf)
 -makedepends=(gtk-doc gobject-introspection autoconf-archive git valgrind bash-completion)
++depends=(libxml2 glib2 libcap libelf)
 +makedepends=(gtk-doc gobject-introspection autoconf-archive git bash-completion)
  checkdepends=(gmp gsl gtk3)
  _commit=80e0e90d00bb358ca9dc071cf6de010ec5ae2644  # tags/1.14.0^0
  install=gstreamer.install
+ source=("git+https://anongit.freedesktop.org/git/gstreamer/gstreamer#commit=$_commit"
+-        "gst-common::git+https://anongit.freedesktop.org/git/gstreamer/common")
++        "gst-common::git+https://anongit.freedesktop.org/git/gstreamer/common"
++        "0001-gstreamer-riscv-alignment.patch")
+ sha256sums=('SKIP'
+-            'SKIP')
++            'SKIP'
++            '2161a3e1cd47c351da5c6a1718533309e4b01c3d0347c43f86b7fb21c327065a')
+ 
+ pkgver() {
+   cd $pkgname
+@@ -31,6 +33,8 @@ prepare() {
+   git config --local submodule.common.url "$srcdir/gst-common"
+   git submodule update
+ 
++  patch -Np1 -i ../0001-gstreamer-riscv-alignment.patch
++
+   NOCONFIGURE=1 ./autogen.sh
+ }
+ 

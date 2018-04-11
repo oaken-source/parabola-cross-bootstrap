@@ -1,0 +1,30 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-04 18:42:40.025282697 +0200
++++ b/PKGBUILD	2018-04-09 13:58:22.983955501 +0200
+@@ -11,7 +11,7 @@ url='http://phonon.kde.org/'
+ license=(LGPL)
+ optdepends=('pulseaudio: PulseAudio support' 'gst-plugins-good: PulseAudio support and good codecs' 'gst-plugins-bad: additional codecs'
+ 	'gst-plugins-ugly: additional codecs' 'gst-libav: libav codec')
+-makedepends=(gst-plugins-base extra-cmake-modules phonon-qt4 phonon-qt5 qt5-x11extras)
++makedepends=(gst-plugins-base extra-cmake-modules qt5-x11extras)
+ source=("http://download.kde.org/stable/phonon/phonon-backend-gstreamer/$pkgver/phonon-backend-gstreamer-$pkgver.tar.xz")
+ sha256sums=('cec3e5ece1261d344b68363ef0606ebf49772628ba94bb55b0c0d18773b885f1')
+ 
+@@ -43,7 +43,7 @@ build() {
+ 
+ package_phonon-qt4-gstreamer() {
+   pkgdesc="Phonon GStreamer backend for Qt4"
+-  depends=(gst-plugins-base phonon-qt4)
++  depends=(gst-plugins-base)
+   provides=(phonon-qt4-backend)
+ 
+   cd build-qt4
+@@ -55,7 +55,7 @@ package_phonon-qt4-gstreamer() {
+ 
+ package_phonon-qt5-gstreamer() {
+   pkgdesc="Phonon GStreamer backend for Qt5"
+-  depends=(gst-plugins-base qt5-x11extras phonon-qt5)
++  depends=(gst-plugins-base qt5-x11extras)
+   provides=(phonon-qt5-backend)
+ 
+   cd build-qt5

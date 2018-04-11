@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-07 19:21:51.070493581 +0200
++++ b/PKGBUILD	2018-04-07 19:21:51.071493581 +0200
+@@ -24,7 +24,7 @@ build() {
+ 
+ package() {
+   # libglvnd needs mesa for indirect rendering
+-  depends=('libxext' 'mesa' 'opengl-driver')
++  depends=('libxext')
+ 
+   cd $pkgname-$pkgver
+   make DESTDIR="$pkgdir" install

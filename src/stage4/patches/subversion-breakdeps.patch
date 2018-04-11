@@ -1,0 +1,52 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-08 10:01:54.988488966 +0200
++++ b/PKGBUILD	2018-04-08 10:01:54.988488966 +0200
+@@ -13,13 +13,12 @@ arch=('x86_64')
+ url="http://subversion.apache.org/"
+ license=('APACHE')
+ depends=('sqlite' 'file' 'serf' 'systemd')
+-makedepends=('apache' 'python2' 'perl' 'swig' 'java-environment'
+-             'libgnome-keyring' 'kdelibs' 'ruby')
++makedepends=('apache' 'python2' 'perl' 'swig'
++             'libgnome-keyring')
+ optdepends=('libgnome-keyring: for GNOME Keyring for auth credentials'
+             'kdebase-runtime: for KWallet for auth credentials'
+             'bash-completion: for svn bash completion'
+             'python2: for some hook scripts'
+-            'java-environment: for Java support'
+             'ruby: for some hook scripts')
+ provides=('svn')
+ backup=('etc/xinetd.d/svn' 'etc/conf.d/svnserve')
+@@ -59,21 +58,18 @@ build() {
+    ./configure --prefix=/usr --with-apr=/usr --with-apr-util=/usr \
+                --with-zlib=/usr --with-serf=/usr --with-apxs \
+                --with-sqlite=/usr \
+-               --enable-javahl --with-jdk=/usr/lib/jvm/default \
+-               --with-gnome-keyring --with-kwallet \
+                --with-apache-libexecdir=/usr/lib/httpd/modules \
+-               --with-ruby-sitedir=/usr/lib/ruby/vendor_ruby \
+                --disable-static
+ 
+    make LT_LDFLAGS="-L$Fdestdir/usr/lib"
+    make swig_pydir=/usr/lib/python2.7/site-packages/libsvn \
+-     swig_pydir_extra=/usr/lib/python2.7/site-packages/svn swig-py swig-pl javahl swig-rb
++     swig_pydir_extra=/usr/lib/python2.7/site-packages/svn swig-py swig-pl
+ }
+ 
+ check() {
+    cd ${pkgname}-${pkgver}
+    export LANG=C LC_ALL=C
+-   make check check-swig-pl check-swig-py check-swig-rb CLEANUP=yes # check-javahl
++   make check check-swig-pl check-swig-py CLEANUP=yes # check-javahl
+ }
+ 
+ package() {
+@@ -83,7 +79,7 @@ package() {
+    make DESTDIR="${pkgdir}" INSTALLDIRS=vendor \
+      swig_pydir=/usr/lib/python2.7/site-packages/libsvn \
+      swig_pydir_extra=/usr/lib/python2.7/site-packages/svn \
+-     install install-swig-py install-swig-pl install-javahl install-swig-rb
++     install install-swig-py install-swig-pl
+ 
+    install -dm755 "${pkgdir}"/usr/share/subversion
+    cp -a tools/hook-scripts "${pkgdir}"/usr/share/subversion/

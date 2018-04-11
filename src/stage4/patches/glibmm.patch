@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-10 21:28:38.187206309 +0200
++++ b/PKGBUILD	2018-04-10 21:31:17.543191205 +0200
+@@ -11,7 +11,7 @@ url="http://www.gtkmm.org/"
+ arch=(x86_64)
+ license=(LGPL)
+ depends=(glib2 libsigc++)
+-makedepends=(git mm-common perl-xml-parser clang)
++makedepends=(git mm-common perl-xml-parser)
+ _commit=8236b0f457e6ede0511f5e197017baa31eb953b4  # tags/2.56.0^0
+ source=("git+https://git.gnome.org/browse/glibmm#commit=$_commit")
+ sha256sums=('SKIP')

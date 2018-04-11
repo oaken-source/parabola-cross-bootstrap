@@ -1,0 +1,29 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-04 18:00:26.031522863 +0200
++++ b/PKGBUILD	2018-04-09 12:49:37.357346517 +0200
+@@ -9,7 +9,7 @@ pkgdesc="OpenType text shaping engine"
+ url="http://www.freedesktop.org/wiki/Software/HarfBuzz"
+ arch=(x86_64)
+ license=(MIT)
+-makedepends=(glib2 freetype2 graphite cairo icu gobject-introspection gtk-doc ragel git
++makedepends=(glib2 freetype2 cairo icu gobject-introspection gtk-doc ragel git
+              python)
+ _commit=ff2f81432bb0484a019a678058595e10217df51d  # tags/1.7.6^0
+ source=("git+https://anongit.freedesktop.org/git/harfbuzz#commit=$_commit")
+@@ -33,7 +33,6 @@ build() {
+     --with-freetype \
+     --with-glib \
+     --with-gobject \
+-    --with-graphite2 \
+     --with-icu \
+     --enable-gtk-doc
+   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+@@ -46,7 +45,7 @@ check() {
+ }
+ 
+ package_harfbuzz() {
+-  depends=(glib2 freetype2 graphite)
++  depends=(glib2 freetype2)
+   optdepends=('cairo: hb-view program')
+ 
+   cd $pkgbase

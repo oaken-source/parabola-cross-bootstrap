@@ -1,0 +1,38 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-08 09:59:52.831500543 +0200
++++ b/PKGBUILD	2018-04-08 09:59:52.831500543 +0200
+@@ -10,20 +10,20 @@ arch=('x86_64')
+ license=('LGPL2.1' 'custom: QPL-1.0')
+ url="http://caml.inria.fr/"
+ depends=('gdbm')
+-makedepends=('tk>=8.6.0' 'ncurses>=5.6-7' 'libx11')
++makedepends=('tk>=8.6.0' 'ncurses>=5.6-7' 'libx11' 'git')
+ optdepends=('ncurses: advanced ncurses features' 'tk: advanced tk features')
+-source=(http://caml.inria.fr/distrib/ocaml-${pkgver%.*}/${pkgname}-${pkgver}.tar.xz)
+-sha1sums=('831fab643feb0f78bd206f0a9a09a92df58838e7')
++source=("git+https://github.com/nojb/riscv-ocaml.git#branch=4.06")
++sha1sums=('SKIP')
+ options=('!makeflags' '!emptydirs' 'staticlibs')
+ 
+ build() {
+-  cd "${srcdir}/${pkgname}-${pkgver}"
++  cd "${srcdir}/riscv-${pkgbase}"
+   ./configure -prefix /usr -x11include /usr/include
+   make world.opt
+ }
+ 
+ package_ocaml() {
+-  cd "${srcdir}/${pkgbase}-${pkgver}"
++  cd "${srcdir}/riscv-${pkgbase}"
+   make PREFIX="${pkgdir}/usr" MANDIR="${pkgdir}/usr/share/man" install
+ 
+   # Save >10MB with this one, makepkg only strips debug symbols.
+@@ -43,7 +43,7 @@ license=('custom: QPL-1.0')
+ depends=('ocaml')
+ optdepends=()
+ 
+-  cd "${srcdir}/${pkgbase}-${pkgver}"
++  cd "${srcdir}/riscv-${pkgbase}"
+   # from Makefile
+   BYTESTART=driver/main.cmo
+   TOPLEVELSTART=toplevel/topstart.cmo

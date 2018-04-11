@@ -1,0 +1,20 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-10 19:24:11.734913959 +0200
++++ b/PKGBUILD	2018-04-10 19:31:03.617874922 +0200
+@@ -9,7 +9,7 @@ arch=('i686' 'x86_64')
+ url="http://www.mega-nerd.com/libsndfile"
+ license=('LGPL')
+ depends=('alsa-lib' 'flac' 'libvorbis')
+-checkdepends=('python2')
++makedepends=('python2')
+ source=(http://www.mega-nerd.com/libsndfile/files/${pkgname}-${pkgver}.tar.gz)
+ sha1sums=('85aa967e19f6b9bf975601d79669025e5f8bc77d')
+ validpgpkeys=('73571E85C19F4281D8C97AA86CA41A7743B8D6C8')
+@@ -23,6 +23,7 @@ prepare() {
+ 
+ build() {
+   cd ${pkgname}-${pkgver}
++  autoreconf --install
+   ./configure --prefix=/usr --disable-sqlite
+   make
+ }

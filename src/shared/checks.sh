@@ -110,10 +110,10 @@ check_pkgfile() {
   done
   shift $((OPTIND-1))
 
-  echo -n "checking for built package $2 ... "
+  echo -n "checking for built package $2$p ... "
 
   local esc pkgfile have_pkgfile=yes
-  esc=$(printf '%s\n' "$2" | sed 's:[][\/.^$*]:\\&:g')
+  esc=$(printf '%s\n' "$2" | sed 's:[][\/.+^$*]:\\&:g')
   pkgfile=$(find "$1" -regex "^.*/$esc$p-[^-]*-[^-]*-[^-]*\\.pkg\\.tar\\.xz\$")
   [ -n "$pkgfile" ] || have_pkgfile=no
   echo $have_pkgfile

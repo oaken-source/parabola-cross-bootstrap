@@ -1,0 +1,51 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-08 10:04:38.017473514 +0200
++++ b/PKGBUILD	2018-04-08 10:04:38.018473514 +0200
+@@ -9,8 +9,8 @@ arch=('x86_64')
+ license=('GPL')
+ url="https://www.cups.org/"
+ makedepends=('libtiff' 'libpng' 'acl' 'pam' 'xdg-utils' 'krb5' 'gnutls'
+-             'cups-filters' 'bc' 'colord' 'xinetd' 'gzip' 'autoconf' 'libusb' 'dbus' 
+-             'avahi'  'hicolor-icon-theme' 'systemd' 'inetutils' 'libpaper' 'valgrind')
++             'bc' 'xinetd' 'gzip' 'autoconf' 'libusb' 'dbus' 
++             'hicolor-icon-theme' 'systemd' 'inetutils' 'libpaper')
+ source=(https://github.com/apple/cups/releases/download/v${pkgver}/cups-${pkgver}-source.tar.gz{,.sig}
+         cups.logrotate cups.pam
+         cups.sysusers guid.patch
+@@ -81,7 +81,7 @@ build() {
+      --enable-dbus --with-dbusdir=/etc/dbus-1 \
+      --enable-ssl=yes \
+      --enable-threads \
+-     --enable-avahi\
++     --disable-avahi\
+      --enable-libpaper \
+      --with-php=/usr/bin/php-cgi \
+      --with-optim="$CFLAGS" #--help
+@@ -95,7 +95,7 @@ check() {
+ 
+ package_libcups() {
+ pkgdesc="The CUPS Printing System - client libraries and headers"
+-depends=('gnutls' 'libtiff>=4.0.0' 'libpng>=1.5.7' 'krb5' 'avahi' 'libusb')
++depends=('gnutls' 'libtiff>=4.0.0' 'libpng>=1.5.7' 'krb5' 'libusb')
+ 
+   cd ${pkgbase}-${pkgver}
+   make BUILDROOT=${pkgdir} install-headers install-libs
+@@ -116,7 +116,7 @@ backup=(etc/cups/cupsd.conf
+         etc/dbus-1/system.d/cups.conf
+         etc/logrotate.d/cups
+         etc/pam.d/cups)
+-depends=('acl' 'pam' "libcups>=${pkgver}" 'cups-filters' 'bc' 
++depends=('acl' 'pam' "libcups>=${pkgver}" 'bc' 
+          'dbus' 'systemd' 'libpaper' 'hicolor-icon-theme')
+ optdepends=('xdg-utils: xdg .desktop file support'
+             'colord: for ICC color profile support')
+@@ -153,9 +153,6 @@ optdepends=('xdg-utils: xdg .desktop fil
+   touch ${pkgdir}/etc/cups/subscriptions.conf 
+   chgrp -R 209 ${pkgdir}/etc/cups
+   
+-  # fix .desktop file
+-  sed -i 's|^Exec=htmlview http://localhost:631/|Exec=xdg-open http://localhost:631/|g' ${pkgdir}/usr/share/applications/cups.desktop
+-  
+   # compress some driver files, adopted from Fedora
+   find ${pkgdir}/usr/share/cups/model -name "*.ppd" | xargs gzip -n9f
+   

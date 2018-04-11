@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-08 14:24:55.428993337 +0200
++++ b/PKGBUILD	2018-04-11 10:26:40.780781856 +0200
+@@ -10,7 +10,7 @@ url="https://cairographics.org/"
+ arch=(x86_64)
+ license=(LGPL MPL)
+ depends=(libpng libxrender libxext fontconfig pixman glib2 lzo)
+-makedepends=(librsvg gtk2 poppler-glib libspectre gtk-doc valgrind git)
++makedepends=(librsvg poppler-glib libspectre gtk-doc git)
+ _commit=1ed124ace201946177eab962d3b07bb2fedf9026  # master
+ source=("git+https://anongit.freedesktop.org/git/cairo#commit=$_commit"
+         utf-8.diff)

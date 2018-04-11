@@ -29,8 +29,8 @@ stage4_makepkg() {
   [ "x$1" != "x$pkgname" ] && prefix=(-r -p breakdeps)
 
   package_fetch_upstream_pkgfiles "$pkgname" || return
-  package_import_keys "$pkgname" || return
   package_patch "${prefix[@]}" "$pkgname" || return
+  package_import_keys "$pkgname" || return
 
   # substitute common variables
   sed "s#@MULTILIB@#${MULTILIB:-disable}#g" \
@@ -53,7 +53,7 @@ stage4_makepkg() {
     # add a temporary -breakdeps build, if a patch exists
     if [ "x$1" == "x$pkgname" ] && package_has_patch -p breakdeps "$1"; then
       deptree_add_entry "$1-breakdeps" "$1"
-      sed -i "s/ $pkgname / $pkgname-breakdeps /g" "$DEPTREE"
+      sed -i "s/ /  /g; s/ $pkgname / $pkgname-breakdeps /g; s/  */ /g" "$DEPTREE"
     fi
     # postpone actual build
     return 0

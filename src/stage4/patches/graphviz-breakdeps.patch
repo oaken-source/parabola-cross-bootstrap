@@ -1,0 +1,24 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-10 16:12:42.814002849 +0200
++++ b/PKGBUILD	2018-04-10 17:01:16.056726739 +0200
+@@ -11,9 +11,8 @@ url='http://www.graphviz.org/'
+ license=('CPL')
+ arch=('x86_64')
+ depends=('libltdl' 'gd' 'librsvg' 'libxaw' 'ghostscript' 'pango' 'gts' 'gsfonts')
+-makedepends=('swig' 'mono' 'guile' 'lua' 'ocaml' 'perl' 'python2' 'r' 'tk' 'qt4' 'gtk2')
+-optdepends=('mono: sharp bindings'
+-            'guile: guile bindings'
++makedepends=('swig' 'guile' 'lua' 'ocaml' 'perl' 'python2' 'r' 'tk')
++optdepends=('guile: guile bindings'
+             'lua: lua bindings'
+             'ocaml: ocaml bindings'
+             'perl: perl bindings'
+@@ -42,7 +41,7 @@ build() {
+ 	export PYTHON=python2
+ 	export LIBPOSTFIX=/
+ 
+-	./configure --prefix=/usr
++	./configure --with-rsvg=no --prefix=/usr
+ 	make
+ }
+ 

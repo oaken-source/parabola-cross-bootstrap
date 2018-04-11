@@ -1,0 +1,14 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-08 14:42:25.744893791 +0200
++++ b/PKGBUILD	2018-04-08 14:42:25.745893791 +0200
+@@ -12,8 +12,8 @@ license=('GPL')
+ url='https://www.r-project.org/'
+ depends=('blas' 'lapack' 'bzip2'  'libpng' 'libjpeg' 'libtiff'
+          'ncurses' 'pcre' 'readline' 'zlib' 'perl' 'gcc-libs'
+-         'libxt' 'libxmu' 'pango' 'xz' 'zip' 'unzip' 'curl' 'icu')
+-makedepends=('jdk7-openjdk' 'gcc-fortran' 'tk')
++         'libxt' 'libxmu' 'xz' 'zip' 'unzip' 'curl' 'icu')
++makedepends=('gcc-fortran' 'tk')
+ optdepends=('tk: tcl/tk interface' 'texlive-bin: latex sty files' 'gcc-fortran: needed to compile some CRAN packages')
+ backup=('etc/R/Makeconf' 'etc/R/Renviron' 'etc/R/ldpaths' 'etc/R/repositories' 'etc/R/javaconf')
+ options=('!makeflags' '!emptydirs')

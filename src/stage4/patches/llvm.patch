@@ -1,0 +1,99 @@
+diff -rupN a/llvm-riscv.patch b/llvm-riscv.patch
+--- a/llvm-riscv.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/llvm-riscv.patch	2018-04-08 15:41:31.296557753 +0200
+@@ -0,0 +1,15 @@
++diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
++index 46b7ffc..5ef1cf4 100644
++--- a/cmake/config-ix.cmake
+++++ b/cmake/config-ix.cmake
++@@ -443,6 +443,10 @@ elseif (LLVM_NATIVE_ARCH MATCHES "wasm32")
++   set(LLVM_NATIVE_ARCH WebAssembly)
++ elseif (LLVM_NATIVE_ARCH MATCHES "wasm64")
++   set(LLVM_NATIVE_ARCH WebAssembly)
+++elseif (LLVM_NATIVE_ARCH MATCHES "riscv32")
+++  set(LLVM_NATIVE_ARCH RISCV)
+++elseif (LLVM_NATIVE_ARCH MATCHES "riscv64")
+++  set(LLVM_NATIVE_ARCH RISCV)
++ else ()
++   message(FATAL_ERROR "Unknown architecture ${LLVM_NATIVE_ARCH}")
++ endif ()
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-09 16:54:36.797953343 +0200
++++ b/PKGBUILD	2018-04-09 16:54:36.798953343 +0200
+@@ -18,7 +18,8 @@ source=(https://releases.llvm.org/$pkgve
+         PR36417-fixup-for-rL326769-RegState-Debug-is-being-truncated.patch
+         D44391-export-LLVM_DYLIB_COMPONENTS-in-LLVMConfig.cmake.patch
+         D44420-cmake-fix-a-typo-in-llvm_config-macro.patch
+-        llvm-config.h)
++        llvm-config.h
++        llvm-riscv.patch)
+ sha256sums=('1ff53c915b4e761ef400b803f07261ade637b0c269d99569f18040f3dcee4408'
+             'SKIP'
+             '7d0082d1c641873c1d45c2f076b9533fbc43002d605336afa92198b8830a5bcb'
+@@ -26,7 +27,8 @@ sha256sums=('1ff53c915b4e761ef400b803f07
+             'da80b59c9abe9fe864ff8dc42132c5aa135a79d342fd147ae6f54e2621e009fa'
+             '96e2f3ca8b7d1bdbe2606a1eebb12c57b39838d1bcc15e40388e8d59649a9f4a'
+             '5cc114fd711e6ea836a6270b2f713e2e751c49e8b5ffa6c6812127ca801acef3'
+-            '597dc5968c695bbdbb0eac9e8eb5117fcd2773bc91edf5ec103ecffffab8bc48')
++            '597dc5968c695bbdbb0eac9e8eb5117fcd2773bc91edf5ec103ecffffab8bc48'
++            '467d2aa8b53bc20482134d909b4a00c0bd9f88011421aad3eed34ba772b9cd28')
+ validpgpkeys+=('B6C8F98282B944E3B0D5C2530FC3042E345AD05D') # Hans Wennborg <hans@chromium.org>
+ validpgpkeys+=('11E521D646982372EB577A1F8F0871F202119294') # Tom Stellard <tom@stellard.net>
+ 
+@@ -46,28 +48,45 @@ prepare() {
+ 
+   # https://reviews.llvm.org/D44420
+   patch -Np0 -i ../D44420-cmake-fix-a-typo-in-llvm_config-macro.patch
++
++  patch -Np1 -i ../llvm-riscv.patch
+ }
+ 
+ build() {
+   cd "$srcdir/llvm-$pkgver.src/build"
+ 
+   cmake .. -G Ninja \
++    -DBUILD_SHARED_LIBS:BOOL=OFF \
++    -DLLVM_BUILD_RUNTIME:BOOL=ON \
++    -DLLVM_BUILD_EXTERNAL_COMPILER_RT:BOOL=ON \
++    -DLLVM_INSTALL_TOOLCHAIN_ONLY:BOOL=OFF \
+     -DCMAKE_BUILD_TYPE=Release \
++    -DLLVM_TARGETS_TO_BUILD="X86;AMDGPU;PowerPC;NVPTX;SystemZ;AArch64;ARM;Mips;BPF" \
+     -DCMAKE_INSTALL_PREFIX=/usr \
+-    -DLLVM_HOST_TRIPLE=$CHOST \
+-    -DLLVM_BUILD_LLVM_DYLIB=ON \
+-    -DLLVM_LINK_LLVM_DYLIB=ON \
+-    -DLLVM_INSTALL_UTILS=ON \
+-    -DLLVM_ENABLE_RTTI=ON \
+-    -DLLVM_ENABLE_FFI=ON \
+-    -DLLVM_BUILD_TESTS=ON \
+-    -DLLVM_BUILD_DOCS=ON \
+-    -DLLVM_ENABLE_SPHINX=ON \
+-    -DLLVM_ENABLE_DOXYGEN=OFF \
++    -DLLVM_BUILD_LLVM_DYLIB:BOOL=ON \
++    -DLLVM_DYLIB_EXPORT_ALL:BOOL=ON \
++    -DLLVM_LINK_LLVM_DYLIB:BOOL=ON \
++    -DLLVM_INCLUDE_UTILS:BOOL=ON \
++    -DLLVM_INSTALL_UTILS:BOOL=ON \
++    -DLLVM_ENABLE_LIBCXX:BOOL=OFF \
++    -DLLVM_ENABLE_ZLIB:BOOL=ON \
++    -DLLVM_ENABLE_RTTI:BOOL=ON \
++    -DLLVM_ENABLE_FFI:BOOL=ON \
++    -DLLVM_INCLUDE_TOOLS:BOOL=ON \
++    -DLLVM_BUILD_TOOLS:BOOL=ON \
++    -DLLVM_INCLUDE_EXAMPLES:BOOL=ON \
++    -DLLVM_BUILD_EXAMPLES:BOOL=OFF \
++    -DLLVM_INCLUDE_TESTS:BOOL=ON \
++    -DLLVM_BUILD_TESTS:BOOL=ON \
++    -DLLVM_INCLUDE_DOCS:BOOL=ON \
++    -DLLVM_BUILD_DOCS:BOOL=ON \
++    -DLLVM_ENABLE_SPHINX:BOOL=ON \
++    -DLLVM_ENABLE_DOXYGEN:BOOL=OFF \
+     -DSPHINX_WARNINGS_AS_ERRORS=OFF \
+     -DFFI_INCLUDE_DIR=$(pkg-config --variable=includedir libffi) \
+     -DLLVM_BINUTILS_INCDIR=/usr/include
+-  ninja all ocaml_doc
++  sed -i 's/-lpthread/& -latomic/g' build.ninja
++  ninja -v all ocaml_doc
+ }
+ 
+ check() {

@@ -1,0 +1,15 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-04 18:25:29.192380397 +0200
++++ b/PKGBUILD	2018-04-09 13:53:12.169984960 +0200
+@@ -11,9 +11,8 @@ pkgdesc="Driver for FireWire audio devic
+ arch=('x86_64')
+ url="http://www.ffado.org/"
+ license=('GPL')
+-depends=('dbus-c++' 'jack' 'libavc1394' 'libconfig' 'libiec61883' 'libxml++' 'python-dbus')
+-makedepends=('python-pyqt5' 'python-dbus' 'scons')
+-optdepends=('python-pyqt5: ffado-mixer')
++depends=('dbus-c++' 'libavc1394' 'libconfig' 'libiec61883' 'libxml++' 'python-dbus')
++makedepends=('python-dbus' 'scons')
+ provides=('ffado')
+ source=("http://www.ffado.org/files/${pkgname}-${pkgver}.tgz"
+         "${pkgname}-fix-python3-pyqt5.diff"

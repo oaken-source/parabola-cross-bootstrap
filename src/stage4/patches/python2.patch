@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-07 17:14:38.518216974 +0200
++++ b/PKGBUILD	2018-04-07 17:14:38.519216974 +0200
+@@ -71,7 +71,7 @@ build() {
+   ./configure --prefix=/usr \
+               --enable-shared \
+               --with-threads \
+-              --enable-optimizations \
++              --disable-optimizations \
+               --with-lto \
+               --enable-ipv6 \
+               --enable-unicode=ucs4 \

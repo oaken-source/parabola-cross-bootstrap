@@ -1,0 +1,49 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-10 15:05:04.145387519 +0200
++++ b/PKGBUILD	2018-04-10 15:46:39.528151013 +0200
+@@ -9,9 +9,9 @@ pkgdesc="An interpreter for the PostScri
+ url="https://www.ghostscript.com/"
+ arch=('x86_64')
+ license=('AGPL3' 'custom')
+-depends=('libxt' 'libcups' 'fontconfig' 'zlib' 'libpng' 'libjpeg' 'jbig2dec'
+-         'libtiff' 'lcms2' 'dbus' 'libpaper' 'ijs' 'openjpeg2')
+-makedepends=('gtk3' 'gnutls' 'glu' 'freeglut')
++depends=('libxt' 'fontconfig' 'zlib' 'libpng' 'libjpeg' 'jbig2dec'
++         'libtiff' 'lcms2' 'dbus' 'libpaper' 'openjpeg2')
++makedepends=('gnutls' 'glu' 'freeglut')
+ # https://github.com/ArtifexSoftware/ghostpdl-downloads/releases
+ source=(https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs${pkgver/./}/ghostpdl-${pkgver}.tar.xz)
+ sha512sums=('4c2f6c0f31138c780943c866067f95f5867c56ca54fc5cc5ae8394e682ae1e97c575529844b04a9664fd72510a86ecd23ba69feee19dadb5852c3c0cf7b7f917')
+@@ -20,7 +20,7 @@ prepare() {
+   cd ghostpdl-${pkgver}
+ 
+   # force it to use system-libs
+-  rm -r cups/libs expat ijs jbig2dec jpeg lcms2art libpng openjpeg tiff zlib
++  rm -r expat jbig2dec jpeg lcms2art libpng openjpeg tiff zlib
+   # using tree freetype because of https://bugs.archlinux.org/task/56849
+   # lcms2art is the new lcms2 fork aimed to replace lcms2 in a thread safe way
+ 
+@@ -32,9 +32,9 @@ build() {
+ 
+   ./configure --prefix=/usr \
+               --enable-dynamic \
+-              --with-ijs \
++              --without-ijs \
+               --with-jbig2dec \
+-              --with-x \
++              --without-x \
+               --with-drivers=ALL \
+               --with-fontpath=/usr/share/fonts/gsfonts \
+               --enable-fontconfig \
+@@ -54,10 +54,7 @@ package_ghostscript() {
+ 
+   cd ghostpdl-${pkgver}
+ 
+-  make DESTDIR="${pkgdir}" \
+-       CUPSSERVERROOT="${pkgdir}$(cups-config --serverroot)" \
+-       CUPSSERVERBIN="${pkgdir}$(cups-config --serverbin)" \
+-       soinstall
++  make DESTDIR="${pkgdir}" soinstall
+   ln -s gsc "${pkgdir}"/usr/bin/gs
+ 
+   # install missing doc files # http://bugs.archlinux.org/task/18023

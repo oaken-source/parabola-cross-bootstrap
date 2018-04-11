@@ -1,0 +1,34 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-11 07:23:00.338826344 +0200
++++ b/PKGBUILD	2018-04-11 08:25:38.813470126 +0200
+@@ -1,6 +1,8 @@
+ # $Id$
+ # Maintainer: AndyRTR <andyrtr@archlinux.org>
+ 
++# FIXME: dblatex fails when building documentation
++
+ pkgname=graphite
+ pkgver=1.3.11
+ pkgrel=1
+@@ -39,7 +41,7 @@ build() {
+   find . -type f ! -name "rules" ! -name "changelog" -exec sed -i -e 's/\-O3//g' {} \;
+ 
+   make 
+-  make -j1 docs
++  #make -j1 docs
+ }
+ 
+ check() {
+@@ -53,9 +55,9 @@ package() {
+   cd "${srcdir}"/build
+   make DESTDIR="$pkgdir/" install
+   # install doc files
+-  mkdir -p "${pkgdir}"/usr/share/doc/graphite2/api
+-  cp -vrf doc/doxygen/{html,latex/refman.pdf} "${pkgdir}"/usr/share/doc/graphite2/api
+-  cp -vrf doc/{GTF,manual}.html "${pkgdir}"/usr/share/doc/graphite2
++  #mkdir -p "${pkgdir}"/usr/share/doc/graphite2/api
++  #cp -vrf doc/doxygen/{html,latex/refman.pdf} "${pkgdir}"/usr/share/doc/graphite2/api
++  #cp -vrf doc/{GTF,manual}.html "${pkgdir}"/usr/share/doc/graphite2
+ 
+   # licenses
+   mkdir -p "${pkgdir}"/usr/share/licenses/${pkgname}

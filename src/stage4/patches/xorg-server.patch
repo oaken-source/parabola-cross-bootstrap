@@ -1,0 +1,74 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-11 07:29:18.352790517 +0200
++++ b/PKGBUILD	2018-04-11 07:29:18.353790517 +0200
+@@ -16,7 +16,7 @@ makedepends=('pixman' 'libx11' 'mesa' 'm
+              'xf86dgaproto' 'libxmu' 'libxrender' 'libxi' 'dmxproto' 'libxaw' 'libdmx' 'libxtst' 'libxres'
+              'xorg-xkbcomp' 'xorg-util-macros' 'xorg-font-util' 'glproto' 'dri2proto' 'libgcrypt' 'libepoxy'
+              'xcb-util' 'xcb-util-image' 'xcb-util-renderutil' 'xcb-util-wm' 'xcb-util-keysyms' 'dri3proto'
+-             'libxshmfence' 'libunwind' 'systemd' 'wayland-protocols' 'git')
++             'libxshmfence' 'systemd' 'wayland-protocols' 'git')
+ _commit=d0d1a694f967af770fba0d36043fd5218ff20984 # branch 1.19
+ #source=(https://xorg.freedesktop.org/releases/individual/xserver/${pkgbase}-${pkgver}.tar.bz2{,.sig}
+ source=("git+https://anongit.freedesktop.org/git/xorg/xserver.git#commit=$_commit"
+@@ -69,7 +69,6 @@ build() {
+       --enable-xnest \
+       --enable-composite \
+       --enable-xcsecurity \
+-      --enable-libunwind \
+       --enable-xorg \
+       --enable-xephyr \
+       --enable-glamor \
+@@ -127,7 +126,7 @@ package_xorg-server-common() {
+ 
+ package_xorg-server() {
+   pkgdesc="Xorg X server"
+-  depends=(libepoxy libxfont2 pixman xorg-server-common libunwind dbus libgl xf86-input-libinput
++  depends=(libepoxy libxfont2 pixman xorg-server-common dbus libgl xf86-input-libinput
+            libpciaccess libdrm libxshmfence) # FS#52949
+ 
+   # see xorg-server-*/hw/xfree86/common/xf86Module.h for ABI versions - we provide major numbers that drivers can depend on
+@@ -159,7 +158,7 @@ package_xorg-server() {
+ 
+ package_xorg-server-xephyr() {
+   pkgdesc="A nested X server that runs as an X application"
+-  depends=(libxfont2 libgl libepoxy libunwind libsystemd libxv pixman xorg-server-common xcb-util-image
++  depends=(libxfont2 libgl libepoxy libsystemd libxv pixman xorg-server-common xcb-util-image
+            xcb-util-renderutil xcb-util-wm xcb-util-keysyms)
+ 
+   cd xserver/hw/kdrive
+@@ -172,7 +171,7 @@ package_xorg-server-xephyr() {
+ 
+ package_xorg-server-xvfb() {
+   pkgdesc="Virtual framebuffer X server"
+-  depends=(libxfont2 libunwind libsystemd pixman xorg-server-common xorg-xauth libgl)
++  depends=(libxfont2 libsystemd pixman xorg-server-common xorg-xauth libgl)
+ 
+   cd xserver/hw/vfb
+   #cd "${pkgbase}-${pkgver}/hw/vfb"
+@@ -187,7 +186,7 @@ package_xorg-server-xvfb() {
+ 
+ package_xorg-server-xnest() {
+   pkgdesc="A nested X server that runs as an X application"
+-  depends=(libxfont2 libxext libunwind pixman xorg-server-common libsystemd)
++  depends=(libxfont2 libxext pixman xorg-server-common libsystemd)
+ 
+   cd xserver/hw/xnest
+   #cd "${pkgbase}-${pkgver}/hw/xnest"
+@@ -199,7 +198,7 @@ package_xorg-server-xnest() {
+ 
+ package_xorg-server-xdmx() {
+   pkgdesc="Distributed Multihead X Server and utilities"
+-  depends=(libxfont2 libxi libxaw libxrender libdmx libxfixes libunwind pixman xorg-server-common)
++  depends=(libxfont2 libxi libxaw libxrender libdmx libxfixes pixman xorg-server-common)
+ 
+   cd xserver/hw/dmx
+   #cd "${pkgbase}-${pkgver}/hw/dmx"
+@@ -211,7 +210,7 @@ package_xorg-server-xdmx() {
+ 
+ package_xorg-server-xwayland() {
+   pkgdesc="run X clients under wayland"
+-  depends=(libxfont2 libepoxy libunwind libsystemd libgl pixman xorg-server-common)
++  depends=(libxfont2 libepoxy libsystemd libgl pixman xorg-server-common)
+ 
+   cd xserver/hw/xwayland
+   #cd "${pkgbase}-${pkgver}/hw/xwayland"

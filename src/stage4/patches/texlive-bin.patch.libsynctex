@@ -1,0 +1,56 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-11 03:30:50.128146613 +0200
++++ b/PKGBUILD	2018-04-11 04:46:41.040715289 +0200
+@@ -10,7 +10,7 @@ arch=('x86_64')
+ makedepends=('cairo' 'pixman' 'graphite' 't1lib' 'gd' 'poppler'
+          'libsigsegv' 'zziplib' 'libpng' 'libjpeg' 'freetype2'
+          'icu' 'harfbuzz' 'harfbuzz-icu' 'gmp' 'mpfr' 'potrace' 'libpaper'
+-         'perl' 'clisp' 'ffcall')
++         'perl')
+ url='http://tug.org/texlive/'
+ source=("https://sources.archlinux.org/other/texlive/texlive-bin-source-${pkgver}.tar.xz"
+         "luatex-gcc7.patch"
+@@ -89,8 +89,7 @@ build() {
+      --disable-dump-share \
+      --disable-aleph \
+      --enable-luatex \
+-     --with-clisp-runtime=default \
+-     --enable-xindy --disable-xindy-rules --disable-xindy-docs
++     --disable-xindy --disable-luajittex --disable-mfluajit
+    #############################################################
+    ### make
+    echo "-------------------------------------------------------"
+@@ -114,7 +113,7 @@ package_texlive-bin() {
+             'libsigsegv' 'zziplib' 'libpng' 'libjpeg' 'freetype2'
+             'icu' 'harfbuzz' 'harfbuzz-icu' 'gmp' 'mpfr' 'potrace' 'libpaper'
+             'libsynctex')
+-   provides=('lcdf-typetools' 'kpathsea' 'xindy')
++   provides=('lcdf-typetools' 'kpathsea')
+    optdepends=('ed: for texconfig'
+                'biber: for bibliography processing')
+    options=('!strip')
+@@ -124,8 +123,6 @@ package_texlive-bin() {
+    #############################################################
+    ### install
+    cd source
+-   # fixes for xindy
+-   find utils/xindy -name Makefile -exec sed -i -e "s|^prefix =.\+$|prefix = $pkgdir/usr|" -e "s|^mandir =.\+$|mandir = \${prefix}/share/man|" -e "s|^datadir =.\+$|datadir = \${datarootdir}/texmf|" -e "s|^docdir =.\+$|docdir = \${datadir}/doc/xindy|" '{}' \;
+ 
+    echo "-------------------------------------------------------"
+    echo "--> Proceeding with make install ..."
+@@ -298,7 +295,6 @@ texdoc
+ texdoctk
+ texexec
+ texfot
+-texindy
+ texlinks
+ texliveonfly
+ texloganalyser
+@@ -314,7 +310,6 @@ updmap-user
+ vpl2ovp
+ vpl2vpl
+ xhlatex
+-xindy
+ "
+    _games_scripts="rubikrotation"
+    _humanities_scripts="diadia"

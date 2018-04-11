@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-04 18:13:29.798448579 +0200
++++ b/PKGBUILD	2018-04-09 13:32:46.976101080 +0200
+@@ -11,7 +11,7 @@ arch=(x86_64)
+ url="http://www.gtk.org/"
+ depends=(atk cairo libxcursor libxinerama libxrandr libxi libepoxy gdk-pixbuf2 dconf
+          libxcomposite libxdamage pango shared-mime-info at-spi2-atk wayland libxkbcommon
+-         adwaita-icon-theme json-glib librsvg wayland-protocols desktop-file-utils mesa
++         json-glib librsvg wayland-protocols desktop-file-utils mesa
+          cantarell-fonts colord rest libcups libcanberra)
+ makedepends=(gobject-introspection gtk-doc git glib2-docs sassc)
+ license=(LGPL)
