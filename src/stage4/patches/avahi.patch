@@ -1,0 +1,27 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-13 23:45:55.699859289 +0200
++++ b/PKGBUILD	2018-04-14 08:44:27.735796839 +0200
+@@ -11,14 +11,13 @@ url='https://github.com/lathiat/avahi'
+ license=(LGPL)
+ arch=(x86_64)
+ depends=(expat libdaemon glib2 libcap gdbm dbus)
+-makedepends=(git qt4 pygtk mono intltool gtk-sharp-2 gobject-introspection gtk3
++makedepends=(git qt4 pygtk intltool gobject-introspection gtk3
+              xmltoman python-dbus python-gobject doxygen graphviz)
+ optdepends=('gtk3: avahi-discover, avahi-discover-standalone, bshell, bssh, bvnc'
+             'gtk2: gtk2 bindings'
+             'qt4: qt4 bindings'
+             'pygtk: avahi-bookmarks'
+             'python2-twisted: avahi-bookmarks'
+-            'mono: mono bindings'
+             'nss-mdns: NSS support for mDNS'
+             'python-gobject: avahi-discover'
+             'python-dbus: avahi-discover')
+@@ -50,6 +49,7 @@ build() {
+     --sysconfdir=/etc \
+     --localstatedir=/var \
+     --sbindir=/usr/bin \
++    --disable-mono \
+     --disable-monodoc \
+     --disable-qt3 \
+     --enable-compat-libdns_sd \

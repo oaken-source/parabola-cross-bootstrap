@@ -1,0 +1,55 @@
+diff -rupN a/04_disable_stacktrace.patch b/04_disable_stacktrace.patch
+--- a/04_disable_stacktrace.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/04_disable_stacktrace.patch	2018-04-11 14:28:53.993404436 +0200
+@@ -0,0 +1,29 @@
++Description: Don't print the stacktrace on segfaults.
++ Fixes FTBFS on armel,powerpc,ia64,alpha.
++Origin: Ubuntu, https://launchpad.net/bugs/647091
++Bug-Ubuntu: https://launchpad.net/bugs/647091
++---
++ lashd/sigsegv.c |    5 +++++
++ 1 file changed, 5 insertions(+)
++
++--- lash.orig/lashd/sigsegv.c
+++++ lash/lashd/sigsegv.c
++@@ -90,6 +90,10 @@ static void signal_segv(int signum, sigi
++     lash_error("info.si_errno = %d", info->si_errno);
++     lash_error("info.si_code  = %d (%s)", info->si_code, si_codes[info->si_code]);
++     lash_error("info.si_addr  = %p", info->si_addr);
+++
+++#if defined(__arm__) || defined(__aarch64__) || defined(__powerpc__) || defined (__ia64__) || defined (__alpha__) || defined (__FreeBSD_kernel__) || defined(__riscv)
+++    lash_error("No stack trace");
+++#else
++     for(i = 0; i < NGREG; i++)
++         lash_error("reg[%02d]       = 0x" REGFORMAT, i, ucontext->uc_mcontext.gregs[i]);
++ 
++@@ -143,6 +147,7 @@ static void signal_segv(int signum, sigi
++         lash_error("%s", strings[i]);
++ #endif
++     lash_error("End of stack trace");
+++#endif
++     exit (-1);
++ }
++ 
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-11 14:05:43.327536240 +0200
++++ b/PKGBUILD	2018-04-11 14:28:53.988404437 +0200
+@@ -15,13 +15,16 @@ depends=('jack' 'python2')
+ makedepends=('gtk2')
+ optdepends=('gtk2: For lash_panel, lash_save_button and lash_synth')
+ source=("https://download.savannah.gnu.org/releases/lash/${pkgname}-${pkgver}.tar.bz2"
+-        "fix-manual-generation.patch")
++        "fix-manual-generation.patch"
++        "04_disable_stacktrace.patch")
+ sha512sums=('704e24ccadccb469e820be5fb58dd4d953a8fc2903cd857a290267a87dda596639ec381d5cb7cdfcd715df7d98d6570e52731bddd17f8a3425edd8b699632401'
+-            '25bb9f97bc6ff7543fea39242bc321b40cd35ba042248671e958348f9e250f810ea1e4753918aceba799b0fdd886184af57a7c497796034b999ca8d6b85e1252')
++            '25bb9f97bc6ff7543fea39242bc321b40cd35ba042248671e958348f9e250f810ea1e4753918aceba799b0fdd886184af57a7c497796034b999ca8d6b85e1252'
++            '08dc6ef1aa811cf8709c8fb88868ec4278b3066d25aa53617f43f751f10a918c57222c2e3c1b27f4a3069712d0804dbaa4ba9e1b10f36e8252d76f3ee1cf486f')
+ 
+ prepare() {
+   cd "${pkgname}-${_relver}"
+   patch -Np0 -i "../fix-manual-generation.patch"
++  patch -Np1 -i "../04_disable_stacktrace.patch"
+   # Python2 fixes
+   export PYTHON="python2"
+   sed -i "s#env python#&2#" clients/lash_control

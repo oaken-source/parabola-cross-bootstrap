@@ -1,0 +1,175 @@
+diff -rupN a/0001-qt4-riscv.patch b/0001-qt4-riscv.patch
+--- a/0001-qt4-riscv.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/0001-qt4-riscv.patch	2018-04-14 08:01:54.085038868 +0200
+@@ -0,0 +1,130 @@
++
++This patch adds 64Bit RISC-V support to qt 4.8.7. The relevant changes are:
++
++	* configure: correctly detect riscv64 as $CFG_HOST_ARCH
++
++	* src/3rdparty/webkit/Source/JavaScriptCore/wtf/Platform.h: introduce
++	  WTF_CPU_RISCV64; and since rv64 requires a 64bit JSValue, set
++	  WTF_USE_JSVALUE64 here
++
++	* src/corelib/arch/qatomic_arch.h: use qatomic_generic on rv64
++	* src/corelib/arch/riscv64/arch.pri: likewise
++
++	* src/dbus/qdbusintegrator.cpp: this can not be a const QString since
++	  the atomics involved are defined for pointer types, not const pointer
++	  types (would require -fpermissive to build on current g++)
++
++	* src/3rdparty/webkit/Source/JavaScriptCore/JavaScriptCore.pri: add
++	  -fpermissive to local build flags to work around an unconditional
++	  reinterpret_cast<int32_t> in JSValue.h failing the build in current g++
++	* src/3rdparty/javascriptcore/JavaScriptCore/JavaScriptCore.pri: likewise
++
++
++
++diff -rupN qt-everywhere-opensource-src-4.8.7-orig/configure qt-everywhere-opensource-src-4.8.7/configure
++--- qt-everywhere-opensource-src-4.8.7-orig/configure	2015-05-07 16:14:56.000000000 +0200
+++++ qt-everywhere-opensource-src-4.8.7/configure	2018-04-13 09:18:38.937791195 +0200
++@@ -3239,6 +3239,12 @@ if [ -z "${CFG_HOST_ARCH}" ]; then
++         fi
++         CFG_HOST_ARCH=powerpc
++         ;;
+++    *:*:riscv64*)
+++        if [ "$OPT_VERBOSE" = "yes" ]; then
+++            echo "    64-bit RISC-V (riscv64)"
+++        fi
+++        CFG_HOST_ARCH=riscv64
+++        ;;
++     *:*:s390*)
++     	if [ "$OPT_VERBOSE" = "yes" ]; then
++     	    echo "    IBM S/390 (s390)"
++diff -rupN qt-everywhere-opensource-src-4.8.7-orig/src/3rdparty/javascriptcore/JavaScriptCore/JavaScriptCore.pri qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/JavaScriptCore.pri
++--- qt-everywhere-opensource-src-4.8.7-orig/src/3rdparty/javascriptcore/JavaScriptCore/JavaScriptCore.pri	2015-05-07 16:14:47.000000000 +0200
+++++ qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/JavaScriptCore.pri	2018-04-11 20:15:06.901435635 +0200
++@@ -66,6 +66,12 @@ contains(JAVASCRIPTCORE_JIT,no) {
++     }
++ }
++ 
+++# JSValue.h unconditionally casts pointer to int32_t.
+++# add -fpermissive locally as a workaround
+++equals(QT_ARCH, riscv64) {
+++    QMAKE_CXXFLAGS += -fpermissive
+++}
+++
++ wince* {
++     INCLUDEPATH += $$QT_SOURCE_TREE/src/3rdparty/ce-compat
++     SOURCES += $$QT_SOURCE_TREE/src/3rdparty/ce-compat/ce_time.c
++diff -rupN qt-everywhere-opensource-src-4.8.7-orig/src/3rdparty/webkit/Source/JavaScriptCore/JavaScriptCore.pri qt-everywhere-opensource-src-4.8.7/src/3rdparty/webkit/Source/JavaScriptCore/JavaScriptCore.pri
++--- qt-everywhere-opensource-src-4.8.7-orig/src/3rdparty/webkit/Source/JavaScriptCore/JavaScriptCore.pri	2015-05-07 16:14:45.000000000 +0200
+++++ qt-everywhere-opensource-src-4.8.7/src/3rdparty/webkit/Source/JavaScriptCore/JavaScriptCore.pri	2018-04-11 20:15:06.901435635 +0200
++@@ -63,6 +63,12 @@ contains (CONFIG, text_breaking_with_icu
++     DEFINES += WTF_USE_QT_ICU_TEXT_BREAKING=1
++ }
++ 
+++# JSValue.h unconditionally casts pointer to int32_t.
+++# add -fpermissive locally as a workaround
+++equals(QT_ARCH, riscv64) {
+++    QMAKE_CXXFLAGS += -fpermissive
+++}
+++
++ wince* {
++     INCLUDEPATH += $$QT_SOURCE_TREE/src/3rdparty/ce-compat
++     INCLUDEPATH += $$PWD/../JavaScriptCore/os-win32
++diff -rupN qt-everywhere-opensource-src-4.8.7-orig/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Platform.h qt-everywhere-opensource-src-4.8.7/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Platform.h
++--- qt-everywhere-opensource-src-4.8.7-orig/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Platform.h	2015-05-07 16:14:45.000000000 +0200
+++++ qt-everywhere-opensource-src-4.8.7/src/3rdparty/webkit/Source/JavaScriptCore/wtf/Platform.h	2018-04-11 21:30:33.962006572 +0200
++@@ -369,6 +369,11 @@
++ 
++ #endif /* ARM */
++ 
+++/* CPU(RISCV64) - RISC-V 64 */
+++#if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 64
+++#define WTF_CPU_RISCV64 1
+++#endif
+++
++ #if CPU(ARM) || CPU(MIPS) || CPU(SH4)
++ #define WTF_CPU_NEEDS_ALIGNED_ACCESS 1
++ #endif
++@@ -1003,7 +1008,8 @@
++     || CPU(SPARC64) \
++     || CPU(S390X) \
++     || CPU(PPC64) \
++-    || CPU(MIPS64)
+++    || CPU(MIPS64) \
+++    || CPU(RISCV64)
++ #define WTF_USE_JSVALUE64 1
++ #else
++ #define WTF_USE_JSVALUE32_64 1
++diff -rupN qt-everywhere-opensource-src-4.8.7-orig/src/corelib/arch/qatomic_arch.h qt-everywhere-opensource-src-4.8.7/src/corelib/arch/qatomic_arch.h
++--- qt-everywhere-opensource-src-4.8.7-orig/src/corelib/arch/qatomic_arch.h	2015-05-07 16:14:48.000000000 +0200
+++++ qt-everywhere-opensource-src-4.8.7/src/corelib/arch/qatomic_arch.h	2018-04-11 21:29:43.477011357 +0200
++@@ -94,6 +94,8 @@ QT_BEGIN_HEADER
++ #  include "QtCore/qatomic_sh4a.h"
++ #elif defined(QT_ARCH_NACL)
++ #  include "QtCore/qatomic_generic.h"
+++#elif defined(QT_ARCH_RISCV64)
+++#  include "QtCore/qatomic_generic.h"
++ #else
++ #  error "Qt has not been ported to this architecture"
++ #endif
++diff -rupN qt-everywhere-opensource-src-4.8.7-orig/src/corelib/arch/riscv64/arch.pri qt-everywhere-opensource-src-4.8.7/src/corelib/arch/riscv64/arch.pri
++--- qt-everywhere-opensource-src-4.8.7-orig/src/corelib/arch/riscv64/arch.pri	1970-01-01 01:00:00.000000000 +0100
+++++ qt-everywhere-opensource-src-4.8.7/src/corelib/arch/riscv64/arch.pri	2018-04-13 19:45:50.708224556 +0200
++@@ -0,0 +1,6 @@
+++#
+++# RISC-V 64 architecture
+++#
+++
+++unix:SOURCES += ../generic/qatomic_generic_unix.cpp
+++win32:SOURCES += ../generic/qatomic_generic_windows.cpp
++diff -rupN qt-everywhere-opensource-src-4.8.7-orig/src/dbus/qdbusintegrator.cpp qt-everywhere-opensource-src-4.8.7/src/dbus/qdbusintegrator.cpp
++--- qt-everywhere-opensource-src-4.8.7-orig/src/dbus/qdbusintegrator.cpp	2015-05-07 16:14:44.000000000 +0200
+++++ qt-everywhere-opensource-src-4.8.7/src/dbus/qdbusintegrator.cpp	2018-04-12 08:25:56.305279705 +0200
++@@ -73,7 +73,7 @@ QT_BEGIN_NAMESPACE
++ static bool isDebugging;
++ #define qDBusDebug              if (!::isDebugging); else qDebug
++ 
++-Q_GLOBAL_STATIC_WITH_ARGS(const QString, orgFreedesktopDBusString, (QLatin1String(DBUS_SERVICE_DBUS)))
+++Q_GLOBAL_STATIC_WITH_ARGS(QString, orgFreedesktopDBusString, (QLatin1String(DBUS_SERVICE_DBUS)))
++ 
++ static inline QString dbusServiceString()
++ { return *orgFreedesktopDBusString(); }
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-11 18:16:11.410111918 +0200
++++ b/PKGBUILD	2018-04-14 08:01:54.075038868 +0200
+@@ -37,7 +37,8 @@ source=("http://download.qt.io/official_
+         'disable-sslv3.patch'
+         'l-qclipboard_fix_recursive.patch'
+         'l-qclipboard_delay.patch'
+-        'qt4-gcc6.patch' 'qt4-glibc-2.25.patch' 'qt4-icu59.patch' 'qt4-openssl-1.1.patch')
++        'qt4-gcc6.patch' 'qt4-glibc-2.25.patch' 'qt4-icu59.patch' 'qt4-openssl-1.1.patch'
++        '0001-qt4-riscv.patch')
+ sha256sums=('e2882295097e47fe089f8ac741a95fef47e0a73a3f3cdf21b56990638f626ea0'
+             '157eb47865f0b43e4717819783823c569127a2e9fc48309982ca0f2b753517a1'
+             'd63f22858174489068c30a12b9115d1b4e23ade00c31c117513212e9a225c1ce'
+@@ -55,7 +56,8 @@ sha256sums=('e2882295097e47fe089f8ac741a
+             '51da49e41edac66559d3ec8dd0a152995a51a53e5d1f63f09fa089a8af7e3112'
+             'e6555f4a681227447e94e9f14e11626d50b7e5108aad06088311e87063bc0347'
+             '61d6bf45649c728dec5f8d22be5b496ed9d40f52c2c70102696d07133cd1750d'
+-            'ff3ddb5428cd2ff243558dc0c75b35f470077e9204bbc989ddcba04c866c1b68')
++            'ff3ddb5428cd2ff243558dc0c75b35f470077e9204bbc989ddcba04c866c1b68'
++            '729c09e8bd9f6780420bbbcbe25010a5e577905d008a595ec8ba62c22d26ee7e')
+ 
+ prepare() {
+   cd ${_pkgfqn}
+@@ -103,6 +105,8 @@ prepare() {
+   # Fix build with OpenSSL 1.1 (Debian + OpenMandriva)
+   patch -p1 -i "$srcdir"/qt4-openssl-1.1.patch
+ 
++  patch -Np1 -i "$srcdir"/0001-qt4-riscv.patch
++
+   echo "QMAKE_CXXFLAGS += -std=gnu++98" >> src/3rdparty/javascriptcore/JavaScriptCore/JavaScriptCore.pri
+   echo "QMAKE_CXXFLAGS += -std=gnu++98" >> src/plugins/accessible/qaccessiblebase.pri
+ }
+@@ -137,6 +141,8 @@ build() {
+     -nomake docs \
+     -silent \
+     -no-rpath \
++    -no-pch \
++    -verbose \
+     -optimized-qmake \
+     -no-reduce-relocations \
+     -dbus-linked \

@@ -8,6 +8,8 @@ gcc-ada:bootstrap needed
 gcc-go:libffi patch needed
 gcc-objc:libffi patch needed
 gcc-objc++:libffi patch needed
+gtk-sharp-2:depends on mono
+gtkglext:build is broken
 go:bootstrap needed
 jdk7-openjdk:build broken
 jre7-openjdk:build broken

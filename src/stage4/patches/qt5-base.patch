@@ -1,0 +1,14 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-11 19:21:18.579741607 +0200
++++ b/PKGBUILD	2018-04-14 08:39:46.332823510 +0200
+@@ -89,8 +89,8 @@ build() {
+     -dbus-linked \
+     -system-harfbuzz \
+     -journald \
+-    -no-use-gold-linker \
+-    -reduce-relocations
++    -no-pch \
++    -no-use-gold-linker
+   make
+ }
+ 
