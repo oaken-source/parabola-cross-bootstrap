@@ -1,0 +1,102 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-11 06:12:11.168229069 +0200
++++ b/PKGBUILD	2018-04-11 06:12:11.169229069 +0200
+@@ -9,18 +9,15 @@
+ # parabola changes and rationale:
+ #  - rebranded to parabola
+ 
+-pkgname=('texlive-bin')
++pkgname=('texlive-bin' 'libsynctex')
+ pkgver=2017.44590
+ pkgrel=13
+-pkgrel+=.parabola1
+ license=('GPL')
+ arch=('x86_64')
+-arch+=('i686' 'armv7h')
+ makedepends=('cairo' 'pixman' 'graphite' 't1lib' 'gd' 'poppler'
+          'libsigsegv' 'zziplib' 'libpng' 'libjpeg' 'freetype2'
+          'icu' 'harfbuzz' 'harfbuzz-icu' 'gmp' 'mpfr' 'potrace' 'libpaper'
+-         'perl' 'clisp' 'ffcall')
+-makedepends+=('poppler=0.63.0' 'icu>=61' 'icu<62')
++         'perl')
+ url='http://tug.org/texlive/'
+ source=("https://sources.archlinux.org/other/texlive/texlive-bin-source-${pkgver}.tar.xz"
+         "luatex-gcc7.patch"
+@@ -52,12 +49,6 @@ prepare() {
+ build() {
+    cd "$srcdir"
+ 
+-   if [ "${CARCH}" = "armv7h" ]; then
+-     local config_xindy="--disable-xindy"
+-   else
+-     local config_xindy="--enable-xindy"
+-   fi
+-
+    #############################################################
+    ### configure
+    cd source
+@@ -105,8 +96,7 @@ build() {
+      --disable-dump-share \
+      --disable-aleph \
+      --enable-luatex \
+-     --with-clisp-runtime=default \
+-     --disable-xindy-rules --disable-xindy-docs "$config_xindy"
++     --disable-xindy --disable-luajittex --disable-mfluajit
+    #############################################################
+    ### make
+    echo "-------------------------------------------------------"
+@@ -115,6 +105,15 @@ build() {
+    make
+ }
+ 
++package_libsynctex() {
++    pkgdesc='Library for synchronization between TeX files and resulting file'
++    depends=('glibc' 'zlib')
++
++    cd "${srcdir}/source/Work"
++    make -C texk/web2c DESTDIR="${pkgdir}" \
++        install-data-am install-libLTLIBRARIES
++}
++
+ package_texlive-bin() {
+    pkgdesc="TeX Live binaries"
+    pkgdesc+=" (Parabola rebranded)"
+@@ -122,8 +121,7 @@ package_texlive-bin() {
+             'libsigsegv' 'zziplib' 'libpng' 'libjpeg' 'freetype2'
+             'icu' 'harfbuzz' 'harfbuzz-icu' 'gmp' 'mpfr' 'potrace' 'libpaper'
+             'libsynctex')
+-   depends+=('icu>=61' 'icu<62' 'poppler=0.63.0')
+-   provides=('lcdf-typetools' 'kpathsea' 'xindy')
++   provides=('lcdf-typetools' 'kpathsea')
+    optdepends=('ed: for texconfig'
+                'biber: for bibliography processing')
+    options=('!strip')
+@@ -133,8 +131,6 @@ package_texlive-bin() {
+    #############################################################
+    ### install
+    cd source
+-   # fixes for xindy
+-   find utils/xindy -name Makefile -exec sed -i -e "s|^prefix =.\+$|prefix = $pkgdir/usr|" -e "s|^mandir =.\+$|mandir = \${prefix}/share/man|" -e "s|^datadir =.\+$|datadir = \${datarootdir}/texmf|" -e "s|^docdir =.\+$|docdir = \${datadir}/doc/xindy|" '{}' \;
+ 
+    echo "-------------------------------------------------------"
+    echo "--> Proceeding with make install ..."
+@@ -307,7 +303,6 @@ texdoc
+ texdoctk
+ texexec
+ texfot
+-texindy
+ texlinks
+ texliveonfly
+ texloganalyser
+@@ -323,11 +318,7 @@ updmap-user
+ vpl2ovp
+ vpl2vpl
+ xhlatex
+-xindy
+ "
+-   if [ "$CARCH" = "armv7h" ]; then
+-     _core_scripts="$(echo "$_core_scripts" | sed '/xindy$/d')"
+-   fi
+    _games_scripts="rubikrotation"
+    _humanities_scripts="diadia"
+    _langcyrillic_scripts="rubibtex rumakeindex"

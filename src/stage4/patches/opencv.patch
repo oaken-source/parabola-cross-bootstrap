@@ -1,0 +1,70 @@
+diff -rupN a/0001-opencv-riscv-support.patch b/0001-opencv-riscv-support.patch
+--- a/0001-opencv-riscv-support.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/0001-opencv-riscv-support.patch	2018-04-17 09:04:43.865115287 +0200
+@@ -0,0 +1,13 @@
++diff -rupN opencv-3.4.1-orig/3rdparty/protobuf/src/google/protobuf/stubs/platform_macros.h opencv-3.4.1/3rdparty/protobuf/src/google/protobuf/stubs/platform_macros.h
++--- opencv-3.4.1-orig/3rdparty/protobuf/src/google/protobuf/stubs/platform_macros.h	2018-04-17 09:00:18.978140393 +0200
+++++ opencv-3.4.1/3rdparty/protobuf/src/google/protobuf/stubs/platform_macros.h	2018-04-17 09:02:50.023126077 +0200
++@@ -79,6 +79,9 @@
++ #elif defined(__PPC__)
++ #define GOOGLE_PROTOBUF_ARCH_PPC 1
++ #define GOOGLE_PROTOBUF_ARCH_32_BIT 1
+++#elif defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 64
+++#define GOOGLE_PROTOBUF_ARCH_RISCV64 1
+++#define GOOGLE_PROTOBUF_ARCH_64_BIT 1
++ #elif defined(__GNUC__)
++ # if (((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7)) || (__GNUC__ > 4))
++ // We fallback to the generic Clang/GCC >= 4.7 implementation in atomicops.h
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-17 06:50:43.666877316 +0200
++++ b/PKGBUILD	2018-04-17 11:46:44.792193964 +0200
+@@ -14,19 +14,22 @@ arch=('i686' 'x86_64' 'armv7h')
+ license=('BSD')
+ url="http://opencv.org/"
+ depends=('intel-tbb' 'openexr' 'xine-lib' 'libdc1394' 'cblas' 'lapack' 'libgphoto2' 'jasper')
+-makedepends=('cmake' 'python-numpy' 'python2-numpy' 'mesa' 'eigen' 'hdf5' 'lapacke' 'gtkglext')
++makedepends=('cmake' 'python-numpy' 'python2-numpy' 'mesa' 'eigen' 'hdf5' 'lapacke')
+ optdepends=('opencv-samples'
+-            'gtkglext: for the HighGUI module'
+             'hdf5: support for HDF5 format'
+             'opencl-icd-loader: For coding with OpenCL'
+             'python-numpy: Python 3 interface'
+             'python2-numpy: Python 2 interface')
+ mksource=("$pkgbase-$pkgver.zip::https://github.com/opencv/opencv/archive/$pkgver.zip"
+           "opencv_contrib-$pkgver.tar.gz::https://github.com/opencv/opencv_contrib/archive/$pkgver.tar.gz")
+-source=("https://repo.parabola.nu/other/${pkgname}-libre/${pkgname}-libre-${pkgver}.zip")
++source=("https://repo.parabola.nu/other/${pkgname}-libre/${pkgname}-libre-${pkgver}.zip"
++        "0001-opencv-riscv-support.patch"
++        "https://github.com/google/protobuf/pull/3955/commits/642e1ac635f2563b4a14c255374f02645ae85dac.patch")
+ mksha256sums=('24bda432eaace9e992322dcc3d30144cefa5314c2424d4aa02e5fe3fa9dd17bd'
+               '298c69ee006d7675e1ff9d371ba8b0d9e7e88374bb7ba0f9d0789851d352ec6e')
+-sha256sums=('e5b34f29622d044e07163ed8d806bce5ff208531c1cdd5be24a9ec0255633396')
++sha256sums=('e5b34f29622d044e07163ed8d806bce5ff208531c1cdd5be24a9ec0255633396'
++            '039667b90c16c9ad311b09ad40ff421e5fddbb8f4f2a50caa79b6e70b41265e5'
++            '74b368bc17ddbe056f73748c5557ff1709d03da67e3ebfaabcb9423e5507f65c')
+ 
+ _cmakeopts=('-D WITH_OPENCL=ON'
+             '-D WITH_OPENGL=ON'
+@@ -42,6 +45,7 @@ _cmakeopts=('-D WITH_OPENCL=ON'
+             '-D CMAKE_INSTALL_PREFIX=/usr'
+             '-D CMAKE_INSTALL_LIBDIR=lib'
+             '-D WITH_IPP=OFF'
++            '-D ENABLE_PRECOMPILED_HEADERS=OFF'
+             )
+ 
+ # SSE only available from Pentium 3 onwards (i686 is way older)
+@@ -69,6 +73,14 @@ prepare() {
+ 
+   # remove nonfree SIFT and SURF references
+   rm -rv modules/xfeatures2d
++
++  # add risc-v support
++  cd "$srcdir/opencv-$pkgver"
++  patch -Np1 -i "$srcdir"/0001-opencv-riscv-support.patch
++
++  # fix generic atomics on 64bit
++  cd "$srcdir/opencv-$pkgver/3rdparty/protobuf"
++  patch -Np1 -i "$srcdir"/642e1ac635f2563b4a14c255374f02645ae85dac.patch
+ }
+ 
+ build() {

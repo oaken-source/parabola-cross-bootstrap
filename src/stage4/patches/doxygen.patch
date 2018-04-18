@@ -1,0 +1,22 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-14 16:29:01.773155012 +0200
++++ b/PKGBUILD	2018-04-14 16:50:58.123030252 +0200
+@@ -28,15 +28,16 @@ prepare() {
+ build() {
+   cd ${pkgbase}-Release_${pkgver//./_}/build
+ 
++  # FIXME: ironically, building docs breaks on risc-v.
+   cmake .. \
+     -DCMAKE_INSTALL_PREFIX:PATH=/usr \
+     -DDOC_INSTALL_DIR:PATH=share/doc/doxygen \
+     -DPYTHON_EXECUTABLE:FILE=/usr/bin/python2 \
+-    -Dbuild_doc:BOOL=ON \
++    -Dbuild_doc:BOOL=OFF \
+     -Dbuild_wizard:BOOL=ON
+ 
+   make
+-  make docs
++  #make docs
+ }
+ 
+ check(){

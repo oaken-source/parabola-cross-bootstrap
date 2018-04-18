@@ -1,0 +1,178 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-16 21:02:39.504221456 +0200
++++ b/PKGBUILD	2018-04-16 21:06:13.560201168 +0200
+@@ -12,7 +12,7 @@ url='http://qt-project.org/'
+ license=(GPL3 LGPL3 FDL custom)
+ pkgdesc='Classes for a WebKit2 based implementation and a new QML API'
+ depends=(qt5-location qt5-sensors qt5-webchannel libwebp libxslt libxcomposite gst-plugins-base hyphen)
+-makedepends=(cmake ruby gperf python2 qt5-doc qt5-tools)
++makedepends=(cmake ruby gperf python2 qt5-doc qt5-tools ninja)
+ optdepends=('gst-plugins-good: Webm codec support')
+ conflicts=(qt5-webkit-ng)
+ replaces=(qt5-webkit-ng)
+@@ -23,13 +23,15 @@ source=("https://github.com/annulen/webk
+         qt5-webkit-null-pointer-dereference.patch
+         qt5-webkit-trojita-1.patch::"https://github.com/annulen/webkit/commit/6faf1121.patch"
+         qt5-webkit-trojita-2.patch::"https://github.com/annulen/webkit/commit/76420459.patch"
+-        qt5-webkit-cmake3.10.patch::"https://github.com/annulen/webkit/commit/f51554bf.patch")
++        qt5-webkit-cmake3.10.patch::"https://github.com/annulen/webkit/commit/f51554bf.patch"
++        "qtwebkit-5.212.0-alpha2-add-riscv.patch")
+ sha256sums=('f8f901de567e11fc5659402b6b827eac75505ff9c5072d8e919aa306003f8f8a'
+             'f108833562d766d4c086026f9202b2ebc8c19e97fddedce952afed78df3c0720'
+             '510e1f78c2bcd76909703a097dbc1d5c9c6ce4cd94883c26138f09cc10121f43'
+             'bd22bd7842d5ad1cb1f5a4b6acb2674509732274d5f9dc51943144dff76996ae'
+             'b42b70fd2a4a36b0ff48fc4e0dc386b3dda373e6fec18f3be9f5e2d3b04e0aa3'
+-            'b4e6c85fcb062e7cc141b0e34977bcc4f9c8677c773fc4b310151b85f51e7189')
++            'b4e6c85fcb062e7cc141b0e34977bcc4f9c8677c773fc4b310151b85f51e7189'
++            'f976cc349e29c05efb0ad7b8548ef440256eea8610da14dade1ad181826af9e1')
+ 
+ prepare() {
+   mkdir -p build
+@@ -44,22 +46,27 @@ prepare() {
+   patch -p1 -i ../qt5-webkit-null-pointer-dereference.patch
+ # Fix build with cmake 3.10
+   patch -p1 -i ../qt5-webkit-cmake3.10.patch
++# add risc-v support
++  patch -Np1 -i ../qtwebkit-5.212.0-alpha2-add-riscv.patch
+ }
+ 
+ build() {
+   cd build
+ 
+   cmake ../qtwebkit-$_qtver \
++    -G Ninja \
+     -DCMAKE_INSTALL_PREFIX=/usr \
+     -DCMAKE_BUILD_TYPE=Release \
+     -DPORT=Qt \
+-    -DENABLE_TOOLS=OFF
+-  make
++    -DENABLE_TOOLS=OFF \
++    -DENABLE_JIT=OFF
++  sed -i 's/-lpthread/& -latomic/g' build.ninja
++  ninja
+ }
+ 
+ package() {
+   cd build
+-  make DESTDIR="$pkgdir" install
++  DESTDIR="$pkgdir" ninja install
+ 
+   install -d "$pkgdir"/usr/share/licenses
+   ln -s /usr/share/licenses/qt5-base "$pkgdir"/usr/share/licenses/${pkgname}
+diff -rupN a/qtwebkit-5.212.0-alpha2-add-riscv.patch b/qtwebkit-5.212.0-alpha2-add-riscv.patch
+--- a/qtwebkit-5.212.0-alpha2-add-riscv.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/qtwebkit-5.212.0-alpha2-add-riscv.patch	2018-04-14 16:23:40.469185464 +0200
+@@ -0,0 +1,113 @@
++diff --git a/CMakeLists.txt b/CMakeLists.txt
++index 1f9bab8..d5aa2ee 100644
++--- a/CMakeLists.txt
+++++ b/CMakeLists.txt
++@@ -86,6 +86,8 @@ elseif (LOWERCASE_CMAKE_SYSTEM_PROCESSOR MATCHES "s390")
++     set(WTF_CPU_S390 1)
++ elseif (LOWERCASE_CMAKE_SYSTEM_PROCESSOR MATCHES "s390x")
++     set(WTF_CPU_S390X 1)
+++elseif (LOWERCASE_CMAKE_SYSTEM_PROCESSOR MATCHES "riscv64")
+++    set(WTF_CPU_RISCV64 1)
++ else ()
++     message(FATAL_ERROR "Unknown CPU '${LOWERCASE_CMAKE_SYSTEM_PROCESSOR}'")
++ endif ()
++diff --git a/Source/JavaScriptCore/CMakeLists.txt b/Source/JavaScriptCore/CMakeLists.txt
++index 1957446..96255d6 100644
++--- a/Source/JavaScriptCore/CMakeLists.txt
+++++ b/Source/JavaScriptCore/CMakeLists.txt
++@@ -1289,6 +1289,7 @@ elseif (WTF_CPU_MIPS)
++ elseif (WTF_CPU_SH4)
++ elseif (WTF_CPU_X86)
++ elseif (WTF_CPU_X86_64)
+++elseif (WTF_CPU_RISCV64)
++     if (MSVC AND ENABLE_JIT)
++         add_custom_command(
++             OUTPUT ${DERIVED_SOURCES_DIR}/JITStubsMSVC64.obj
++diff --git a/Source/ThirdParty/brotli/dec/port.h b/Source/ThirdParty/brotli/dec/port.h
++index 19b457c..be1b2ad 100644
++--- a/Source/ThirdParty/brotli/dec/port.h
+++++ b/Source/ThirdParty/brotli/dec/port.h
++@@ -66,6 +66,10 @@
++ #define BROTLI_TARGET_POWERPC64
++ #endif
++ 
+++#if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 64
+++#define BROTLI_TARGET_RISCV64
+++#endif
+++
++ #if defined(__GNUC__) && defined(__GNUC_MINOR__)
++ #define BROTLI_GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
++ #else
++@@ -180,7 +184,7 @@ static inline void BrotliDump(const char* f, int l, const char* fn) {
++ #elif defined(BROTLI_BUILD_32_BIT)
++ #define BROTLI_64_BITS 0
++ #elif defined(BROTLI_TARGET_X64) || defined(BROTLI_TARGET_ARMV8) || \
++-    defined(BROTLI_TARGET_POWERPC64)
+++    defined(BROTLI_TARGET_POWERPC64) || defined(BROTLI_TARGET_RISCV64)
++ #define BROTLI_64_BITS 1
++ #else
++ #define BROTLI_64_BITS 0
++diff --git a/Source/WTF/wtf/Platform.h b/Source/WTF/wtf/Platform.h
++index 3f2069e..d4e02a8 100644
++--- a/Source/WTF/wtf/Platform.h
+++++ b/Source/WTF/wtf/Platform.h
++@@ -176,6 +176,11 @@
++ #define WTF_CPU_X86_SSE2 1
++ #endif
++ 
+++/* CPU(RISCV64) - RISCV64 */
+++#if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 64
+++#define WTF_CPU_RISCV64 1
+++#endif
+++
++ /* CPU(ARM64) - Apple */
++ #if (defined(__arm64__) && defined(__APPLE__)) || defined(__aarch64__)
++ #define WTF_CPU_ARM64 1
++@@ -712,7 +717,8 @@
++     || CPU(S390X) \
++     || CPU(MIPS64) \
++     || CPU(PPC64) \
++-    || CPU(PPC64LE)
+++    || CPU(PPC64LE) \
+++    || CPU(RISCV64)
++ #define USE_JSVALUE64 1
++ #else
++ #define USE_JSVALUE32_64 1
++diff --git a/Source/WTF/wtf/dtoa/utils.h b/Source/WTF/wtf/dtoa/utils.h
++index 889642c..176d590 100644
++--- a/Source/WTF/wtf/dtoa/utils.h
+++++ b/Source/WTF/wtf/dtoa/utils.h
++@@ -49,7 +49,7 @@
++ defined(__ARMEL__) || \
++ defined(_MIPS_ARCH_MIPS32R2)
++ #define DOUBLE_CONVERSION_CORRECT_DOUBLE_OPERATIONS 1
++-#elif CPU(MIPS) || CPU(MIPS64) || CPU(PPC) || CPU(PPC64) || CPU(PPC64LE) || CPU(SH4) || CPU(S390) || CPU(S390X) || CPU(IA64) || CPU(ALPHA) || CPU(ARM64) || CPU(HPPA)
+++#elif CPU(MIPS) || CPU(MIPS64) || CPU(PPC) || CPU(PPC64) || CPU(PPC64LE) || CPU(SH4) || CPU(S390) || CPU(S390X) || CPU(IA64) || CPU(ALPHA) || CPU(ARM64) || CPU(HPPA) || CPU(RISCV64)
++ #define DOUBLE_CONVERSION_CORRECT_DOUBLE_OPERATIONS 1
++ #elif defined(_M_IX86) || defined(__i386__)
++ #if defined(_WIN32)
++diff --git a/Tools/Scripts/webkitdirs.pm b/Tools/Scripts/webkitdirs.pm
++index 84b18c7..b64d9d1 100755
++--- a/Tools/Scripts/webkitdirs.pm
+++++ b/Tools/Scripts/webkitdirs.pm
++@@ -1264,6 +1264,11 @@ sub isARM()
++     return ($Config{archname} =~ /^arm[v\-]/) || ($Config{archname} =~ /^aarch64[v\-]/);
++ }
++ 
+++sub isRISCV()
+++{
+++    return ($Config{archname} =~ /^riscv(|32|64)\-/);
+++}
+++
++ sub isX86_64()
++ {
++     return (architecture() eq "x86_64") || 0;
++@@ -2064,7 +2069,7 @@ sub generateBuildSystemFromCMakeProject
++     # Compiler options to keep floating point values consistent
++     # between 32-bit and 64-bit architectures.
++     determineArchitecture();
++-    if ($architecture ne "x86_64" && !isARM() && !isCrossCompilation() && !isAnyWindows()) {
+++    if ($architecture ne "x86_64" && !isARM() && !isRISCV && !isCrossCompilation() && !isAnyWindows()) {
++         $ENV{'CXXFLAGS'} = "-march=pentium4 -msse2 -mfpmath=sse " . ($ENV{'CXXFLAGS'} || "");
++     }
++ 

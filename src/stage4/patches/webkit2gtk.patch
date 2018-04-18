@@ -1,0 +1,105 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-16 07:21:50.189889175 +0200
++++ b/PKGBUILD	2018-04-16 07:24:37.332873334 +0200
+@@ -15,14 +15,17 @@ optdepends=('gtk2: Netscape plugin suppo
+             'gst-plugins-base: free media decoding'
+             'gst-plugins-good: media decoding'
+             'gst-libav: nonfree media decoding')
+-source=(https://webkitgtk.org/releases/webkitgtk-${pkgver}.tar.xz{,.asc})
++source=(https://webkitgtk.org/releases/webkitgtk-${pkgver}.tar.xz{,.asc}
++        webkitgtk-2.20.0-add-riscv64.patch)
+ sha256sums=('57f640f720bd9a8a7207f3321cf803a15c2f207b4e7b75ff1be17bc1eeb00a3c'
+-            'SKIP')
++            'SKIP'
++            'c843cc85b3f48121ed0fd3cb50d026f0c9d6e62461e457e1e059e9068c3b3997')
+ validpgpkeys=('D7FCF61CF9A2DEAB31D81BD3F3D322D0EC4582C3')
+ 
+ prepare() {
+   mkdir build
+   cd webkitgtk-$pkgver
++  patch -Np1 -i ../webkitgtk-2.20.0-add-riscv64.patch
+   sed -i '1s/python$/&2/' Tools/gtk/generate-gtkdoc
+ }
+ 
+@@ -35,10 +38,12 @@ build() {
+     -DCMAKE_INSTALL_PREFIX=/usr \
+     -DCMAKE_SKIP_RPATH=ON \
+     -DENABLE_GTKDOC=ON \
++    -DENABLE_JIT=OFF \
+     -DLIBEXEC_INSTALL_DIR=/usr/lib \
+     -DLIB_INSTALL_DIR=/usr/lib \
+     -DPYTHON_EXECUTABLE=/usr/bin/python2 \
+     ../webkitgtk-$pkgver
++  sed -i 's/-lpthread/& -latomic/g' build.ninja
+   ninja
+ }
+ 
+diff -rupN a/webkitgtk-2.20.0-add-riscv64.patch b/webkitgtk-2.20.0-add-riscv64.patch
+--- a/webkitgtk-2.20.0-add-riscv64.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/webkitgtk-2.20.0-add-riscv64.patch	2018-04-15 17:22:32.242661969 +0200
+@@ -0,0 +1,65 @@
++diff --git a/CMakeLists.txt b/CMakeLists.txt
++index 3fb3dd5..4da0158 100644
++--- a/CMakeLists.txt
+++++ b/CMakeLists.txt
++@@ -99,6 +99,8 @@ elseif (LOWERCASE_CMAKE_SYSTEM_PROCESSOR MATCHES "ppc64")
++     set(WTF_CPU_PPC64 1)
++ elseif (LOWERCASE_CMAKE_SYSTEM_PROCESSOR MATCHES "ppc64le")
++     set(WTF_CPU_PPC64LE 1)
+++elseif (LOWERCASE_CMAKE_SYSTEM_PROCESSOR MATCHES "riscv64")
+++    set(WTF_CPU_RISCV64 1)
++ else ()
++     set(WTF_CPU_UNKNOWN 1)
++ endif ()
++diff --git a/Source/JavaScriptCore/CMakeLists.txt b/Source/JavaScriptCore/CMakeLists.txt
++index 94036df..b8a784a 100644
++--- a/Source/JavaScriptCore/CMakeLists.txt
+++++ b/Source/JavaScriptCore/CMakeLists.txt
++@@ -225,6 +225,8 @@ else ()
++         set(OFFLINE_ASM_BACKEND "ARMv7_TRADITIONAL")
++     elseif (WTF_CPU_MIPS)
++         set(OFFLINE_ASM_BACKEND "MIPS")
+++    elseif (WTF_CPU_RISCV64)
+++	set(OFFLINE_ASM_BACKEND "RISCV64")
++     endif ()
++ 
++     if (NOT ENABLE_JIT)
++diff --git a/Source/WTF/wtf/Platform.h b/Source/WTF/wtf/Platform.h
++index 850e298..22f06c2 100644
++--- a/Source/WTF/wtf/Platform.h
+++++ b/Source/WTF/wtf/Platform.h
++@@ -137,6 +137,11 @@
++ #define WTF_CPU_KNOWN 1
++ #endif
++ 
+++/* CPU(RISCV64) - RISCV64 */
+++#if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 64
+++#define WTF_CPU_RISCV64 1
+++#endif
+++
++ /* CPU(ARM64) - Apple */
++ #if (defined(__arm64__) && defined(__APPLE__)) || defined(__aarch64__)
++ #define WTF_CPU_ARM64 1
++@@ -744,7 +749,8 @@
++ #if !defined(ENABLE_JIT) \
++     && (CPU(X86) || CPU(X86_64) || CPU(ARM) || (CPU(ARM64) && !defined(__ILP32__)) || CPU(MIPS)) \
++     && !CPU(APPLE_ARMV7K) \
++-    && !CPU(ARM64E)
+++    && !CPU(ARM64E) \
+++    && !CPU(RISCV64)
++ #define ENABLE_JIT 1
++ #endif
++ 
++diff --git a/Source/WTF/wtf/dtoa/utils.h b/Source/WTF/wtf/dtoa/utils.h
++index 14a9478..a35a78d 100644
++--- a/Source/WTF/wtf/dtoa/utils.h
+++++ b/Source/WTF/wtf/dtoa/utils.h
++@@ -49,7 +49,7 @@
++ defined(__ARMEL__) || \
++ defined(_MIPS_ARCH_MIPS32R2)
++ #define DOUBLE_CONVERSION_CORRECT_DOUBLE_OPERATIONS 1
++-#elif CPU(MIPS) || CPU(MIPS64) || CPU(PPC) || CPU(PPC64) || CPU(PPC64LE) || CPU(ARM64)
+++#elif CPU(MIPS) || CPU(MIPS64) || CPU(PPC) || CPU(PPC64) || CPU(PPC64LE) || CPU(ARM64) || CPU(RISCV64)
++ #define DOUBLE_CONVERSION_CORRECT_DOUBLE_OPERATIONS 1
++ #elif defined(_M_IX86) || defined(__i386__)
++ #if defined(_WIN32)

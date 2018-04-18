@@ -1,9 +1,10 @@
---- a/PKGBUILD	2018-03-16 18:23:58.112034593 +0100
-+++ b/PKGBUILD	2018-03-16 18:59:17.686017180 +0100
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-17 19:26:37.026578845 +0200
++++ b/PKGBUILD	2018-04-17 22:07:42.832662745 +0200
 @@ -85,6 +85,10 @@ sha512sums=('SKIP'
  _backports=(
-   # core: do not free heap-allocated strings (#8391) (FS#57741)
-   '5cbaad2f6795088db56063d20695c6444595822f'
+   # nspawn: wait for network namespace creation before interface setup (#8633)
+   '7511655807e90aa33ea7b71991401a79ec36bb41'
 +  # basic/macros: rename noreturn into _noreturn_ (#8456)
 +  '848e863acc51ecfb0f3955c498874588201d9130'
 +  # core: don't include libmount.h in a header file (#8580)

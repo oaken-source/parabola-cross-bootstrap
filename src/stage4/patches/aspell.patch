@@ -1,6 +1,6 @@
 --- a/PKGBUILD	2018-04-04 12:52:35.771273425 +0200
 +++ b/PKGBUILD	2018-04-04 17:35:11.302666425 +0200
-@@ -15,9 +15,17 @@ url="http://aspell.net/"
+@@ -15,9 +15,18 @@ url="http://aspell.net/"
  license=('LGPL')
  depends=('gcc-libs' 'ncurses')
  optdepends=('perl: to import old dictionaries')
@@ -16,6 +16,7 @@
 +
 +prepare() {
 +  cd "${srcdir}/${pkgname}-${pkgver}"
++  # fix build with gcc-7
 +  patch -Np1 -i ../8089fa02122fed0a6394eba14bbedcb1d18e238.patch
 +}
  

@@ -1,0 +1,21 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-04 18:42:26.285284000 +0200
++++ b/PKGBUILD	2018-04-14 21:48:54.573335969 +0200
+@@ -46,7 +46,7 @@ build() {
+ 
+ package_phonon-qt4(){
+   pkgdesc="The multimedia framework for KDE4"
+-  depends=(qt4 libpulse phonon-qt4-backend)
++  depends=(qt4 libpulse)
+   optdepends=('pulseaudio: PulseAudio support')
+ 
+   cd build
+@@ -62,7 +62,7 @@ package_phonon-qt4(){
+ 
+ package_phonon-qt5(){
+   pkgdesc="The multimedia framework for KF5"
+-  depends=(libpulse qt5-base phonon-qt5-backend)
++  depends=(libpulse qt5-base)
+   optdepends=('pulseaudio: PulseAudio support')
+ 
+   cd build-qt5

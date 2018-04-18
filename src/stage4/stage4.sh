@@ -128,11 +128,11 @@ stage4_package_install() {
   pkgfile=$(find "$PKGPOOL" -regex "^.*/$esc-[^-]*-[^-]*-[^-]*\\.pkg\\.tar\\.xz\$" | head -n1)
   [ -n "$pkgfile" ] || { error -n "$1: pkgfile not found"; return "$ERROR_MISSING"; }
 
-  yes | librechroot \
+  librechroot \
       -n "$CHOST-stage4" \
       -C "$BUILDDIR"/config/pacman.conf \
       -M "$BUILDDIR"/config/makepkg.conf \
-    run pacman -U /repos/pool/"$(basename "$pkgfile")" || return
+    run pacman -U --noconfirm /repos/pool/"$(basename "$pkgfile")" || return
   yes | librechroot \
       -n "$CHOST-stage4" \
       -C "$BUILDDIR"/config/pacman.conf \
@@ -143,7 +143,7 @@ stage4_package_install() {
 stage4() {
   msg -n "Entering Stage 4"
 
-  local groups=(base-devel)
+  local groups=(base base-devel)
 
   export BUILDDIR="$TOPBUILDDIR"/stage4
   export SRCDIR="$TOPSRCDIR"/stage4
