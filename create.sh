@@ -52,20 +52,20 @@ if [ -z "${SUDO_USER:-}" ]; then
   die -e "$ERROR_INVOCATION" "SUDO_USER must be set in environment"
 fi
 
-# import stages
 # shellcheck source=src/stage1/stage1.sh
 . "$TOPSRCDIR"/stage1/stage1.sh
+stage1 || die -e "$ERROR_BUILDFAIL" "Stage 1 failed. Exiting..."
+
 # shellcheck source=src/stage2/stage2.sh
 . "$TOPSRCDIR"/stage2/stage2.sh
+stage2 || die -e "$ERROR_BUILDFAIL" "Stage 2 failed. Exiting..."
+
 # shellcheck source=src/stage3/stage3.sh
 . "$TOPSRCDIR"/stage3/stage3.sh
+stage3 || die -e "$ERROR_BUILDFAIL" "Stage 3 failed. Exiting..."
+
 # shellcheck source=src/stage4/stage4.sh
 . "$TOPSRCDIR"/stage4/stage4.sh
-
-# run stages
-stage1 || die -e "$ERROR_BUILDFAIL" "Stage 1 failed. Exiting..."
-stage2 || die -e "$ERROR_BUILDFAIL" "Stage 2 failed. Exiting..."
-stage3 || die -e "$ERROR_BUILDFAIL" "Stage 3 failed. Exiting..."
 stage4 || die -e "$ERROR_BUILDFAIL" "Stage 4 failed. Exiting..."
 
 msg -n "all done."
