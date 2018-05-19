@@ -3,6 +3,7 @@
  #                      parabola-riscv64-bootstrap                            #
  #                                                                            #
  #    Copyright (C) 2018  Andreas Grapentin                                   #
+ #    Copyright (C) 2018  Bruno Cichoń                                        #
  #                                                                            #
  #    This program is free software: you can redistribute it and/or modify    #
  #    it under the terms of the GNU General Public License as published by    #

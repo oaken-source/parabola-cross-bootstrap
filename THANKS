@@ -1,0 +1,12 @@
+This is a list of people who -- directly or indirectly -- supported the
+development of this project, for example by suggesting features, pointing out
+problems, or just being awesome; in chronological order. If you feel that your
+name is missing here, please contact the maintainers.
+
+
+
+  Andreas Baumann <mail@andreasbaumann.cc>
+    for the work on bootstrap32, which this project is heavily based on
+
+  rwmjones, sorear, davidlt in #fedora-riscv
+    for providing ports, CFLAGS and miscellaneous advice where needed
