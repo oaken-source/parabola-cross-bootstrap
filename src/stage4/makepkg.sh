@@ -55,8 +55,8 @@ EOF
   cat >> "$BUILDDIR"/config/makepkg.conf << EOF
 CARCH="$CARCH"
 CHOST="$CHOST"
-CFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
-CXXFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
+CFLAGS="${PLATFORM_CFLAGS[*]} -O2 -pipe -fstack-protector-strong -fno-plt"
+CXXFLAGS="${PLATFORM_CFLAGS[*]} -O2 -pipe -fstack-protector-strong -fno-plt"
 MAKEFLAGS="-j$(($(nproc) + 1))"
 EOF
 
@@ -67,8 +67,8 @@ EOF
   done
 
   # patch libremakepkg to update config.sub/config.guess
-  cat "$(which libremakepkg)" > "$BUILDDIR/libremakepkg-$CARCH.sh"
-  chmod +x "$BUILDDIR/libremakepkg-$CARCH.sh"
+  cat "$(which libremakepkg)" > "$BUILDDIR/libremakepkg.sh"
+  chmod +x "$BUILDDIR/libremakepkg.sh"
 
   if [ "x${REGEN_CONFIG_FRAGMENTS:-no}" == "xyes" ]; then
 	  local url="https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain"
@@ -77,9 +77,9 @@ update_config_fragments() {\\
 	find \$1/build -iname 'config*.sub' -print -exec curl \"$url;f=config.sub;hb=HEAD\" -o {} \\\\;\\
 	find \$1/build -iname 'config*.guess' -print -exec curl \"$url;f=config.guess;hb=HEAD\" -o {} \\\\;\\
 }\\
-hook_pre_build+=(update_config_fragments)" "$BUILDDIR/libremakepkg-$CARCH.sh"
+hook_pre_build+=(update_config_fragments)" "$BUILDDIR/libremakepkg.sh"
   fi
 
   # patch libremakepkg to disable checks
-  sed -i 's/makepkg_args=(.*noconfirm[^)]*/& --nocheck/' "$BUILDDIR/libremakepkg-$CARCH.sh"
+  sed -i 's/makepkg_args=(.*noconfirm[^)]*/& --nocheck/' "$BUILDDIR/libremakepkg.sh"
 }

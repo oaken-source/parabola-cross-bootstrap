@@ -19,6 +19,8 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
+# this configuration targets the TalosII systems
+
 # the target host triplet
 export CARCH=powerpc64le
 export CHOST="$CARCH-unknown-linux-gnu"
@@ -39,9 +41,9 @@ export GCC_CONFIG_FLAGS=("--with-long-double-128" "--enable-vsx")
 #export PLATFORM32_CFLAGS=()
 
 # configure build directories
-export TOPBUILDDIR="$startdir/build/$CHOST"
+export TOPBUILDDIR="$startdir/build/$CARCH"
 export TOPSRCDIR="$startdir"/src
-export SRCDEST="$startdir"/build/sources
+export SRCDEST="$startdir"/sources
 
 # build options
 export REGEN_CONFIG_FRAGMENTS=yes

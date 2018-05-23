@@ -27,11 +27,9 @@ export ERROR_KEYFAIL=5
 
 # messaging functions
 notify() {
-  # useful if running notify_telegram
-  local recipient=-211578786
   if type -p notify-send >/dev/null; then
     machinectl -q shell --uid="$SUDO_USER" .host \
-      "$(which notify-send)" -h string:recipient:$recipient "$@" >/dev/null
+      "$(which notify-send)" "$@" >/dev/null
   fi
 }
 

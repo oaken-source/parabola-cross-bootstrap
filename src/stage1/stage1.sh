@@ -52,14 +52,13 @@ stage1_makepkg() {
   for f in "$SRCDIR"/toolchain-pkgbuilds/$1/*.in; do
     sed "s#@CHOST@#$CHOST#g; \
          s#@CARCH@#$CARCH#g; \
+         s#@PLATFORM_CFLAGS@#${PLATFORM_CFLAGS[*]}#g; \
          s#@LINUX_ARCH@#$LINUX_ARCH#g; \
-         s#@GCC_MARCH@#${GCC_MARCH:-}#g; \
-         s#@GCC_MABI@#${GCC_MABI:-}#g; \
+         s#@GCC_CONFIG_FLAGS@#${GCC_CONFIG_FLAGS[*]}#g; \
          s#@MULTILIB@#${MULTILIB:-disable}#g; \
-         s#@GCC_32_MARCH@#${GCC_32_MARCH:-}#g; \
-         s#@GCC_32_MABI@#${GCC_32_MABI:-}#g; \
          s#@CARCH32@#${CARCH32:-}#g; \
-         s#@CHOST32@#${CHOST32:-}#g" \
+         s#@CHOST32@#${CHOST32:-}#g; \
+         s#@PLATFORM32_CFLAGS@#${PLATFORM32_CFLAGS[*]}#g" \
       "$f" > ./"$(basename "${f%.in}")"
   done
 
@@ -118,6 +117,8 @@ EOF
     yes | pacman -U "$PKGDEST/$pkgfile"
   done
 
-  # final sanity check
+  # final sanity checks
   check_cross_toolchain || die -e "$ERROR_MISSING" "toolchain build incomplete"
+  [ ! -e "/usr/$CHOST/lib64" ] || die \
+    "toolchain installs libraries in lib64. this WILL cause problems. fix pure64.patch!"
 }

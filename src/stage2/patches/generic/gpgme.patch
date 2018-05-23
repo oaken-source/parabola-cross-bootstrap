@@ -1,0 +1,33 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-05-19 19:55:02.590725028 +0200
++++ b/PKGBUILD	2018-05-19 19:58:21.434060348 +0200
+@@ -4,7 +4,7 @@
+ # Contributor: Sarah Hay <sarah@archlinux.org>
+ 
+ pkgbase=gpgme
+-pkgname=(gpgme qgpgme python-gpgme python2-gpgme)
++pkgname=(gpgme)
+ pkgver=1.11.1
+ pkgrel=1
+ pkgdesc="A C wrapper library for GnuPG"
+@@ -20,6 +20,7 @@ validpgpkeys=('D8692123C4065DEA5E0F3AB52
+ build() {
+   cd ${pkgbase}-${pkgver}
+   ./configure \
++    --host=@CHOST@ --build=@BUILDHOST@ \
+     --prefix=/usr \
+     --disable-fd-passing \
+     --disable-static \
+@@ -40,9 +41,9 @@ package_gpgme() {
+   make DESTDIR="${pkgdir}" install
+ 
+   # split qgpgme
+-  rm -r "${pkgdir}"/usr/include/{qgpgme,QGpgME}/
+-  rm -r "${pkgdir}"/usr/lib/{cmake/QGpgme/,libqgpgme.*}
+-  rm -r "${pkgdir}"/usr/lib/python*
++  rm -r "${pkgdir}"/usr/include/{qgpgme,QGpgME}/ || true
++  rm -r "${pkgdir}"/usr/lib/{cmake/QGpgme/,libqgpgme.*} || true
++  rm -r "${pkgdir}"/usr/lib/python* || true
+ }
+ 
+ package_qgpgme() {

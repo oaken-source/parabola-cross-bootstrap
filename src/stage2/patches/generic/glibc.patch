@@ -1,0 +1,73 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-05-19 20:29:56.917412596 +0200
++++ b/PKGBUILD	2018-05-19 20:33:17.550747931 +0200
+@@ -6,7 +6,8 @@
+ # NOTE: valgrind requires rebuilt with each major glibc version
+ 
+ pkgbase=glibc
+-pkgname=(glibc lib32-glibc)
++pkgname=(glibc)
++[ "x@MULTILIB@" != "xenable" ] || pkgname+=(lib32-glibc)
+ pkgver=2.27
+ pkgrel=3
+ arch=(x86_64)
+@@ -48,12 +49,13 @@ prepare() {
+ build() {
+   local _configure_flags=(
+       --prefix=/usr
+-      --with-headers=/usr/include
++      --host=@CHOST@ --build=@BUILDHOST@
++      --with-headers=@SYSROOT@/usr/include
+       --with-bugurl=https://bugs.archlinux.org/
+       --enable-add-ons
+       --enable-bind-now
+       --enable-lock-elision
+-      --enable-multi-arch
++      --@MULTILIB@-multi-arch
+       --enable-stack-protector=strong
+       --enable-stackguard-randomization
+       --enable-static-pie
+@@ -87,6 +89,8 @@ build() {
+   echo "CXX += -D_FORTIFY_SOURCE=2" >> configparms
+   make
+ 
++  [ "x@MULTILIB@" == "xenable" ] || return 0
++
+   cd "$srcdir/lib32-glibc-build"
+   export CC="gcc -m32 -mstackrealign"
+   export CXX="g++ -m32 -mstackrealign"
+@@ -164,8 +168,8 @@ package_glibc() {
+     "$srcdir/glibc/localedata/SUPPORTED" >> "$pkgdir/etc/locale.gen"
+ 
+   if check_option 'debug' n; then
+-    find "$pkgdir"/usr/bin -type f -executable -exec strip $STRIP_BINARIES {} + 2> /dev/null || true
+-    find "$pkgdir"/usr/lib -name '*.a' -type f -exec strip $STRIP_STATIC {} + 2> /dev/null || true
++    find "$pkgdir"/usr/bin -type f -executable -exec @CHOST@-strip $STRIP_BINARIES {} + 2> /dev/null || true
++    find "$pkgdir"/usr/lib -name '*.a' -type f -exec @CHOST@-strip $STRIP_STATIC {} + 2> /dev/null || true
+ 
+     # Do not strip these for gdb and valgrind functionality, but strip the rest
+     find "$pkgdir"/usr/lib \
+@@ -173,7 +177,7 @@ package_glibc() {
+       -not -name 'libc-*.so' \
+       -not -name 'libpthread-*.so' \
+       -not -name 'libthread_db-*.so' \
+-      -name '*-*.so' -type f -exec strip $STRIP_SHARED {} + 2> /dev/null || true
++      -name '*-*.so' -type f -exec @CHOST@-strip $STRIP_SHARED {} + 2> /dev/null || true
+   fi
+ }
+ 
+@@ -200,12 +204,12 @@ package_lib32-glibc() {
+   ln -s ../lib/locale "$pkgdir/usr/lib32/locale"
+ 
+   if check_option 'debug' n; then
+-    find "$pkgdir"/usr/lib32 -name '*.a' -type f -exec strip $STRIP_STATIC {} + 2> /dev/null || true
++    find "$pkgdir"/usr/lib32 -name '*.a' -type f -exec @CHOST@-strip $STRIP_STATIC {} + 2> /dev/null || true
+     find "$pkgdir"/usr/lib32 \
+       -not -name 'ld-*.so' \
+       -not -name 'libc-*.so' \
+       -not -name 'libpthread-*.so' \
+       -not -name 'libthread_db-*.so' \
+-      -name '*-*.so' -type f -exec strip $STRIP_SHARED {} + 2> /dev/null || true
++      -name '*-*.so' -type f -exec @CHOST@-strip $STRIP_SHARED {} + 2> /dev/null || true
+   fi
+ }

@@ -1,0 +1,34 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-16 21:02:39.504221456 +0200
++++ b/PKGBUILD	2018-04-16 21:06:13.560201168 +0200
+@@ -12,7 +12,7 @@ url='http://qt-project.org/'
+ license=(GPL3 LGPL3 FDL custom)
+ pkgdesc='Classes for a WebKit2 based implementation and a new QML API'
+ depends=(qt5-location qt5-sensors qt5-webchannel libwebp libxslt libxcomposite gst-plugins-base hyphen)
+-makedepends=(cmake ruby gperf python2 qt5-doc qt5-tools)
++makedepends=(cmake ruby gperf python2 qt5-doc qt5-tools ninja)
+ optdepends=('gst-plugins-good: Webm codec support')
+ conflicts=(qt5-webkit-ng)
+ replaces=(qt5-webkit-ng)
+@@ -44,16 +46,18 @@ prepare() {
+   cd build
+ 
+   cmake ../qtwebkit-$_qtver \
++    -G Ninja \
+     -DCMAKE_INSTALL_PREFIX=/usr \
+     -DCMAKE_BUILD_TYPE=Release \
+     -DPORT=Qt \
+-    -DENABLE_TOOLS=OFF
+-  make
++    -DENABLE_TOOLS=OFF \
++    -DENABLE_JIT=OFF
++  ninja
+ }
+ 
+ package() {
+   cd build
+-  make DESTDIR="$pkgdir" install
++  DESTDIR="$pkgdir" ninja install
+ 
+   install -d "$pkgdir"/usr/share/licenses
+   ln -s /usr/share/licenses/qt5-base "$pkgdir"/usr/share/licenses/${pkgname}

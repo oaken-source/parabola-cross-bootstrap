@@ -1,0 +1,19 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-04-05 07:57:08.773764780 +0200
++++ b/PKGBUILD	2018-04-05 07:57:08.774764779 +0200
+@@ -48,11 +48,14 @@ build() {
+ 	elif [ "${CARCH}" == 'i686' ]; then
+ 		openssltarget='linux-elf'
+ 		optflags=''
++	elif [ "${CARCH}" == 'powerpc64le' ]; then
++		openssltarget='linux-elf'
++		optflags=''
+ 	fi
+ 
+ 	# mark stack as non-executable: http://bugs.archlinux.org/task/12434
+ 	./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib/openssl-1.0 \
+-		shared no-ssl3-method ${optflags} \
++		shared no-ssl3-method no-asm ${optflags} \
+ 		"${openssltarget}" \
+ 		"-Wa,--noexecstack ${CPPFLAGS} ${CFLAGS} ${LDFLAGS}"
+ 

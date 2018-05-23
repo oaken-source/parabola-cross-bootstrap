@@ -4,7 +4,7 @@
 _target_arch=@LINUX_ARCH@
 _target=@CHOST@
 pkgname=$_target-linux-libre-api-headers
-_pkgver=4.15-gnu
+_pkgver=4.16-gnu
 
 _archpkgver=${_pkgver%-*}
 pkgver=${_pkgver//-/_}
@@ -17,7 +17,7 @@ provides=("$_target-linux-api-headers=${_archpkgver}")
 conflicts=("$_target-linux-api-headers")
 replaces=("$_target-linux-api-headers")
 source=("https://linux-libre.fsfla.org/pub/linux-libre/releases/${_pkgver}/linux-libre-${_pkgver}.tar.xz"{,.sign})
-sha512sums=('a55cc663c6fb1e1cfa7905282b368b5d5888bc2398f0acf37e5bb9a232ded04fd566b1980e654da26aaec005332e458581495184d6bd4cec669181085d4d78a5'
+sha512sums=('c6805b3649cd71cfef272384958b33da23a00908e795592470bf711dd67886ab7d7610e7d4ae8a2230fa7483466636465ed9744444464a078de37b41c3db23e0'
             'SKIP')
 validpgpkeys=('474402C8C582DAFBE389C427BCB7CF877E7D47A7') # Alexandre Oliva
 

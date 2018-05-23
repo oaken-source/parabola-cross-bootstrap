@@ -38,7 +38,8 @@ if [ -z "${SUDO_USER:-}" ]; then
 fi
 
 # shellcheck source=config/config.template.sh
-. "$CONFIGDIR/config.$1.sh" || die -e "$ERROR_INVOCATION" "usage: $0 CARCH (see config/config.*.sh)"
+. "$CONFIGDIR/config.$1.sh" || die -e "$ERROR_INVOCATION" \
+    "usage: $0 CARCH (see config/config.*.sh)"
 
 mkdir -p "$TOPBUILDDIR" "$SRCDEST"
 chown "$SUDO_USER" "$TOPBUILDDIR"

@@ -33,7 +33,8 @@ stage4_makepkg() {
   package_import_keys "$pkgname" || return
 
   # substitute common variables
-  sed "s#@MULTILIB@#${MULTILIB:-disable}#g" \
+  sed "s#@MULTILIB@#${MULTILIB:-disable}#g; \
+       s#@GCC_CONFIG_FLAGS@#${GCC_CONFIG_FLAGS[*]}#g" \
     PKGBUILD.in > PKGBUILD
 
   # prepare the pkgbuild
@@ -70,7 +71,7 @@ stage4_makepkg() {
     run pacman -Scc || return
 
   # build the package
-  "$BUILDDIR/libremakepkg-$CARCH.sh" -n "$CHOST"-stage4 || return
+  "$BUILDDIR/libremakepkg.sh" -n "$CHOST"-stage4 || return
 }
 
 stage4_package_build() {

@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-21 18:08:08.138446567 +0100
++++ b/PKGBUILD	2018-03-21 18:22:01.229401254 +0100
+@@ -17,7 +17,7 @@ md5sums=('SKIP')
+ build() {
+   cd "${srcdir}/${pkgname}-dev"
+   make configure
+-  export OPTIMIZER="-march=${CARCH/_/-} -O1"
++  export OPTIMIZER="@PLATFORM_CFLAGS@ -O1"
+   export DEBUG=-DNDEBUG
+   ./configure --prefix=/usr --sbindir=/usr/bin --enable-readline
+   make

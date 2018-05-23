@@ -1,0 +1,18 @@
+--- a/PKGBUILD	2018-03-09 17:08:56.091685853 +0100
++++ b/PKGBUILD	2018-03-09 17:30:15.538077499 +0100
+@@ -38,11 +38,14 @@ build() {
+ 	elif [ "${CARCH}" == 'i686' ]; then
+ 		openssltarget='linux-elf'
+ 		optflags=''
++	elif [ "${CARCH}" == 'powerpc64le' ]; then
++		openssltarget='linux-elf'
++		optflags=''
+ 	fi
+ 
+ 	# mark stack as non-executable: http://bugs.archlinux.org/task/12434
+ 	./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib \
+-		shared no-ssl3-method ${optflags} \
++		shared no-ssl3-method no-asm ${optflags} \
+ 		"${openssltarget}" \
+ 		"-Wa,--noexecstack ${CPPFLAGS} ${CFLAGS} ${LDFLAGS}"
+ 

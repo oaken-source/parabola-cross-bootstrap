@@ -38,8 +38,8 @@ export GCC_CONFIG_FLAGS=()
 #export PLATFORM32_CFLAGS=()
 
 # configure build directories
-export TOPBUILDDIR="$startdir/build/$CHOST"
-export SRCDEST="$startdir"/build/sources
+export TOPBUILDDIR="$startdir/build/$CARCH"
+export SRCDEST="$startdir"/sources
 
 # regenerate config.sub / config.guess during builds
 export REGEN_CONFIG_FRAGMENTS=yes

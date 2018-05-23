@@ -37,10 +37,14 @@ build_deptree() {
   # add the packages listed in the given groups
   local g p r
   for g in "$@"; do
-    for p in $(pacman -Sg "$g" | awk '{print $2}'); do
-      r=$(make_realpkg "$p") || return "$ERROR_MISSING"
-      deptree_add_entry "$r" "$g"
-    done
+    if pacman -Si "$g" &>/dev/null; then
+      deptree_add_entry "$g" "<immediate>"
+    else
+      for p in $(pacman -Sg "$g" | awk '{print $2}'); do
+        r=$(make_realpkg "$p") || return "$ERROR_MISSING"
+        deptree_add_entry "$r" "$g"
+      done
+    fi
   done
 
   return 0
@@ -107,7 +111,7 @@ deptree_check_depend() {
 }
 
 deptree_add_entry() {
-  local r="${2:-<cmdline>}"
+  local r="${2:-<immediate>}"
 
   if grep -q "^$1 :" "$DEPTREE".FULL; then
     # if pkg is in deptree, append requestee to list
@@ -115,7 +119,7 @@ deptree_add_entry() {
   elif grep -q "^$r :" "$DEPTREE".FULL; then
     # elif requestee is in deptree, insert after requestee
     sed -i "/^$r :/a $1 : [ ] # $r" "$DEPTREE"*
-  elif [ "x$r" == "x<cmdline>" ]; then
+  elif [ "x$r" == "x<immediate>" ]; then
     # elif requested directly, add to top of file
     sed -i "1i $1 : [ ] # $r" "$DEPTREE"*
   else

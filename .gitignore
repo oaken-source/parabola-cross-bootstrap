@@ -1,6 +1,7 @@
 
 # build dirs
 build/
+sources/
 
 # built packages and signatures
 *.pkg.tar.xz

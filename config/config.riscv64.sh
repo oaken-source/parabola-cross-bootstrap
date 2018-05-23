@@ -18,6 +18,8 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
+# this configuration targets the HiFive boards
+
 # the target host triplet
 export CARCH=riscv64
 export CHOST="$CARCH-unknown-linux-gnu"
@@ -38,9 +40,9 @@ export GCC_CONFIG_FLAGS=("--with-arch=rv64gc" "--with-abi=lp64d")
 #export PLATFORM32_CFLAGS=()
 
 # configure build directories
-export TOPBUILDDIR="$startdir/build/$CHOST"
+export TOPBUILDDIR="$startdir/build/$CARCH"
 export TOPSRCDIR="$startdir"/src
-export SRCDEST="$startdir"/build/sources
+export SRCDEST="$startdir"/sources
 
 # build options
 export REGEN_CONFIG_FRAGMENTS=yes

@@ -1,0 +1,21 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-05-19 23:28:57.634186431 +0200
++++ b/PKGBUILD	2018-05-20 07:24:23.307804390 +0200
+@@ -12,7 +12,7 @@ pkgdesc="Freedesktop.org message bus sys
+ url="https://wiki.freedesktop.org/www/Software/dbus/"
+ arch=(x86_64)
+ license=(GPL custom)
+-depends=(libsystemd expat)
++depends=(libsystemd expat glib2)
+ makedepends=(systemd xmlto docbook-xsl python yelp-tools doxygen git autoconf-archive graphviz)
+ _commit=f8902fa1c840e3fab807016e6a00647b6ef9dd41  # tags/dbus-1.12.8^0
+ source=("git+https://anongit.freedesktop.org/git/dbus/dbus#commit=$_commit"
+@@ -40,6 +40,8 @@ prepare() {
+ build() {
+   cd $pkgbase
+   ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
++      --host=@CHOST@ --build=@BUILDHOST@ \
++      --disable-silent-rules --without-x --disable-xml-docs \
+       --libexecdir=/usr/lib/dbus-1.0 --with-dbus-user=dbus \
+       --with-system-pid-file=/run/dbus/pid \
+       --with-system-socket=/run/dbus/system_bus_socket \

@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-05-19 22:31:00.764151740 +0200
++++ b/PKGBUILD	2018-05-19 22:33:38.267486645 +0200
+@@ -19,7 +19,7 @@ md5sums=('466267889daead47674df933cea9ca
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  ./configure --prefix=/usr
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr
+   make
+ }
+ 

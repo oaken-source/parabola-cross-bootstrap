@@ -31,16 +31,15 @@ stage2_makepkg() {
   # substitute common variables
   sed "s#@CARCH@#$CARCH#g; \
        s#@CHOST@#$CHOST#g; \
-       s#@GCC_MARCH@#$GCC_MARCH#g; \
-       s#@GCC_MABI@#$GCC_MABI#g; \
+       s#@PLATFORM_CFLAGS@#${PLATFORM_CFLAGS[*]}#g; \
+       s#@LINUX_ARCH@#$LINUX_ARCH#g; \
+       s#@GCC_CONFIG_FLAGS@#${GCC_CONFIG_FLAGS[*]}#g; \
+       s#@MULTILIB@#${MULTILIB:-disable}#g; \
        s#@CARCH32@#${CARCH32:-}#g; \
        s#@CHOST32@#${CHOST32:-}#g; \
-       s#@GCC32_MARCH@#${GCC32_MARCH:-}#g; \
-       s#@GCC32_MABI@#${GCC32_MABI:-}#g; \
+       s#@PLATFORM32_CFLAGS@#${PLATFORM32_CFLAGS[*]}#g; \
        s#@BUILDHOST@#$(gcc -dumpmachine)#g; \
-       s#@SYSROOT@#$SYSROOT#g; \
-       s#@LINUX_ARCH@#$LINUX_ARCH#g; \
-       s#@MULTILIB@#${MULTILIB:-disable}#g;" \
+       s#@SYSROOT@#$SYSROOT#g;" \
     PKGBUILD.in > PKGBUILD
 
   package_enable_arch "$CARCH"
@@ -62,7 +61,7 @@ stage2_makepkg() {
 
   # build the package
   runas "$SUDO_USER" \
-  "$BUILDDIR"/makepkg-"$CARCH".sh -fLC --config "$BUILDDIR"/makepkg-"$CARCH".conf \
+  "$BUILDDIR"/makepkg.sh -fLC --config "$BUILDDIR"/makepkg.conf \
     --nocheck --nodeps --nobuild --noconfirm || return
 
   if [ "x${REGEN_CONFIG_FRAGMENTS:-no}" == "xyes" ]; then
@@ -71,7 +70,7 @@ stage2_makepkg() {
   fi
 
   runas "$SUDO_USER" \
-  "$BUILDDIR"/makepkg-"$CARCH".sh -efL --config "$BUILDDIR"/makepkg-"$CARCH".conf \
+  "$BUILDDIR"/makepkg.sh -efL --config "$BUILDDIR"/makepkg.conf \
     --nocheck --nodeps --noprepare --noconfirm || return
 }
 
@@ -103,7 +102,7 @@ stage2_package_install() {
 stage2() {
   msg -n "Entering Stage 2"
 
-  local groups=(base-devel)
+  local groups=(filesystem base-devel)
 
   local sysroot
   sysroot="$("$CHOST"-gcc --print-sysroot)"

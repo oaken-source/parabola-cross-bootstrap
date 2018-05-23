@@ -7,7 +7,7 @@ VCSCLIENTS=('bzr::bzr'
             'git::git'
             'hg::mercurial'
             'svn::subversion')
-CPPFLAGS="-D_FORTIFY_SOURCE=2"
+CPPFLAGS=""
 LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
 DEBUG_CFLAGS="-g -fvar-tracking-assignments"
 DEBUG_CXXFLAGS="-g -fvar-tracking-assignments"

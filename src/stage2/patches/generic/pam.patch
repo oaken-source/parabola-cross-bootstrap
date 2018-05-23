@@ -1,0 +1,28 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-05-19 21:06:16.120767672 +0200
++++ b/PKGBUILD	2018-05-19 21:08:16.307435539 +0200
+@@ -9,7 +9,7 @@ pkgdesc="PAM (Pluggable Authentication M
+ arch=('x86_64')
+ license=('GPL2')
+ url="http://linux-pam.org"
+-depends=('glibc' 'cracklib' 'libtirpc' 'pambase')
++depends=('glibc' 'cracklib' 'libtirpc' 'pambase' 'libnsl')
+ makedepends=('flex' 'w3m' 'docbook-xml>=4.4' 'docbook-xsl')
+ backup=(etc/security/{access.conf,group.conf,limits.conf,namespace.conf,namespace.init,pam_env.conf,time.conf} etc/default/passwd etc/environment)
+ source=(http://linux-pam.org/library/Linux-PAM-$pkgver.tar.bz2)
+@@ -19,7 +19,7 @@ options=('!emptydirs')
+ 
+ build() {
+   cd $srcdir/Linux-PAM-$pkgver
+-  ./configure --libdir=/usr/lib --sbindir=/usr/bin --disable-db
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --libdir=/usr/lib --sbindir=/usr/bin --disable-db
+   make
+ }
+ 
+@@ -32,5 +32,5 @@ package() {
+ 
+   # remove doc which is not used anymore
+   # FS #40749
+-  rm $pkgdir/usr/share/doc/Linux-PAM/sag-pam_userdb.html
++  rm -f $pkgdir/usr/share/doc/Linux-PAM/sag-pam_userdb.html
+ }

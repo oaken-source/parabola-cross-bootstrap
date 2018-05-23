@@ -120,10 +120,14 @@ package_has_patch() {
   done
   shift $((OPTIND-1))
 
-  local pkgbase
+  local pkgbase pkgname
   pkgbase=$(srcinfo_pkgbase) || return
+  pkgname=$(srcinfo_pkgname) || return
 
-  local patch="$SRCDIR/patches/$pkgbase$p".patch
+  local patch="$SRCDIR/patches/$CARCH/$pkgbase$p.$pkgname".patch
+  [ -f "$patch" ] || patch="$SRCDIR/patches/$CARCH/$pkgbase$p".patch
+  [ -f "$patch" ] || patch="$SRCDIR/patches/generic/$pkgbase$p.$pkgname".patch
+  [ -f "$patch" ] || patch="$SRCDIR/patches/generic/$pkgbase$p".patch
   [ -f "$patch" ] || return "$ERROR_MISSING"
 }
 
@@ -138,26 +142,51 @@ package_patch() {
   done
   shift $((OPTIND-1))
 
-  local pkgbase
+  local pkgbase pkgname
   pkgbase=$(srcinfo_pkgbase) || return
+  pkgname=$(srcinfo_pkgname) || return
 
-  local patch="$SRCDIR/patches/$pkgbase$p".patch
-  local badpatch="$SRCDIR/patches/$pkgname$p".patch
-
-  ln -s "$patch" .PATCH
-
-  echo -n "checking for $(basename "$patch") ... "
+  local patch="$SRCDIR/patches/$CARCH/$pkgbase$p.$pkgname".patch
+  echo -n "checking for $CARCH/$(basename "$patch") ... "
   local have_patch=yes
   if [ ! -f "$patch" ]; then
     have_patch=no
-    if [ -f "$badpatch" ]; then
-      have_patch="$(basename "$badpatch") (renaming...)"
-      mv "$badpatch" "$patch" || return
-    fi
   fi
   echo "$have_patch (needed: $r)"
 
-  [ "x$r" == "xyes" ] && [ ! -e "$patch" ] && return "$ERROR_MISSING"
+  if [ "x$have_patch" == "xno" ]; then
+    patch="$SRCDIR/patches/$CARCH/$pkgbase$p".patch
+    echo -n "checking for $CARCH/$(basename "$patch") ... "
+    have_patch=yes
+    if [ ! -f "$patch" ]; then
+      have_patch=no
+    fi
+    echo "$have_patch (needed: $r)"
+  fi
+
+  if [ "x$have_patch" == "xno" ]; then
+    patch="$SRCDIR/patches/generic/$pkgbase$p.$pkgname".patch
+    echo -n "checking for generic/$(basename "$patch") ... "
+    have_patch=yes
+    if [ ! -f "$patch" ]; then
+      have_patch=no
+    fi
+    echo "$have_patch (needed: $r)"
+  fi
+
+  if [ "x$have_patch" == "xno" ]; then
+    patch="$SRCDIR/patches/generic/$pkgbase$p".patch
+    echo -n "checking for generic/$(basename "$patch") ... "
+    have_patch=yes
+    if [ ! -f "$patch" ]; then
+      have_patch=no
+    fi
+    echo "$have_patch (needed: $r)"
+  fi
+
+  ln -s "$patch" .PATCH
+
+  [ "x$r" == "xyes" ] && [ "x$have_patch" == "xno" ] && return "$ERROR_MISSING"
 
   cp PKGBUILD{,.orig}
   [ ! -e "$patch" ] || patch -Np1 -i "$patch" || return

@@ -33,7 +33,8 @@ stage3_makepkg() {
   package_patch "${prefix[@]}" "$pkgname" || return
 
   # substitute common variables
-  sed "s#@MULTILIB@#${MULTILIB:-disable}#g" \
+  sed "s#@MULTILIB@#${MULTILIB:-disable}#g; \
+       s#@GCC_CONFIG_FLAGS@#${GCC_CONFIG_FLAGS[*]}#g" \
     PKGBUILD.in > PKGBUILD
 
   # prepare the pkgbuild
@@ -57,13 +58,13 @@ stage3_makepkg() {
 
   if [ "x$1" != "x$pkgname" ]; then
     # a bit of magic for -decross builds
-    PKGDEST=. "$BUILDDIR/libremakepkg-$CARCH.sh" -n "$CHOST"-stage3 || return
+    PKGDEST=. "$BUILDDIR/libremakepkg.sh" -n "$CHOST"-stage3 || return
     local pkgfiles pkgfile
     pkgfiles=("$pkgname"-*.pkg.tar.xz); pkgfile="${pkgfiles[0]}"
     mv -v "$pkgfile" "$PKGDEST/${pkgfile/$pkgname/$1}"
   else
     # regular build otherwise
-    "$BUILDDIR/libremakepkg-$CARCH.sh" -n "$CHOST"-stage3 || return
+    "$BUILDDIR/libremakepkg.sh" -n "$CHOST"-stage3 || return
   fi
 }
 

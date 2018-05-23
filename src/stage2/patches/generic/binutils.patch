@@ -1,0 +1,20 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-05-19 22:42:12.064158439 +0200
++++ b/PKGBUILD	2018-05-19 22:47:21.014161521 +0200
+@@ -51,6 +51,7 @@ build() {
+   cd binutils-build
+ 
+   "$srcdir/binutils-$pkgver/configure" \
++    --host=@CHOST@ --build=@BUILDHOST@ \
+     --prefix=/usr \
+     --with-lib-path=/usr/lib:/usr/local/lib \
+     --with-bugurl=https://bugs.archlinux.org/ \
+@@ -66,7 +67,7 @@ build() {
+     --disable-gdb \
+     --disable-werror \
+     --with-pic \
+-    --with-system-zlib
++    --with-system-zlib=@SYSROOT@/usr/lib/libz.so
+ 
+   make configure-host
+   make tooldir=/usr

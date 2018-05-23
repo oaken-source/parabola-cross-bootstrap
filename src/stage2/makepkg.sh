@@ -19,10 +19,10 @@
  ##############################################################################
 
 check_stage2_makepkg() {
-  echo -n "checking for makepkg-$CARCH.sh ... "
+  echo -n "checking for makepkg.sh ... "
 
   local have_stage2_makepkg=yes
-  [ -f "$BUILDDIR"/makepkg-"$CARCH".sh ] || have_stage2_makepkg=no
+  [ -f "$BUILDDIR"/makepkg.sh ] || have_stage2_makepkg=no
   echo $have_stage2_makepkg
 
   [ "x$have_stage2_makepkg" == "xyes" ] || return "$ERROR_MISSING"
@@ -31,18 +31,18 @@ check_stage2_makepkg() {
 build_stage2_makepkg() {
   check_exe bsdtar pacman || return
 
-  prepare_makepkgdir "$MAKEPKGDIR/makepkg-$CARCH" || return
+  prepare_makepkgdir "$MAKEPKGDIR/makepkg" || return
 
   # fetch pacman package to excract makepkg
-  pacman -Sw --noconfirm --cachedir . pacman
+  pacman -Sw --noconfirm --cachedir . pacman || return
   mkdir tmp && bsdtar -C tmp -xf pacman-*.pkg.tar.xz
 
   # install makepkg
-  cp -Lv tmp/usr/bin/makepkg "$BUILDDIR"/makepkg-"$CARCH".sh
+  cp -Lv tmp/usr/bin/makepkg "$BUILDDIR"/makepkg.sh
 
   # patch run_pacman in makepkg, we cannot pass the pacman root to it as parameter ATM
   sed -i "s#\"\$PACMAN_PATH\"#& --config $CHROOTDIR/etc/pacman.conf -r $CHROOTDIR#" \
-    "$BUILDDIR"/makepkg-"$CARCH".sh
+    "$BUILDDIR"/makepkg.sh
 
   popd >/dev/null || return
 }
@@ -51,12 +51,12 @@ prepare_stage2_makepkg() {
   check_stage2_makepkg || build_stage2_makepkg || return
 
   # create a sane makepkg.conf
-  cat "$SRCDIR"/makepkg.conf.in > "$BUILDDIR"/makepkg-"$CARCH".conf
-  cat >> "$BUILDDIR"/makepkg-"$CARCH".conf << EOF
+  cat "$SRCDIR"/makepkg.conf.in > "$BUILDDIR"/makepkg.conf
+  cat >> "$BUILDDIR"/makepkg.conf << EOF
 CARCH="$CARCH"
 CHOST="$CHOST"
-CFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
-CXXFLAGS="-march=$GCC_MARCH -mabi=$GCC_MABI -O2 -pipe -fstack-protector-strong -fno-plt"
+CFLAGS="${PLATFORM_CFLAGS[*]} -O2 -pipe -fstack-protector-strong -fno-plt"
+CXXFLAGS="${PLATFORM_CFLAGS[*]} -O2 -pipe -fstack-protector-strong -fno-plt"
 MAKEFLAGS="-j$(($(nproc) + 1))"
 EOF
 

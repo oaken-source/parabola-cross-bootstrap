@@ -1,0 +1,48 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-05-19 22:56:10.097500131 +0200
++++ b/PKGBUILD	2018-05-19 22:58:48.824168384 +0200
+@@ -2,14 +2,14 @@
+ # Maintainer: Jan de Groot <jgc@archlinux.org>
+ 
+ pkgbase=glib2
+-pkgname=(glib2 glib2-docs)
++pkgname=(glib2)
+ pkgver=2.56.1
+ pkgrel=1
+ pkgdesc="Low level core library"
+ url="https://wiki.gnome.org/Projects/GLib"
+ license=(LGPL2.1)
+ arch=(x86_64)
+-depends=(pcre libffi libutil-linux zlib)
++depends=(pcre libffi libutil-linux zlib libelf)
+ makedepends=(gettext gtk-doc shared-mime-info python libelf git util-linux dbus)
+ checkdepends=(desktop-file-utils)
+ optdepends=('python: gdbus-codegen, glib-genmarshal, glib-mkenums, gtester-report'
+@@ -43,13 +43,18 @@ build() {
+   check_option debug y && debug=yes
+ 
+   cd glib
++  cat > config.cache << EOF
++glib_cv_stack_grows=no
++glib_cv_uscore=no
++EOF
+   ./configure \
++    --host=@CHOST@ --build=@BUILDHOST@ \
++    --cache-file=config.cache \
+     --prefix=/usr \
+     --libdir=/usr/lib \
+     --sysconfdir=/etc \
+     --with-pcre=system \
+     --enable-debug=$debug \
+-    --enable-gtk-doc \
+     --disable-fam
+   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+   make
+@@ -63,7 +68,6 @@ check() {
+ package_glib2() {
+   cd glib
+   make DESTDIR="$pkgdir" install
+-  mv "$pkgdir/usr/share/gtk-doc" "$srcdir"
+ 
+   install -Dt "$pkgdir/usr/share/libalpm/hooks" -m644 ../*.hook
+ }

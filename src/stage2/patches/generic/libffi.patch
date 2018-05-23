@@ -1,0 +1,11 @@
+--- a/PKGBUILD	2018-03-03 22:03:14.363545840 +0100
++++ b/PKGBUILD	2018-03-03 22:03:14.363545840 +0100
+@@ -12,7 +12,7 @@ url='http://sourceware.org/libffi/'
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  ./configure --prefix=/usr --disable-static \
++  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr --disable-static \
+     --enable-pax_emutramp
+   make
+ }

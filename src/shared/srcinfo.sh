@@ -34,6 +34,10 @@ srcinfo_pkgbase() {
   grep '^pkgbase =' .SRCINFO | awk '{print $3}'
 }
 
+srcinfo_pkgname() {
+  $(basename $(pwd))
+}
+
 srcinfo_builddeps() {
   local OPTIND o n='check\|' m='make\|'
   while getopts "nm" o; do

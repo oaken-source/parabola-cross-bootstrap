@@ -9,22 +9,28 @@ parabola-riscv64-bootstrap
 ---------------
 
 This project is an attempt to bootstrap a self-contained parabola
-GNU/Linux-libre system for the riscv64 architecture. The scripts are created
-with the goal to be as architectur agnostic as possible, to make future porting
-efforts easier.
+GNU/Linux-libre system for the following architectures:
+
+ - riscv64 (HiFive)
+ - riscv32 (PULP)
+ - sparc (OpenSparc)
+ - powerpc64le (TalosII)
+
+The scripts are created with the goal to be as architecture agnostic as
+possible, to make future porting efforts easier.
 
 The build process is split into four stages, the rationale of which is outlined
 in section 2 below.
 
 To initiate a complete build of all stages, run:
-  $> sudo ./create
+  $> sudo ./create [CARCH]
 
 The builds can be configured to keep going if the build of a single package
 fails, by creating the file `build/.KEEP_GOING`. Otherwise, the build will stop
 once an error is encountered. This is useful for getting as much work done as
 possible unattended, but will make debugging harder in the later stages,
-because temporary build fragments and filesystem trees will be overwritten by
-the next package.
+because temporary build fragments and filesystem trees in the build chroots
+will be overwritten by the next package.
 
 The complete console output of a package build process can be found in the
 corresponding .MAKEPKGLOG file in the build directory of that package.
@@ -62,9 +68,9 @@ can email me at <andreas@grapentin.org>, or find me as <oaken-source> in
 1.3. Current state of the project
 ---------------------------------
 
-All four stages are complete and this repository is now closed. A pointer where
-to find future development efforts for the parabola RISC-V port will be added
-here in due time.
+All four stages of the riscv64 bootstrap are complete, and efforts to add
+additional architectures has begun. A pointer where to find future development
+efforts for the parabola RISC-V port will be added here in due time.
 
 2. Build Stages
 ---------------

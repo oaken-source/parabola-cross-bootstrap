@@ -1,0 +1,18 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-05-18 20:06:48.996536657 +0200
++++ b/PKGBUILD	2018-05-18 20:08:03.463204067 +0200
+@@ -39,12 +39,12 @@ build() {
+   cd linux-${pkgver%.*}
+ 
+   make mrproper
+-  make headers_check
++  make ARCH=@LINUX_ARCH@ CROSS_COMPILE=@CHOST@- headers_check
+ }
+ 
+ package() {
+   cd linux-${pkgver%.*}
+-  make INSTALL_HDR_PATH="$pkgdir/usr" headers_install
++  make INSTALL_HDR_PATH="$pkgdir/usr" ARCH=@LINUX_ARCH@ CROSS_COMPILE=@CHOST@- headers_install
+ 
+   # use headers from libdrm
+   rm -r "$pkgdir/usr/include/drm"
