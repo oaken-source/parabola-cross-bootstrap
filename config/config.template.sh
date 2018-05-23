@@ -3,7 +3,6 @@
  #                      parabola-riscv64-bootstrap                            #
  #                                                                            #
  #    Copyright (C) 2018  Andreas Grapentin                                   #
- #    Copyright (C) 2018  Bruno Cichoń                                        #
  #                                                                            #
  #    This program is free software: you can redistribute it and/or modify    #
  #    it under the terms of the GNU General Public License as published by    #
@@ -19,44 +18,29 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-startdir="$(pwd)"
-export TOPSRCDIR="$startdir"/src
-export CONFIGDIR="$startdir"/config
+# the target host triplet
+export CARCH=
+export CHOST="$CARCH-unknown-linux-gnu"
 
-# shellcheck source=src/shared/common.sh
-. "$TOPSRCDIR"/shared/common.sh
+# the equivalent architecture name used by the linux kernel
+export LINUX_ARCH=
 
-# sanity checks
-if [ -z "$1" ]; then
-  die -e "$ERROR_INVOCATION" "usage: $0 CARCH (see config/config.*.sh)"
-fi
-if [ "$(id -u)" -ne 0 ]; then
-  die -e "$ERROR_INVOCATION" "must be root"
-fi
-if [ -z "${SUDO_USER:-}" ]; then
-  die -e "$ERROR_INVOCATION" "SUDO_USER must be set in environment"
-fi
+# flags added to the default CFLAGS in makepkg.conf
+export PLATFORM_CFLAGS=()
 
-# shellcheck source=config/config.template.sh
-. "$CONFIGDIR/config.$1.sh" || die -e "$ERROR_INVOCATION" "usage: $0 CARCH (see config/config.*.sh)"
+# flags added to the gcc PKGBUILD configure call
+export GCC_CONFIG_FLAGS=()
 
-mkdir -p "$TOPBUILDDIR" "$SRCDEST"
-chown "$SUDO_USER" "$TOPBUILDDIR"
+# multilib configuration, uncomment if applicable
+#export MULTILIB=enable
+#export CARCH32=""
+#export CHOST32=""
+#export PLATFORM32_CFLAGS=()
 
-# shellcheck source=src/stage1/stage1.sh
-. "$TOPSRCDIR"/stage1/stage1.sh
-stage1 || die -e "$ERROR_BUILDFAIL" "Stage 1 failed. Exiting..."
+# configure build directories
+export TOPBUILDDIR="$startdir/build/$CHOST"
+export SRCDEST="$startdir"/build/sources
 
-# shellcheck source=src/stage2/stage2.sh
-. "$TOPSRCDIR"/stage2/stage2.sh
-stage2 || die -e "$ERROR_BUILDFAIL" "Stage 2 failed. Exiting..."
+# regenerate config.sub / config.guess during builds
+export REGEN_CONFIG_FRAGMENTS=yes
 
-# shellcheck source=src/stage3/stage3.sh
-. "$TOPSRCDIR"/stage3/stage3.sh
-stage3 || die -e "$ERROR_BUILDFAIL" "Stage 3 failed. Exiting..."
-
-# shellcheck source=src/stage4/stage4.sh
-. "$TOPSRCDIR"/stage4/stage4.sh
-stage4 || die -e "$ERROR_BUILDFAIL" "Stage 4 failed. Exiting..."
-
-msg -n "all done."

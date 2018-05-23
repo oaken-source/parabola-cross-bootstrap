@@ -19,44 +19,29 @@
  #    along with this program.  If not, see <http://www.gnu.org/licenses/>.   #
  ##############################################################################
 
-startdir="$(pwd)"
+# the target host triplet
+export CARCH=powerpc64le
+export CHOST="$CARCH-unknown-linux-gnu"
+
+# the equivalent architecture name used by the linux kernel
+export LINUX_ARCH=powerpc
+
+# flags added to the default CFLAGS in makepkg.conf
+export PLATFORM_CFLAGS=("-mabi=elfv2")
+
+# flags added to the gcc PKGBUILD configure call
+export GCC_CONFIG_FLAGS=("--with-long-double-128" "--enable-vsx")
+
+# multilib configuration, uncomment if applicable
+#export MULTILIB=enable
+#export CARCH32=""
+#export CHOST32=""
+#export PLATFORM32_CFLAGS=()
+
+# configure build directories
+export TOPBUILDDIR="$startdir/build/$CHOST"
 export TOPSRCDIR="$startdir"/src
-export CONFIGDIR="$startdir"/config
+export SRCDEST="$startdir"/build/sources
 
-# shellcheck source=src/shared/common.sh
-. "$TOPSRCDIR"/shared/common.sh
-
-# sanity checks
-if [ -z "$1" ]; then
-  die -e "$ERROR_INVOCATION" "usage: $0 CARCH (see config/config.*.sh)"
-fi
-if [ "$(id -u)" -ne 0 ]; then
-  die -e "$ERROR_INVOCATION" "must be root"
-fi
-if [ -z "${SUDO_USER:-}" ]; then
-  die -e "$ERROR_INVOCATION" "SUDO_USER must be set in environment"
-fi
-
-# shellcheck source=config/config.template.sh
-. "$CONFIGDIR/config.$1.sh" || die -e "$ERROR_INVOCATION" "usage: $0 CARCH (see config/config.*.sh)"
-
-mkdir -p "$TOPBUILDDIR" "$SRCDEST"
-chown "$SUDO_USER" "$TOPBUILDDIR"
-
-# shellcheck source=src/stage1/stage1.sh
-. "$TOPSRCDIR"/stage1/stage1.sh
-stage1 || die -e "$ERROR_BUILDFAIL" "Stage 1 failed. Exiting..."
-
-# shellcheck source=src/stage2/stage2.sh
-. "$TOPSRCDIR"/stage2/stage2.sh
-stage2 || die -e "$ERROR_BUILDFAIL" "Stage 2 failed. Exiting..."
-
-# shellcheck source=src/stage3/stage3.sh
-. "$TOPSRCDIR"/stage3/stage3.sh
-stage3 || die -e "$ERROR_BUILDFAIL" "Stage 3 failed. Exiting..."
-
-# shellcheck source=src/stage4/stage4.sh
-. "$TOPSRCDIR"/stage4/stage4.sh
-stage4 || die -e "$ERROR_BUILDFAIL" "Stage 4 failed. Exiting..."
-
-msg -n "all done."
+# build options
+export REGEN_CONFIG_FRAGMENTS=yes
