@@ -1,37 +1,6 @@
---- a/PKGBUILD	2018-02-22 14:14:29.100909778 +0100
-+++ b/PKGBUILD	2018-02-22 14:16:13.593060069 +0100
-@@ -45,6 +45,7 @@ sha256sums=('dfd36086ad68564bcd977f4a1fa
-             '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
-             '1b2c8f4ec84d0dc496516880a54b5e4deb78798618c9cf5e284a45303f156e58'
-             'b2cb3ba229edba338c0af7d7f5bb1a6ef6143bcd453c693bfee0c02fa1cfa18a'
-+            '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
-             '0d174c7c47921cfbb35dacb9d099095e78f6f67bfaa86836a3e588552f14ed03'
-             '1df848c5038a3f81ae4dc79a4072d340109b02f56292a5c4a20c59f735edd2b3'
-             '1cc4af1cf8e2133d4520827cc7d3ffad731892595f8e699909002d2e40ad8df9'
-@@ -71,7 +72,8 @@ build() {
-   cd "$pkgname-$pkgver"
- 
-   ./configure --prefix=/usr --sysconfdir=/etc \
--    --localstatedir=/var --enable-doc \
-+    --host=@CHOST@ --build=@BUILDHOST@ \
-+    --localstatedir=/var --disable-doc \
-     --with-scriptlet-shell=/usr/bin/bash \
-     --with-ldconfig=/usr/bin/ldconfig
-   make V=1
-@@ -96,6 +98,11 @@ build() {
-         mychost="armv7l-unknown-linux-gnueabihf"
-         myflags="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -O2 -pipe -fstack-protector-strong -fno-plt"
-         ;;
-+      @CARCH@)
-+        mycarch="@CARCH@"
-+        mychost="@CHOST@"
-+        myflags="-march=@GCC_MARCH@ -mabi=@GCC_MABI@ -O2 -pipe -fstack-protector-strong  -fno-plt"
-+        ;;
-     esac
-     myldflags="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
- 
---- /dev/null	2018-02-17 13:03:10.829324204 +0100
-+++ b/pacman.conf.riscv64	2018-02-22 14:15:15.338358317 +0100
+diff -rupN a/pacman.conf.riscv64 b/pacman.conf.riscv64
+--- a/pacman.conf.riscv64	1970-01-01 01:00:00.000000000 +0100
++++ b/pacman.conf.riscv64	2018-05-19 07:43:10.426953548 +0200
 @@ -0,0 +1,120 @@
 +#
 +# /etc/pacman.conf
@@ -153,3 +122,36 @@
 +#[custom]
 +#SigLevel = Optional TrustAll
 +#Server = file:///home/custompkgs
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-05-19 07:39:33.266951381 +0200
++++ b/PKGBUILD	2018-05-19 07:43:10.416953547 +0200
+@@ -51,6 +51,7 @@ sha256sums=('dfd36086ad68564bcd977f4a1fa
+             '78129351e96d19e14b05bda30480df3e834a96153b7cfe72ca5c91f5cc5cae40'
+             '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
+             '1b2c8f4ec84d0dc496516880a54b5e4deb78798618c9cf5e284a45303f156e58'
++            '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
+             'b2cb3ba229edba338c0af7d7f5bb1a6ef6143bcd453c693bfee0c02fa1cfa18a'
+             '117892e340cc502b8659f21b209886c51a375e52f4af39f173ff7fe12762d40b'
+             '220f1b25a64727041dc6fa3fd486b0a043f735a3f6cecedc4e2f7c47ec6ce66d'
+@@ -80,7 +81,8 @@ build() {
+   cd "$pkgname-$pkgver"
+ 
+   ./configure --prefix=/usr --sysconfdir=/etc \
+-    --localstatedir=/var --enable-doc \
++    --host=@CHOST@ --build=@BUILDHOST@ \
++    --localstatedir=/var --disable-doc \
+     --with-scriptlet-shell=/usr/bin/bash \
+     --with-ldconfig=/usr/bin/ldconfig
+   make V=1
+@@ -105,6 +107,11 @@ build() {
+         mychost="armv7l-unknown-linux-gnueabihf"
+         myflags="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -O2 -pipe -fstack-protector-strong -fno-plt"
+         ;;
++      @CARCH@)
++        mycarch="@CARCH@"
++        mychost="@CHOST@"
++        myflags="@PLATFORM_FLAGS@ -O2 -pipe -fstack-protector-strong -fno-plt"
++        ;;
+     esac
+     myldflags="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
+ 
