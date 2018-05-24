@@ -146,50 +146,27 @@ package_patch() {
   pkgbase=$(srcinfo_pkgbase) || return
   pkgname=$(srcinfo_pkgname) || return
 
+  echo -n "checking for package patch ... "
   local patch="$SRCDIR/patches/$CARCH/$pkgbase$p.$pkgname".patch
-  echo -n "checking for $CARCH/$(basename "$patch") ... "
-  local have_patch=yes
-  if [ ! -f "$patch" ]; then
-    have_patch=no
-  fi
-  echo "$have_patch (needed: $r)"
-
-  if [ "x$have_patch" == "xno" ]; then
-    patch="$SRCDIR/patches/$CARCH/$pkgbase$p".patch
-    echo -n "checking for $CARCH/$(basename "$patch") ... "
-    have_patch=yes
-    if [ ! -f "$patch" ]; then
-      have_patch=no
-    fi
-    echo "$have_patch (needed: $r)"
+  [ -f "$patch" ] || patch="$SRCDIR/patches/$CARCH/$pkgbase$p".patch
+  [ -f "$patch" ] || patch="$SRCDIR/patches/generic/$pkgbase$p.$pkgname".patch
+  [ -f "$patch" ] || patch="$SRCDIR/patches/generic/$pkgbase$p".patch
+  [ -f "$patch" ] || patch="no"
+  if [ "x$patch" != "xno" ]; then
+    echo "$(basename "$(dirname "$patch")")/$(basename "$patch")"
+  else
+    echo "no"
   fi
 
-  if [ "x$have_patch" == "xno" ]; then
-    patch="$SRCDIR/patches/generic/$pkgbase$p.$pkgname".patch
-    echo -n "checking for generic/$(basename "$patch") ... "
-    have_patch=yes
-    if [ ! -f "$patch" ]; then
-      have_patch=no
-    fi
-    echo "$have_patch (needed: $r)"
-  fi
 
-  if [ "x$have_patch" == "xno" ]; then
-    patch="$SRCDIR/patches/generic/$pkgbase$p".patch
-    echo -n "checking for generic/$(basename "$patch") ... "
-    have_patch=yes
-    if [ ! -f "$patch" ]; then
-      have_patch=no
-    fi
-    echo "$have_patch (needed: $r)"
-  fi
+  local ln_patch="$patch"
+  [ "x$patch" == "xno" ] && ln_patch="$SRCDIR/patches/generic/$pkgbase$p.patch"
+  ln -s "$ln_patch" .PATCH
 
-  ln -s "$patch" .PATCH
-
-  [ "x$r" == "xyes" ] && [ "x$have_patch" == "xno" ] && return "$ERROR_MISSING"
+  [ "x$r" == "xyes" ] && [ "x$patch" == "xno" ] && return "$ERROR_MISSING"
 
   cp PKGBUILD{,.orig}
-  [ ! -e "$patch" ] || patch -Np1 -i "$patch" || return
+  [ "x$patch" == "xno" ] || patch -Np1 -i "$patch" || return
   cp PKGBUILD{,.in}
 
   # force regeneration of .SRCINFO

@@ -35,7 +35,7 @@ srcinfo_pkgbase() {
 }
 
 srcinfo_pkgname() {
-  basename $(pwd)
+  basename "$(pwd)"
 }
 
 srcinfo_builddeps() {

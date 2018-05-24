@@ -119,8 +119,8 @@ deptree_add_entry() {
   elif grep -q "^$r :" "$DEPTREE".FULL; then
     # elif requestee is in deptree, insert after requestee
     sed -i "/^$r :/a $1 : [ ] # $r" "$DEPTREE"*
-  elif [ "x$r" == "x<immediate>" ]; then
-    # elif requested directly, add to top of file
+  elif [ "x$r" == "x<immediate>" ] && [ -s "$DEPTREE".FULL ]; then
+    # elif requested directly, and deptree is not empty, add to top of file
     sed -i "1i $1 : [ ] # $r" "$DEPTREE"*
   else
     # else append to deptree
