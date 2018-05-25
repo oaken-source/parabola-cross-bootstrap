@@ -1,17 +1,34 @@
+diff -rupN a/0001-pthread-reentrant.patch b/0001-pthread-reentrant.patch
+--- a/0001-pthread-reentrant.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/0001-pthread-reentrant.patch	2018-05-25 10:19:14.186356955 +0200
+@@ -0,0 +1,11 @@
++--- trunk/gcc/config/riscv/linux.h	2018/01/03 10:03:58	256169
+++++ trunk/gcc/config/riscv/linux.h	2018/02/13 11:21:01	257621
++@@ -47,6 +47,8 @@
++ 
++ #define ICACHE_FLUSH_FUNC "__riscv_flush_icache"
++ 
+++#define CPP_SPEC "%{pthread:-D_REENTRANT}"
+++
++ #define LINK_SPEC "\
++ -melf" XLEN_SPEC "lriscv \
++ %{shared} \
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-05-21 12:50:49.122195239 +0200
-+++ b/PKGBUILD	2018-05-21 13:10:45.142207172 +0200
-@@ -5,7 +5,8 @@
+--- a/PKGBUILD	2018-05-25 10:15:30.533015789 +0200
++++ b/PKGBUILD	2018-05-25 10:18:49.539689424 +0200
+@@ -5,8 +5,9 @@
  # toolchain build order: linux-api-headers->glibc->binutils->gcc->binutils->glibc
  # NOTE: libtool requires rebuilt with each new gcc version
  
 -pkgname=(gcc gcc-libs gcc-fortran gcc-objc gcc-ada gcc-go lib32-gcc-libs)
+-pkgver=8.1.0
 +pkgname=(gcc gcc-libs gcc-fortran)
 +[ "x@MULTILIB@" == "xdisable" ] || pkgname+=(lib32-gcc-libs)
- pkgver=8.1.0
++pkgver=7.3.1+20180312
  _majorver=${pkgver:0:1}
  _islver=0.18
-@@ -14,13 +15,14 @@ pkgdesc='The GNU Compiler Collection'
+ pkgrel=1
+@@ -14,21 +15,26 @@ pkgdesc='The GNU Compiler Collection'
  arch=(x86_64)
  license=(GPL LGPL FDL custom)
  url='http://gcc.gnu.org'
@@ -20,33 +37,45 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  checkdepends=(dejagnu inetutils)
  options=(!emptydirs)
  #source=(https://sources.archlinux.org/other/gcc/gcc-${pkgver/+/-}.tar.xz{,.sig}
- source=(https://ftp.gnu.org/gnu/gcc/gcc-$pkgver/gcc-$pkgver.tar.xz{,.sig}
+-source=(https://ftp.gnu.org/gnu/gcc/gcc-$pkgver/gcc-$pkgver.tar.xz{,.sig}
++source=(https://sources.archlinux.org/other/gcc/gcc-${pkgver/+/-}.tar.xz{,.sig}
          http://isl.gforge.inria.fr/isl-${_islver}.tar.bz2
 -        c89 c99)
-+        c89 c99 pure64.patch)
++        c89 c99
++        http://patches.clfs.org/dev/gcc-7.1.0-pure64-1.patch
++        0001-pthread-reentrant.patch)
  validpgpkeys=(F3691687D867B81B51CE07D9BBE43771487328A9  # bpiotrowski@archlinux.org
                13975A70E63C361C73AE69EF6EEB81F8981C74C7  # richard.guenther@gmail.com
                33C235A34C46AA3FFB293709A328C3A2C3C45C06) # Jakub Jelinek <jakub@redhat.com>
-@@ -28,7 +30,8 @@ sha256sums=('1d1866f992626e61349a1ccd0b8
+-sha256sums=('1d1866f992626e61349a1ccd0b8d5253816222cdc13390dcfaa74b093aa2b153'
++sha256sums=('c52618f656f2102b3544419e7d0a8a4f4e6ff052783865202be73edf1a40e28b'
              'SKIP'
              '6b8b0fd7f81d0a957beb3679c81bbb34ccc7568d5682844d8924424a0dadcb1b'
              'de48736f6e4153f03d0a5d38ceb6c6fdb7f054e8f47ddd6af0a3dbf14f27b931'
 -            '2513c6d9984dd0a2058557bf00f06d8d5181734e41dcfe07be7ed86f2959622a')
 +            '2513c6d9984dd0a2058557bf00f06d8d5181734e41dcfe07be7ed86f2959622a'
-+            'ce8fd53670d34ab3a57a50d1f9b15a905c79bda611d447f52cd1612846682224')
++            'd1bc3de092b2fd12925d7c9bcee0c0d75dd221ddcbc30c8c84c5cc9be8f3d835'
++            'fc9c6f0edd615f2b39deff28b9626a08fd98ef8ce19f7e34281c0a5bd653ac3b')
  
  _svnrev=259195
  _svnurl=svn://gcc.gnu.org/svn/gcc/branches/gcc-${_majorver}-branch
-@@ -63,7 +66,7 @@ prepare() {
+@@ -63,11 +69,14 @@ prepare() {
    sed -i 's@\./fixinc\.sh@-c true@' gcc/Makefile.in
  
    # Arch Linux installs x86_64 libraries /lib
 -  sed -i '/m64=/s/lib64/lib/' gcc/config/i386/t-linux64
-+  patch -Np1 -i "$srcdir"/pure64.patch
++  patch -Np1 -i "$srcdir"/gcc-7.1.0-pure64-1.patch
  
    # hack! - some configure tests for header files using "$CPP $CPPFLAGS"
    sed -i "/ac_cpp=/s/\$CPPFLAGS/\$CPPFLAGS -O2/" {libiberty,gcc}/configure
-@@ -76,19 +79,23 @@ build() {
+ 
++  # fix -pthreads behavior on risc-v
++  patch -Np1 -i "$srcdir/0001-pthread-reentrant.patch"
++
+   mkdir -p "$srcdir/gcc-build"
+ }
+ 
+@@ -76,19 +85,23 @@ build() {
  
    # using -pipe causes spurious test-suite failures
    # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=48565
@@ -75,7 +104,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
        --with-system-zlib \
        --with-isl \
        --enable-__cxa_atexit \
-@@ -103,16 +110,13 @@ build() {
+@@ -103,16 +116,13 @@ build() {
        --enable-install-libiberty \
        --with-linker-hash-style=gnu \
        --enable-gnu-indirect-function \
@@ -93,7 +122,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  }
  
  check() {
-@@ -126,7 +130,7 @@ check() {
+@@ -126,7 +136,7 @@ check() {
  package_gcc-libs() {
    pkgdesc='Runtime libraries shipped by GCC'
    groups=(base)
@@ -102,7 +131,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
    options+=(!strip)
    provides=($pkgname-multilib libgo.so libgfortran.so libubsan.so libasan.so)
    replaces=($pkgname-multilib)
-@@ -137,23 +141,16 @@ package_gcc-libs() {
+@@ -137,23 +147,16 @@ package_gcc-libs() {
  
    for lib in libatomic \
               libgfortran \
@@ -127,7 +156,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
               libquadmath; do
      make -C $CHOST/$lib DESTDIR="$pkgdir" install-info
    done
-@@ -184,22 +181,20 @@ package_gcc() {
+@@ -184,22 +187,20 @@ package_gcc() {
    install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
@@ -155,7 +184,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -210,23 +205,15 @@ package_gcc() {
+@@ -210,23 +211,15 @@ package_gcc() {
      "$pkgdir/usr/lib/bfd-plugins/"
  
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_{libsubinclude,toolexeclib}HEADERS
@@ -182,7 +211,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -238,9 +225,6 @@ package_gcc() {
+@@ -238,9 +231,6 @@ package_gcc() {
    install -Dm755 "$srcdir/c89" "$pkgdir/usr/bin/c89"
    install -Dm755 "$srcdir/c99" "$pkgdir/usr/bin/c99"
  
@@ -192,7 +221,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
    # remove files provided by lib32-gcc-libs
    rm -f "$pkgdir"/usr/lib32/lib{stdc++,gcc_s}.so
  
-@@ -263,7 +247,7 @@ package_gcc-fortran() {
+@@ -263,7 +253,7 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS}
@@ -201,224 +230,3 @@ diff -rupN a/PKGBUILD b/PKGBUILD
      install-{toolexeclibDATA,nodist_fincludeHEADERS}
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_fincludeHEADERS
    make -C gcc DESTDIR="$pkgdir" fortran.install-{common,man,info}
-diff -rupN a/pure64.patch b/pure64.patch
---- a/pure64.patch	1970-01-01 01:00:00.000000000 +0100
-+++ b/pure64.patch	2018-05-21 13:10:45.152207173 +0200
-@@ -0,0 +1,217 @@
-+Submitted By: William Harrington <kb0iic at cross-lfs dot org>
-+Date: 05-13-2017
-+Initial Package Version: 6.1.0
-+Origin: Idea originally developed by Ryan Oliver and Greg Schafer for
-+        the Pure LFS project with help from
-+        Martin Ward and Chris Staub
-+Upstream Status: Not Applied - CLFS Specific
-+Description: This patch makes changes to the paths for pure64, eg 64bit libs
-+             in /usr/lib, 32bit in /usr/lib32.
-+Comment: Rediffed for 7.1.0
-+
-+tweaked for powerpc64le gcc 8.1.0
-+
-+diff -rupN gcc-8.1.0.old/gcc/config/i386/linux64.h gcc-8.1.0/gcc/config/i386/linux64.h
-+--- gcc-8.1.0.old/gcc/config/i386/linux64.h	2018-05-21 12:04:55.942167767 +0200
-++++ gcc-8.1.0/gcc/config/i386/linux64.h	2018-05-21 12:05:08.352167891 +0200
-+@@ -27,8 +27,8 @@ see the files COPYING3 and COPYING.RUNTI
-+ #define GNU_USER_LINK_EMULATION64 "elf_x86_64"
-+ #define GNU_USER_LINK_EMULATIONX32 "elf32_x86_64"
-+ 
-+-#define GLIBC_DYNAMIC_LINKER32 "/lib/ld-linux.so.2"
-+-#define GLIBC_DYNAMIC_LINKER64 "/lib64/ld-linux-x86-64.so.2"
-++#define GLIBC_DYNAMIC_LINKER32 "/lib32/ld-linux.so.2"
-++#define GLIBC_DYNAMIC_LINKER64 "/lib/ld-linux-x86-64.so.2"
-+ #define GLIBC_DYNAMIC_LINKERX32 "/libx32/ld-linux-x32.so.2"
-+ 
-+ #undef MUSL_DYNAMIC_LINKER32
-+diff -rupN gcc-8.1.0.old/gcc/config/i386/t-linux64 gcc-8.1.0/gcc/config/i386/t-linux64
-+--- gcc-8.1.0.old/gcc/config/i386/t-linux64	2018-05-21 12:04:55.945501101 +0200
-++++ gcc-8.1.0/gcc/config/i386/t-linux64	2018-05-21 12:05:08.445501226 +0200
-+@@ -33,6 +33,6 @@
-+ comma=,
-+ MULTILIB_OPTIONS    = $(subst $(comma),/,$(TM_MULTILIB_CONFIG))
-+ MULTILIB_DIRNAMES   = $(patsubst m%, %, $(subst /, ,$(MULTILIB_OPTIONS)))
-+-MULTILIB_OSDIRNAMES = m64=../lib64$(call if_multiarch,:x86_64-linux-gnu)
-+-MULTILIB_OSDIRNAMES+= m32=$(if $(wildcard $(shell echo $(SYSTEM_HEADER_DIR))/../../usr/lib32),../lib32,../lib)$(call if_multiarch,:i386-linux-gnu)
-++MULTILIB_OSDIRNAMES = m64=../lib$(call if_multiarch,:x86_64-linux-gnu)
-++MULTILIB_OSDIRNAMES+= m32=$(if $(wildcard $(shell echo $(SYSTEM_HEADER_DIR))/../../usr/lib32),../lib32,../lib32)$(call if_multiarch,:i386-linux-gnu)
-+ MULTILIB_OSDIRNAMES+= mx32=../libx32$(call if_multiarch,:x86_64-linux-gnux32)
-+diff -rupN gcc-8.1.0.old/gcc/config/linux.h gcc-8.1.0/gcc/config/linux.h
-+--- gcc-8.1.0.old/gcc/config/linux.h	2018-05-21 12:04:55.928834434 +0200
-++++ gcc-8.1.0/gcc/config/linux.h	2018-05-21 12:05:08.445501226 +0200
-+@@ -82,7 +82,7 @@ see the files COPYING3 and COPYING.RUNTI
-+    GLIBC_DYNAMIC_LINKER32 and GLIBC_DYNAMIC_LINKER64 for targets
-+    supporting both 32-bit and 64-bit compilation.  */
-+ #define UCLIBC_DYNAMIC_LINKER "/lib/ld-uClibc.so.0"
-+-#define UCLIBC_DYNAMIC_LINKER32 "/lib/ld-uClibc.so.0"
-++#define UCLIBC_DYNAMIC_LINKER32 "/lib32/ld-uClibc.so.0"
-+ #define UCLIBC_DYNAMIC_LINKER64 "/lib/ld64-uClibc.so.0"
-+ #define UCLIBC_DYNAMIC_LINKERX32 "/lib/ldx32-uClibc.so.0"
-+ #define BIONIC_DYNAMIC_LINKER "/system/bin/linker"
-+diff -rupN gcc-8.1.0.old/gcc/config/mips/t-linux64 gcc-8.1.0/gcc/config/mips/t-linux64
-+--- gcc-8.1.0.old/gcc/config/mips/t-linux64	2018-05-21 12:04:55.918834435 +0200
-++++ gcc-8.1.0/gcc/config/mips/t-linux64	2018-05-21 12:05:08.445501226 +0200
-+@@ -22,5 +22,5 @@ MIPS_EL = $(if $(filter %el, $(firstword
-+ MIPS_SOFT = $(if $(strip $(filter MASK_SOFT_FLOAT_ABI, $(target_cpu_default)) $(filter soft, $(with_float))),soft)
-+ MULTILIB_OSDIRNAMES = \
-+ 	../lib32$(call if_multiarch,:mips64$(MIPS_EL)-linux-gnuabin32$(MIPS_SOFT)) \
-+-	../lib$(call if_multiarch,:mips$(MIPS_EL)-linux-gnu$(MIPS_SOFT)) \
-+-	../lib64$(call if_multiarch,:mips64$(MIPS_EL)-linux-gnuabi64$(MIPS_SOFT))
-++	../lib32$(call if_multiarch,:mips$(MIPS_EL)-linux-gnu$(MIPS_SOFT)) \
-++	../lib$(call if_multiarch,:mips64$(MIPS_EL)-linux-gnuabi64$(MIPS_SOFT))
-+diff -rupN gcc-8.1.0.old/gcc/config/rs6000/linux64.h gcc-8.1.0/gcc/config/rs6000/linux64.h
-+--- gcc-8.1.0.old/gcc/config/rs6000/linux64.h	2018-05-21 12:04:55.972167768 +0200
-++++ gcc-8.1.0/gcc/config/rs6000/linux64.h	2018-05-21 12:05:08.445501226 +0200
-+@@ -420,16 +420,16 @@ extern int dot_symbols;
-+ #undef	LINK_OS_DEFAULT_SPEC
-+ #define LINK_OS_DEFAULT_SPEC "%(link_os_linux)"
-+ 
-+-#define GLIBC_DYNAMIC_LINKER32 "%(dynamic_linker_prefix)/lib/ld.so.1"
-++#define GLIBC_DYNAMIC_LINKER32 "/lib32/ld.so.1"
-+ 
-+ #ifdef LINUX64_DEFAULT_ABI_ELFv2
-+ #define GLIBC_DYNAMIC_LINKER64 \
-+-"%{mabi=elfv1:%(dynamic_linker_prefix)/lib64/ld64.so.1;" \
-+-":%(dynamic_linker_prefix)/lib64/ld64.so.2}"
-++"%{mabi=elfv1:/lib/ld64.so.1;" \
-++":/lib/ld64.so.2}"
-+ #else
-+ #define GLIBC_DYNAMIC_LINKER64 \
-+-"%{mabi=elfv2:%(dynamic_linker_prefix)/lib64/ld64.so.2;" \
-+-":%(dynamic_linker_prefix)/lib64/ld64.so.1}"
-++"%{mabi=elfv2:/lib/ld64.so.2;" \
-++":/lib/ld64.so.1}"
-+ #endif
-+ 
-+ #define MUSL_DYNAMIC_LINKER32 \
-+@@ -437,7 +437,7 @@ extern int dot_symbols;
-+ #define MUSL_DYNAMIC_LINKER64 \
-+   "/lib/ld-musl-powerpc64" MUSL_DYNAMIC_LINKER_E "%{msoft-float:-sf}.so.1"
-+ 
-+-#define UCLIBC_DYNAMIC_LINKER32 "/lib/ld-uClibc.so.0"
-++#define UCLIBC_DYNAMIC_LINKER32 "/lib32/ld-uClibc.so.0"
-+ #define UCLIBC_DYNAMIC_LINKER64 "/lib/ld64-uClibc.so.0"
-+ #if DEFAULT_LIBC == LIBC_UCLIBC
-+ #define CHOOSE_DYNAMIC_LINKER(G, U, M) \
-+diff -rupN gcc-8.1.0.old/gcc/config/rs6000/t-ldouble-linux64le-ibm gcc-8.1.0/gcc/config/rs6000/t-ldouble-linux64le-ibm
-+--- gcc-8.1.0.old/gcc/config/rs6000/t-ldouble-linux64le-ibm	2018-05-21 12:04:55.975501102 +0200
-++++ gcc-8.1.0/gcc/config/rs6000/t-ldouble-linux64le-ibm	2018-05-21 12:17:02.082175008 +0200
-+@@ -21,6 +21,6 @@
-+ 
-+ MULTILIB_OPTIONS	+= mabi=ieeelongdouble/mabi=ibmlongdouble
-+ MULTILIB_DIRNAMES	+= ieee128 ibm128
-+-MULTILIB_OSDIRNAMES	+= mabi.ibmlongdouble=../lib64$(call if_multiarch,:powerpc64-linux-gnu) \
-+-			   mabi.ieeelongdouble=../lib64/ieee128$(call if_multiarch,:powerpc64-linux-gnu) \
-+-			   ../lib64$(call if_multiarch,:powerpc64-linux-gnu)
-++MULTILIB_OSDIRNAMES	+= mabi.ibmlongdouble=../lib$(call if_multiarch,:powerpc64-linux-gnu) \
-++			   mabi.ieeelongdouble=../lib/ieee128$(call if_multiarch,:powerpc64-linux-gnu) \
-++			   ../lib$(call if_multiarch,:powerpc64-linux-gnu)
-+diff -rupN gcc-8.1.0.old/gcc/config/rs6000/t-ldouble-linux64le-ieee gcc-8.1.0/gcc/config/rs6000/t-ldouble-linux64le-ieee
-+--- gcc-8.1.0.old/gcc/config/rs6000/t-ldouble-linux64le-ieee	2018-05-21 12:04:55.972167768 +0200
-++++ gcc-8.1.0/gcc/config/rs6000/t-ldouble-linux64le-ieee	2018-05-21 12:17:02.082175008 +0200
-+@@ -21,6 +21,6 @@
-+ 
-+ MULTILIB_OPTIONS	+= mabi=ieeelongdouble/mabi=ibmlongdouble
-+ MULTILIB_DIRNAMES	+= ieee128 ibm128
-+-MULTILIB_OSDIRNAMES	+= mabi.ibmlongdouble=../lib64/ibm128$(call if_multiarch,:powerpc64-linux-gnu) \
-+-			   mabi.ieeelongdouble=../lib64$(call if_multiarch,:powerpc64-linux-gnu) \
-+-			   ../lib64$(call if_multiarch,:powerpc64-linux-gnu)
-++MULTILIB_OSDIRNAMES	+= mabi.ibmlongdouble=../lib/ibm128$(call if_multiarch,:powerpc64-linux-gnu) \
-++			   mabi.ieeelongdouble=../lib$(call if_multiarch,:powerpc64-linux-gnu) \
-++			   ../lib$(call if_multiarch,:powerpc64-linux-gnu)
-+diff -rupN gcc-8.1.0.old/gcc/config/rs6000/t-linux gcc-8.1.0/gcc/config/rs6000/t-linux
-+--- gcc-8.1.0.old/gcc/config/rs6000/t-linux	2018-05-21 12:04:55.972167768 +0200
-++++ gcc-8.1.0/gcc/config/rs6000/t-linux	2018-05-21 12:17:02.082175008 +0200
-+@@ -2,7 +2,7 @@
-+ # or soft-float.
-+ ifeq (,$(filter $(with_cpu),$(SOFT_FLOAT_CPUS))$(findstring soft,$(with_float)))
-+ ifneq (,$(findstring powerpc64,$(target)))
-+-MULTILIB_OSDIRNAMES := .=../lib64$(call if_multiarch,:powerpc64-linux-gnu)
-++MULTILIB_OSDIRNAMES := .=../lib$(call if_multiarch,:powerpc64-linux-gnu)
-+ else
-+ MULTIARCH_DIRNAME := powerpc-linux-gnu
-+ endif
-+diff -rupN gcc-8.1.0.old/gcc/config/rs6000/t-linux64 gcc-8.1.0/gcc/config/rs6000/t-linux64
-+--- gcc-8.1.0.old/gcc/config/rs6000/t-linux64	2018-05-21 12:04:55.972167768 +0200
-++++ gcc-8.1.0/gcc/config/rs6000/t-linux64	2018-05-21 12:17:02.082175008 +0200
-+@@ -28,8 +28,8 @@
-+ MULTILIB_OPTIONS    := m64/m32
-+ MULTILIB_DIRNAMES   := 64 32
-+ MULTILIB_EXTRA_OPTS := 
-+-MULTILIB_OSDIRNAMES := m64=../lib64$(call if_multiarch,:powerpc64-linux-gnu)
-+-MULTILIB_OSDIRNAMES += m32=$(if $(wildcard $(shell echo $(SYSTEM_HEADER_DIR))/../../usr/lib32),../lib32,../lib)$(call if_multiarch,:powerpc-linux-gnu)
-++MULTILIB_OSDIRNAMES := m64=../lib$(call if_multiarch,:powerpc64-linux-gnu)
-++MULTILIB_OSDIRNAMES += m32=$(if $(wildcard $(shell echo $(SYSTEM_HEADER_DIR))/../../usr/lib32),../lib32,../lib32)$(call if_multiarch,:powerpc-linux-gnu)
-+ 
-+ rs6000-linux.o: $(srcdir)/config/rs6000/rs6000-linux.c
-+ 	$(COMPILE) $<
-+diff -rupN gcc-8.1.0.old/gcc/config/s390/linux.h gcc-8.1.0/gcc/config/s390/linux.h
-+--- gcc-8.1.0.old/gcc/config/s390/linux.h	2018-05-21 12:04:55.938834435 +0200
-++++ gcc-8.1.0/gcc/config/s390/linux.h	2018-05-21 12:05:08.445501226 +0200
-+@@ -73,7 +73,7 @@ along with GCC; see the file COPYING3.
-+ #define MULTILIB_DEFAULTS { "m31" }
-+ #endif
-+ 
-+-#define GLIBC_DYNAMIC_LINKER32 "/lib/ld.so.1"
-++#define GLIBC_DYNAMIC_LINKER32 "/lib32/ld.so.1"
-+ #define GLIBC_DYNAMIC_LINKER64 "/lib/ld64.so.1"
-+ 
-+ #undef  LINK_SPEC
-+diff -rupN gcc-8.1.0.old/gcc/config/s390/t-linux64 gcc-8.1.0/gcc/config/s390/t-linux64
-+--- gcc-8.1.0.old/gcc/config/s390/t-linux64	2018-05-21 12:04:55.938834435 +0200
-++++ gcc-8.1.0/gcc/config/s390/t-linux64	2018-05-21 12:05:08.445501226 +0200
-+@@ -7,5 +7,5 @@
-+ 
-+ MULTILIB_OPTIONS = m64/m31
-+ MULTILIB_DIRNAMES = 64 32
-+-MULTILIB_OSDIRNAMES = ../lib64$(call if_multiarch,:s390x-linux-gnu)
-+-MULTILIB_OSDIRNAMES += $(if $(wildcard $(shell echo $(SYSTEM_HEADER_DIR))/../../usr/lib32),../lib32,../lib)$(call if_multiarch,:s390-linux-gnu)
-++MULTILIB_OSDIRNAMES = ../lib$(call if_multiarch,:s390x-linux-gnu)
-++MULTILIB_OSDIRNAMES += $(if $(wildcard $(shell echo $(SYSTEM_HEADER_DIR))/../../usr/lib32),../lib32,../lib32)$(call if_multiarch,:s390-linux-gnu)
-+diff -rupN gcc-8.1.0.old/gcc/config/sparc/linux64.h gcc-8.1.0/gcc/config/sparc/linux64.h
-+--- gcc-8.1.0.old/gcc/config/sparc/linux64.h	2018-05-21 12:04:55.948834435 +0200
-++++ gcc-8.1.0/gcc/config/sparc/linux64.h	2018-05-21 12:05:08.445501226 +0200
-+@@ -84,8 +84,8 @@ along with GCC; see the file COPYING3.
-+    When the -shared link option is used a final link is not being
-+    done.  */
-+ 
-+-#define GLIBC_DYNAMIC_LINKER32 "/lib/ld-linux.so.2"
-+-#define GLIBC_DYNAMIC_LINKER64 "/lib64/ld-linux.so.2"
-++#define GLIBC_DYNAMIC_LINKER32 "/lib32/ld-linux.so.2"
-++#define GLIBC_DYNAMIC_LINKER64 "/lib/ld-linux.so.2"
-+ 
-+ #ifdef SPARC_BI_ARCH
-+ 
-+@@ -213,7 +213,7 @@ extern const char *host_detect_local_cpu
-+ #else /* !SPARC_BI_ARCH */
-+ 
-+ #undef LINK_SPEC
-+-#define LINK_SPEC "-m elf64_sparc -Y P,%R/usr/lib64 %{shared:-shared} \
-++#define LINK_SPEC "-m elf64_sparc -Y P,%R/lib %{shared:-shared} \
-+   %{!shared: \
-+     %{!static: \
-+       %{rdynamic:-export-dynamic} \
-+diff -rupN gcc-8.1.0.old/gcc/config/sparc/linux.h gcc-8.1.0/gcc/config/sparc/linux.h
-+--- gcc-8.1.0.old/gcc/config/sparc/linux.h	2018-05-21 12:04:55.952167768 +0200
-++++ gcc-8.1.0/gcc/config/sparc/linux.h	2018-05-21 12:05:08.445501226 +0200
-+@@ -83,7 +83,7 @@ extern const char *host_detect_local_cpu
-+    When the -shared link option is used a final link is not being
-+    done.  */
-+ 
-+-#define GLIBC_DYNAMIC_LINKER "/lib/ld-linux.so.2"
-++#define GLIBC_DYNAMIC_LINKER "/lib32/ld-linux.so.2"
-+ 
-+ #undef  LINK_SPEC
-+ #define LINK_SPEC "-m elf32_sparc %{shared:-shared} \
-+diff -rupN gcc-8.1.0.old/gcc/config/sparc/t-linux64 gcc-8.1.0/gcc/config/sparc/t-linux64
-+--- gcc-8.1.0.old/gcc/config/sparc/t-linux64	2018-05-21 12:04:55.948834435 +0200
-++++ gcc-8.1.0/gcc/config/sparc/t-linux64	2018-05-21 12:05:08.445501226 +0200
-+@@ -25,5 +25,5 @@
-+ 
-+ MULTILIB_OPTIONS = m64/m32
-+ MULTILIB_DIRNAMES = 64 32
-+-MULTILIB_OSDIRNAMES = ../lib64$(call if_multiarch,:sparc64-linux-gnu)
-+-MULTILIB_OSDIRNAMES += $(if $(wildcard $(shell echo $(SYSTEM_HEADER_DIR))/../../usr/lib32),../lib32,../lib)$(call if_multiarch,:sparc-linux-gnu)
-++MULTILIB_OSDIRNAMES = ../lib$(call if_multiarch,:sparc64-linux-gnu)
-++MULTILIB_OSDIRNAMES += $(if $(wildcard $(shell echo $(SYSTEM_HEADER_DIR))/../../usr/lib32),../lib32,../lib32)$(call if_multiarch,:sparc-linux-gnu)
