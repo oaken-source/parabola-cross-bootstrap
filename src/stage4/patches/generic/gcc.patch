@@ -77,7 +77,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
    mkdir -p "$srcdir/gcc-build"
  }
  
-@@ -80,15 +83,16 @@ build() {
+@@ -80,15 +89,16 @@ build() {
    CXXFLAGS=${CXXFLAGS/-pipe/}
  
    "$srcdir/gcc/configure" --prefix=/usr \
@@ -96,7 +96,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
        --with-system-zlib \
        --with-isl \
        --enable-__cxa_atexit \
-@@ -103,16 +107,13 @@ build() {
+@@ -103,16 +113,13 @@ build() {
        --enable-install-libiberty \
        --with-linker-hash-style=gnu \
        --enable-gnu-indirect-function \
@@ -114,7 +114,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  }
  
  check() {
-@@ -137,23 +138,16 @@ package_gcc-libs() {
+@@ -137,23 +144,16 @@ package_gcc-libs() {
  
    for lib in libatomic \
               libgfortran \
@@ -139,7 +139,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
               libquadmath; do
      make -C $CHOST/$lib DESTDIR="$pkgdir" install-info
    done
-@@ -184,22 +178,18 @@ package_gcc() {
+@@ -184,22 +184,18 @@ package_gcc() {
    install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
@@ -167,7 +167,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -210,23 +200,15 @@ package_gcc() {
+@@ -210,23 +206,15 @@ package_gcc() {
      "$pkgdir/usr/lib/bfd-plugins/"
  
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_{libsubinclude,toolexeclib}HEADERS
@@ -194,7 +194,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -238,16 +220,9 @@ package_gcc() {
+@@ -238,9 +226,6 @@ package_gcc() {
    install -Dm755 "$srcdir/c89" "$pkgdir/usr/bin/c89"
    install -Dm755 "$srcdir/c99" "$pkgdir/usr/bin/c99"
  
@@ -204,7 +204,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
    # remove files provided by lib32-gcc-libs
    rm -f "$pkgdir"/usr/lib32/lib{stdc++,gcc_s}.so
  
-@@ -263,7 +253,7 @@ package_gcc-fortran() {
+@@ -263,7 +248,7 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS}
