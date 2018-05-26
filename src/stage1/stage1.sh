@@ -120,5 +120,5 @@ EOF
   # final sanity checks
   check_cross_toolchain || die -e "$ERROR_MISSING" "toolchain build incomplete"
   [ ! -e "/usr/$CHOST/lib64" ] || die \
-    "toolchain installs libraries in lib64. this WILL cause problems. fix pure64.patch!"
+    "toolchain installs libraries in lib64. this WILL cause problems!"
 }

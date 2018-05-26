@@ -16,7 +16,7 @@ provides=(${pkgname%-bootstrap})
 conflicts=(${pkgname%-bootstrap})
 source=(https://sources.archlinux.org/other/gcc/gcc-${pkgver/+/-}.tar.xz{,.sig}
         http://isl.gforge.inria.fr/isl-$_islver.tar.bz2
-        http://patches.clfs.org/dev/gcc-7.1.0-pure64-1.patch
+        gcc-pure64.patch::https://gist.githubusercontent.com/alexforsale/a1339a64882ac7df065404f0af9bb639/raw/9586520039c5b83b96aadfff9aa206bd1bb6972d/gcc-pure64.patch
         0001-pthread-reentrant.patch)
 validpgpkeys=(F3691687D867B81B51CE07D9BBE43771487328A9  # bpiotrowski@archlinux.org
               13975A70E63C361C73AE69EF6EEB81F8981C74C7  # richard.guenther@gmail.com
@@ -24,7 +24,7 @@ validpgpkeys=(F3691687D867B81B51CE07D9BBE43771487328A9  # bpiotrowski@archlinux.
 sha256sums=('c52618f656f2102b3544419e7d0a8a4f4e6ff052783865202be73edf1a40e28b'
             'SKIP'
             '6b8b0fd7f81d0a957beb3679c81bbb34ccc7568d5682844d8924424a0dadcb1b'
-            'd1bc3de092b2fd12925d7c9bcee0c0d75dd221ddcbc30c8c84c5cc9be8f3d835'
+            'c7545a5faca9fc1aee47bd1a4e407e7a64ef1d4c4fb018ede0a5f5ffa16c33be'
             'fc9c6f0edd615f2b39deff28b9626a08fd98ef8ce19f7e34281c0a5bd653ac3b')
 
 prepare() {
@@ -38,7 +38,7 @@ prepare() {
   sed -i 's@\./fixinc\.sh@-c true@' gcc/Makefile.in
 
   # Arch Linux installs 64bit libraries in /lib
-  patch -Np1 -i "$srcdir"/gcc-7.1.0-pure64-1.patch
+  patch -Np1 -i "$srcdir"/gcc-pure64.patch
 
   # hack! - some configure tests for header files using "$CPP $CPPFLAGS"
   sed -i "/ac_cpp=/s/\$CPPFLAGS/\$CPPFLAGS -O2/" "$srcdir"/gcc/{libiberty,gcc}/configure
