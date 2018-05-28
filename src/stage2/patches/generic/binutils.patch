@@ -1,6 +1,6 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-05-26 08:42:40.899690467 +0200
-+++ b/PKGBUILD	2018-05-28 16:30:29.258361376 +0200
+--- a/PKGBUILD	2018-05-28 16:39:38.041700185 +0200
++++ b/PKGBUILD	2018-05-28 16:42:42.595035360 +0200
 @@ -20,13 +20,15 @@ options=(staticlibs !distcc !ccache)
  source=(https://ftp.gnu.org/gnu/binutils/binutils-$pkgver.tar.xz{,.sig}
          0001-PR22741-objcopy-segfault-on-fuzzed-COFF-object.patch
@@ -19,11 +19,12 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  
  prepare() {
    mkdir -p binutils-build
-@@ -45,12 +47,15 @@ prepare() {
+@@ -43,14 +45,14 @@ prepare() {
+   # https://sourceware.org/bugzilla/show_bug.cgi?id=22829
+   patch -p1 -i "$srcdir/0002-PR22829-objcopy-strip-removes-PT_GNU_RELRO-from-lld-.patch"
  
-   # https://sourceware.org/bugzilla/show_bug.cgi?id=22836
-   patch -p1 -i "$srcdir/0003-PR22836-r-s-doesnt-work-with-g3-using-GCC-7.patch"
-+
+-  # https://sourceware.org/bugzilla/show_bug.cgi?id=22836
+-  patch -p1 -i "$srcdir/0003-PR22836-r-s-doesnt-work-with-g3-using-GCC-7.patch"
 +  patch -p1 -i "$srcdir/binutils-2.30-branch.patch"
  }
  
@@ -35,7 +36,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
      --prefix=/usr \
      --with-lib-path=/usr/lib:/usr/local/lib \
      --with-bugurl=https://bugs.archlinux.org/ \
-@@ -66,7 +71,7 @@ build() {
+@@ -66,7 +68,7 @@ build() {
      --disable-gdb \
      --disable-werror \
      --with-pic \
