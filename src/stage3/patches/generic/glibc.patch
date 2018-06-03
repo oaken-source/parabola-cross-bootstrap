@@ -1,6 +1,6 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-05-24 12:07:38.664755661 +0200
-+++ b/PKGBUILD	2018-05-24 12:11:10.631424442 +0200
+--- a/PKGBUILD	2018-06-02 23:14:43.099580493 +0200
++++ b/PKGBUILD	2018-06-03 08:56:01.259928500 +0200
 @@ -6,13 +6,13 @@
  # NOTE: valgrind requires rebuilt with each major glibc version
  
@@ -17,7 +17,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  options=(!strip staticlibs)
  _commit=23158b08a0908f381459f273a984c6fd328363cb
  #source=(git+https://sourceware.org/git/glibc.git#commit=$_commit
-@@ -53,7 +53,7 @@ build() {
+@@ -53,10 +53,10 @@ build() {
        --enable-add-ons
        --enable-bind-now
        --enable-lock-elision
@@ -25,8 +25,21 @@ diff -rupN a/PKGBUILD b/PKGBUILD
 +      --@MULTILIB@-multi-arch
        --enable-stack-protector=strong
        --enable-stackguard-randomization
-       --enable-static-pie
-@@ -87,6 +87,8 @@ build() {
+-      --enable-static-pie
++      --disable-static-pie
+       --disable-profile
+       --disable-werror
+   )
+@@ -70,6 +70,8 @@ build() {
+ 
+   # remove fortify for building libraries
+   CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
++  CFLAGS="$CFLAGS -no-pie -fno-PIE"
++  CXXFLAGS="$CXXFLAGS -no-pie -fno-PIE"
+ 
+   "$srcdir/glibc/configure" \
+       --libdir=/usr/lib \
+@@ -87,6 +89,8 @@ build() {
    echo "CXX += -D_FORTIFY_SOURCE=2" >> configparms
    make
  

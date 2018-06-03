@@ -29,12 +29,11 @@ export CHOST="$CARCH-unknown-linux-gnu"
 export LINUX_ARCH=powerpc
 
 # flags added to the default CFLAGS in makepkg.conf
-export PLATFORM_CFLAGS=(
-  "-mcpu=powerpc64le")
+export PLATFORM_CFLAGS=()
 
 # flags added to the gcc PKGBUILD configure call
 export GCC_CONFIG_FLAGS=(
-  "--with-cpu=powerpc64le"
+  "--with-cpu=power8"
   "--with-long-double-128")
 
 # multilib configuration, uncomment if applicable

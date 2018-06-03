@@ -1,6 +1,6 @@
 diff -rupN a/pacman.conf.powerpc64le b/pacman.conf.powerpc64le
 --- a/pacman.conf.powerpc64le	1970-01-01 01:00:00.000000000 +0100
-+++ b/pacman.conf.powerpc64le	2018-05-19 07:43:10.426953548 +0200
++++ b/pacman.conf.powerpc64le	2018-06-01 15:36:14.341777257 +0200
 @@ -0,0 +1,120 @@
 +#
 +# /etc/pacman.conf
@@ -123,17 +123,23 @@ diff -rupN a/pacman.conf.powerpc64le b/pacman.conf.powerpc64le
 +#SigLevel = Optional TrustAll
 +#Server = file:///home/custompkgs
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-05-19 07:39:33.266951381 +0200
-+++ b/PKGBUILD	2018-05-19 07:43:10.416953547 +0200
-@@ -51,6 +51,7 @@ sha256sums=('dfd36086ad68564bcd977f4a1fa
-             '78129351e96d19e14b05bda30480df3e834a96153b7cfe72ca5c91f5cc5cae40'
-             '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
+--- a/PKGBUILD	2018-06-01 15:35:41.401776928 +0200
++++ b/PKGBUILD	2018-06-01 15:36:02.071777134 +0200
+@@ -43,10 +43,11 @@ source=(https://sources.archlinux.org/ot
+         0001-makepkg-treat-pkgrel-more-similarly-to-pkgver.patch)
+ sha256sums=('9f5993fc8923530713742f15df284677f297b3eca15ed7a24758c98ac7399bd3'
+             'SKIP'
+-            '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
              '1b2c8f4ec84d0dc496516880a54b5e4deb78798618c9cf5e284a45303f156e58'
 +            '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
++            '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
              'b2cb3ba229edba338c0af7d7f5bb1a6ef6143bcd453c693bfee0c02fa1cfa18a'
-             '117892e340cc502b8659f21b209886c51a375e52f4af39f173ff7fe12762d40b'
+-            '31565aae027a26bb0e9074aca89a012483dc078e0239dc225c3c15fced526607'
++            'ecef1e98eaaf207f4f2c3d07cfe13533866e1e774240eb833e8b3bd691ada95f'
              '220f1b25a64727041dc6fa3fd486b0a043f735a3f6cecedc4e2f7c47ec6ce66d'
-@@ -80,7 +81,8 @@ build() {
+             '2a857061f032ff5485f5c75ab74e6f6532621e08963ef48640a792cca16cacd6'
+             '635ef682073878b6273e3376b00a89a572c4f5f39b118f7b0b4c7497a265a16c'
+@@ -72,7 +73,8 @@ build() {
    cd "$pkgname-$pkgver"
  
    ./configure --prefix=/usr --sysconfdir=/etc \
@@ -143,7 +149,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
      --with-scriptlet-shell=/usr/bin/bash \
      --with-ldconfig=/usr/bin/ldconfig
    make V=1
-@@ -105,6 +107,11 @@ build() {
+@@ -96,6 +98,11 @@ build() {
          mychost="armv7l-unknown-linux-gnueabihf"
          myflags="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -O2 -pipe -fstack-protector-strong -fno-plt"
          ;;
