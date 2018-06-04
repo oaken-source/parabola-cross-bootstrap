@@ -1,46 +1,6 @@
---- a/PKGBUILD	2018-03-17 22:43:27.776000901 +0100
-+++ b/PKGBUILD	2018-03-17 22:45:57.506623741 +0100
-@@ -20,8 +20,7 @@ groups=('base' 'base-devel' 'base-openrc
- depends=('bash' 'glibc' 'libarchive' 'curl' 'gpgme'
-          'pacman-mirrorlist' 'archlinux-keyring' 'parabola-keyring'
-          'archlinuxarm-keyring' 'archlinux32-keyring')
--makedepends=('asciidoc')
--makedepends+=('openssl>=1.1' 'openssl-1.0') # for during openssl 1.0->1.1 rebuild; remove on next rebuild
-+makedepends+=('openssl>=1.1')
- checkdepends=('python2' 'fakechroot')
- optdepends=('cron: run specified programs at scheduled times and related tools')
- provides=("$pkgname-contrib")
-@@ -45,6 +43,7 @@ sha256sums=('dfd36086ad68564bcd977f4a1fa
-             '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
-             '1b2c8f4ec84d0dc496516880a54b5e4deb78798618c9cf5e284a45303f156e58'
-             'b2cb3ba229edba338c0af7d7f5bb1a6ef6143bcd453c693bfee0c02fa1cfa18a'
-+            '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
-             '0d174c7c47921cfbb35dacb9d099095e78f6f67bfaa86836a3e588552f14ed03'
-             '1df848c5038a3f81ae4dc79a4072d340109b02f56292a5c4a20c59f735edd2b3'
-             '1cc4af1cf8e2133d4520827cc7d3ffad731892595f8e699909002d2e40ad8df9'
-@@ -71,7 +70,7 @@ build() {
-   cd "$pkgname-$pkgver"
- 
-   ./configure --prefix=/usr --sysconfdir=/etc \
--    --localstatedir=/var --enable-doc \
-+    --localstatedir=/var --disable-doc \
-     --with-scriptlet-shell=/usr/bin/bash \
-     --with-ldconfig=/usr/bin/ldconfig
-   make V=1
-@@ -96,6 +95,11 @@ build() {
-         mychost="armv7l-unknown-linux-gnueabihf"
-         myflags="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -O2 -pipe -fstack-protector-strong -fno-plt"
-         ;;
-+      @CARCH@)
-+        mycarch="@CARCH@"
-+        mychost="@CHOST@"
-+        myflags="@PLATFORM_FLAGS@ -O2 -pipe -fstack-protector-strong -fno-plt"
-+        ;;
-     esac
-     myldflags="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
- 
---- /dev/null	2018-03-05 07:42:50.020223709 +0100
-+++ b/pacman.conf.powerpc64le	2018-03-17 22:43:27.778000923 +0100
+diff -rupN a/pacman.conf.powerpc64le b/pacman.conf.powerpc64le
+--- a/pacman.conf.powerpc64le	1970-01-01 01:00:00.000000000 +0100
++++ b/pacman.conf.powerpc64le	2018-06-03 10:20:46.073312571 +0200
 @@ -0,0 +1,120 @@
 +#
 +# /etc/pacman.conf
@@ -162,3 +122,49 @@
 +#[custom]
 +#SigLevel = Optional TrustAll
 +#Server = file:///home/custompkgs
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-03 10:17:48.609977468 +0200
++++ b/PKGBUILD	2018-06-03 10:20:39.373312504 +0200
+@@ -23,7 +23,6 @@ groups+=('base-openrc')
+ depends=('bash' 'glibc' 'libarchive' 'curl'
+          'gpgme' 'pacman-mirrorlist' 'archlinux-keyring')
+ depends+=('parabola-keyring' 'archlinuxarm-keyring' 'archlinux32-keyring')
+-makedepends=('asciidoc')
+ checkdepends=('python2' 'fakechroot')
+ provides=('pacman-parabola')
+ conflicts=('pacman-parabola')
+@@ -43,10 +42,11 @@ source=(https://sources.archlinux.org/ot
+         0001-makepkg-treat-pkgrel-more-similarly-to-pkgver.patch)
+ sha256sums=('9f5993fc8923530713742f15df284677f297b3eca15ed7a24758c98ac7399bd3'
+             'SKIP'
+-            '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
+             '1b2c8f4ec84d0dc496516880a54b5e4deb78798618c9cf5e284a45303f156e58'
++            '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
++            '19853ea9a2138157bbb334eb7f3a9b3098b88e513678b54b7b4f19d2ffd6ecad'
+             'b2cb3ba229edba338c0af7d7f5bb1a6ef6143bcd453c693bfee0c02fa1cfa18a'
+-            '31565aae027a26bb0e9074aca89a012483dc078e0239dc225c3c15fced526607'
++            'ecef1e98eaaf207f4f2c3d07cfe13533866e1e774240eb833e8b3bd691ada95f'
+             '220f1b25a64727041dc6fa3fd486b0a043f735a3f6cecedc4e2f7c47ec6ce66d'
+             '2a857061f032ff5485f5c75ab74e6f6532621e08963ef48640a792cca16cacd6'
+             '635ef682073878b6273e3376b00a89a572c4f5f39b118f7b0b4c7497a265a16c'
+@@ -72,7 +72,7 @@ build() {
+   cd "$pkgname-$pkgver"
+ 
+   ./configure --prefix=/usr --sysconfdir=/etc \
+-    --localstatedir=/var --enable-doc \
++    --localstatedir=/var --disable-doc \
+     --with-scriptlet-shell=/usr/bin/bash \
+     --with-ldconfig=/usr/bin/ldconfig
+   make V=1
+@@ -96,6 +96,11 @@ build() {
+         mychost="armv7l-unknown-linux-gnueabihf"
+         myflags="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -O2 -pipe -fstack-protector-strong -fno-plt"
+         ;;
++      @CARCH@)
++        mycarch="@CARCH@"
++        mychost="@CHOST@"
++        myflags="@PLATFORM_FLAGS@ -O2 -pipe -fstack-protector-strong -fno-plt"
++        ;;
+     esac
+     myldflags="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
+ 

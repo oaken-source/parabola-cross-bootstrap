@@ -1,11 +1,12 @@
---- a/PKGBUILD	2018-03-31 09:12:38.249279305 +0200
-+++ b/PKGBUILD	2018-03-31 09:28:36.403188494 +0200
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-03 11:04:25.416672041 +0200
++++ b/PKGBUILD	2018-06-03 11:10:25.303342299 +0200
 @@ -3,7 +3,7 @@
  # Contributor: Tom Newsom <Jeepster@gmx.co.uk>
  
  pkgbase="sqlite"
 -pkgname=('sqlite' 'sqlite-tcl' 'sqlite-doc' 'sqlite-analyzer')
 +pkgname=('sqlite' 'sqlite-tcl' 'sqlite-analyzer')
- _srcver=3220000
+ _srcver=3230100
  _docver=${_srcver}
  #_docver=3080001

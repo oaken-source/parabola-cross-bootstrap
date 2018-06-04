@@ -1,11 +1,12 @@
---- a/PKGBUILD	2018-02-16 14:06:38.830608498 +0100
-+++ b/PKGBUILD	2018-02-16 14:13:14.468358210 +0100
-@@ -32,7 +32,7 @@ prepare() {
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-04 07:49:44.970750918 +0200
++++ b/PKGBUILD	2018-06-04 07:59:06.607423186 +0200
+@@ -38,6 +38,8 @@ build() {
+   # this breaks makepkg, specifically on the linux PKGBUILD's patch-*.xz
  
- build() {
-   cd $pkgname-$pkgver
--  ./configure --prefix=/usr --datadir=/usr/share/file --enable-fsect-man5
-+  ./configure --host=@CHOST@ --build=@BUILDHOST@ --prefix=/usr --datadir=/usr/share/file --enable-fsect-man5
-   make
- }
- 
+   ./configure \
++    --host=@CHOST@ \
++    --build=@BUILDHOST@ \
+     --prefix=/usr \
+     --datadir=/usr/share/file \
+     --enable-fsect-man5 \

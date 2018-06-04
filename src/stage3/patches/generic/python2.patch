@@ -1,14 +1,15 @@
---- a/PKGBUILD	2018-03-12 18:57:35.511430226 +0100
-+++ b/PKGBUILD	2018-03-12 19:00:59.926712159 +0100
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-03 10:32:25.883319558 +0200
++++ b/PKGBUILD	2018-06-03 10:32:59.146653221 +0200
 @@ -13,7 +13,6 @@ arch=('x86_64')
  license=('PSF')
  url="http://www.python.org/"
- depends=('bzip2' 'gdbm' 'openssl' 'zlib' 'expat' 'sqlite' 'libffi')
+ depends=('bzip2' 'expat' 'gdbm' 'libffi' 'libnsl' 'openssl' 'sqlite' 'zlib')
 -makedepends=('tk' 'bluez-libs')
  checkdepends=('gdb' 'file' 'xorg-server-xvfb')
  optdepends=('tk: for IDLE'
              'python2-setuptools'
-@@ -71,7 +70,7 @@ build() {
+@@ -67,7 +66,7 @@ build() {
    ./configure --prefix=/usr \
                --enable-shared \
                --with-threads \

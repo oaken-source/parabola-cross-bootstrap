@@ -1,17 +1,18 @@
---- a/PKGBUILD	2018-03-12 10:30:18.914223617 +0100
-+++ b/PKGBUILD	2018-03-12 12:13:57.392250473 +0100
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-03 19:37:49.390312733 +0200
++++ b/PKGBUILD	2018-06-03 19:52:17.116988058 +0200
 @@ -11,7 +11,6 @@ url="http://git-scm.com/"
  license=('GPL2')
- depends=('curl' 'expat>=2.0' 'perl-error' 'perl>=5.14.0' 'openssl' 'pcre2'
-          'grep' 'shadow')
+ depends=('curl' 'expat>=2.0' 'perl>=5.14.0' 'perl-error' 'perl-mailtools'
+          'openssl' 'pcre2' 'grep' 'shadow')
 -makedepends=('python2' 'emacs' 'libgnome-keyring' 'xmlto' 'asciidoc')
  optdepends=('tk: gitk and git gui'
              'perl-libwww: git svn'
              'perl-term-readkey: git svn'
-@@ -47,12 +46,9 @@ build() {
-     USE_LIBPCRE2=1 \
-     NO_CROSS_DIRECTORY_HARDLINKS=1 \
-     MAN_BOLD_LITERAL=1 \
+@@ -55,12 +54,9 @@ build() {
+ 
+   make \
+     "${make_options[@]}" \
 -    all doc
 +    all
  
@@ -23,16 +24,16 @@
    make -C contrib/mw-to-git prefix=/usr all
    make -C contrib/diff-highlight prefix=/usr
  }
-@@ -87,7 +83,7 @@ package() {
-     USE_LIBPCRE2=1 \
-     NO_CROSS_DIRECTORY_HARDLINKS=1 \
-     MAN_BOLD_LITERAL=1 \
--    INSTALLDIRS=vendor DESTDIR="$pkgdir" install install-doc
-+    INSTALLDIRS=vendor DESTDIR="$pkgdir" install
+@@ -92,7 +88,7 @@ package() {
+   make \
+     "${make_options[@]}" \
+     DESTDIR="$pkgdir" \
+-    install install-doc
++    install
  
    # bash completion
    mkdir -p "$pkgdir"/usr/share/bash-completion/completions/
-@@ -95,18 +91,8 @@ package() {
+@@ -100,18 +96,8 @@ package() {
    # fancy git prompt
    mkdir -p "$pkgdir"/usr/share/git/
    install -m 0644 ./contrib/completion/git-prompt.sh "$pkgdir"/usr/share/git/git-prompt.sh
@@ -51,4 +52,4 @@
 +  make -C contrib/subtree prefix=/usr gitexecdir=/usr/lib/git-core DESTDIR="$pkgdir" install
    # mediawiki installation
    make -C contrib/mw-to-git prefix=/usr gitexecdir=/usr/lib/git-core DESTDIR="$pkgdir" install
-   # the rest of the contrib stuff
+   mv "$pkgdir"/Git/Mediawiki.pm "$pkgdir"/usr/share/perl5/vendor_perl/Git/ && rmdir "$pkgdir"/Git # TODO: fix install path!

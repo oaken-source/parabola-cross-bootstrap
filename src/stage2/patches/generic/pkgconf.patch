@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-04 09:09:01.524131712 +0200
++++ b/PKGBUILD	2018-06-04 09:09:42.540798790 +0200
+@@ -42,6 +42,8 @@ prepare() {
+ build() {
+   cd build
+   ../$pkgname/configure \
++    --host=@CHOST@ \
++    --build=@BUILDHOST@ \
+     --prefix=/usr \
+     --sysconfdir=/etc \
+     --with-pkg-config-dir="$_pcdirs" \
