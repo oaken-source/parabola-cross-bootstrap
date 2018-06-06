@@ -1,5 +1,15 @@
---- a/PKGBUILD	2018-04-03 08:06:30.779089041 +0200
-+++ b/PKGBUILD	2018-04-03 08:15:48.687036164 +0200
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-06 14:34:13.659383914 +0200
++++ b/PKGBUILD	2018-06-06 14:49:49.749393254 +0200
+@@ -8,7 +8,7 @@
+ pkgname=libtool
+ pkgver=2.4.6+40+g6ca5e224
+ pkgrel=6
+-_gccver=8.1.0
++_gccver=7.3.1
+ pkgdesc='A generic library support script'
+ arch=(x86_64)
+ url='http://www.gnu.org/software/libtool'
 @@ -36,7 +36,7 @@ prepare() {
  
  build() {
