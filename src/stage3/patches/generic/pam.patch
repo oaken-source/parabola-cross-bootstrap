@@ -1,16 +1,19 @@
---- a/PKGBUILD	2018-03-16 19:50:33.760376502 +0100
-+++ b/PKGBUILD	2018-03-16 20:00:05.124785161 +0100
-@@ -10,7 +10,7 @@ arch=('x86_64')
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-05 10:17:50.875035004 +0200
++++ b/PKGBUILD	2018-06-05 13:08:38.295137250 +0200
+@@ -9,8 +9,8 @@ pkgdesc="PAM (Pluggable Authentication M
+ arch=('x86_64')
  license=('GPL2')
  url="http://linux-pam.org"
- depends=('glibc' 'cracklib' 'libtirpc' 'pambase')
+-depends=('glibc' 'cracklib' 'libtirpc' 'pambase')
 -makedepends=('flex' 'w3m' 'docbook-xml>=4.4' 'docbook-xsl')
++depends=('glibc' 'cracklib' 'libtirpc' 'pambase' 'libnsl')
 +makedepends=('flex' 'docbook-xml>=4.4' 'docbook-xsl')
  backup=(etc/security/{access.conf,group.conf,limits.conf,namespace.conf,namespace.init,pam_env.conf,time.conf} etc/default/passwd etc/environment)
- source=(http://linux-pam.org/library/Linux-PAM-$pkgver.tar.bz2
-         https://sources.archlinux.org/other/pam_unix2/pam_unix2-2.9.1.tar.bz2
-@@ -64,5 +71,5 @@ package() {
-   chmod +s $pkgdir/usr/bin/unix_chkpwd
+ source=(http://linux-pam.org/library/Linux-PAM-$pkgver.tar.bz2)
+ md5sums=('da4b2289b7cfb19583d54e9eaaef1c3a')
+@@ -32,5 +32,5 @@ package() {
+ 
    # remove doc which is not used anymore
    # FS #40749
 -  rm $pkgdir/usr/share/doc/Linux-PAM/sag-pam_userdb.html

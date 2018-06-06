@@ -1,21 +1,22 @@
---- a/PKGBUILD	2018-03-15 22:28:13.742085702 +0100
-+++ b/PKGBUILD	2018-03-16 08:33:19.888281296 +0100
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-05 15:27:34.628553763 +0200
++++ b/PKGBUILD	2018-06-05 15:29:07.681888025 +0200
 @@ -3,14 +3,13 @@
  # Maintainer: Felix Yan <felixonmars@archlinux.org>
  
  pkgbase=python-lxml
 -pkgname=('python-lxml' 'python2-lxml' 'python-lxml-docs')
 +pkgname=('python-lxml' 'python2-lxml')
- pkgver=4.1.1
+ pkgver=4.2.1
  pkgrel=1
  arch=('x86_64')
  license=('BSD' 'custom')
  url="http://lxml.de/"
 -makedepends=('libxslt' 'python-setuptools' 'python2-setuptools' 'epydoc' 'python2-pygments'
--             'python2-docutils')
+-             'python2-docutils' 'cython' 'cython2')
 +makedepends=('libxslt' 'python-setuptools' 'python2-setuptools' 'cython' 'cython2')
  checkdepends=('python-cssselect' 'python2-cssselect' 'python-html5lib' 'python2-html5lib'
-               'python-beautifulsoup4' 'python2-beautifulsoup4' 'cython' 'cython2')
+               'python-beautifulsoup4' 'python2-beautifulsoup4')
  source=("https://github.com/lxml/lxml/archive/lxml-$pkgver.tar.gz")
 @@ -30,7 +29,6 @@ build() {
  

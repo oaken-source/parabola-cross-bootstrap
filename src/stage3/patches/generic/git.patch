@@ -1,6 +1,6 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-06-03 19:37:49.390312733 +0200
-+++ b/PKGBUILD	2018-06-03 19:52:17.116988058 +0200
+--- a/PKGBUILD	2018-06-05 08:23:49.458300076 +0200
++++ b/PKGBUILD	2018-06-05 08:24:47.231633983 +0200
 @@ -11,7 +11,6 @@ url="http://git-scm.com/"
  license=('GPL2')
  depends=('curl' 'expat>=2.0' 'perl>=5.14.0' 'perl-error' 'perl-mailtools'
@@ -9,23 +9,23 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  optdepends=('tk: gitk and git gui'
              'perl-libwww: git svn'
              'perl-term-readkey: git svn'
-@@ -55,12 +54,9 @@ build() {
- 
+@@ -64,12 +63,9 @@ build() {
    make \
+     "${make_paths[@]}" \
      "${make_options[@]}" \
 -    all doc
 +    all
  
--  make -C contrib/emacs prefix=/usr
+-  make -C contrib/emacs "${make_paths[@]}"
 -  make -C contrib/credential/gnome-keyring
 -  make -C contrib/credential/libsecret
--  make -C contrib/subtree prefix=/usr gitexecdir=/usr/lib/git-core all doc
-+  make -C contrib/subtree prefix=/usr gitexecdir=/usr/lib/git-core all
-   make -C contrib/mw-to-git prefix=/usr all
-   make -C contrib/diff-highlight prefix=/usr
+-  make -C contrib/subtree "${make_paths[@]}" all doc
++  make -C contrib/subtree "${make_paths[@]}" all
+   make -C contrib/mw-to-git "${make_paths[@]}" all
+   make -C contrib/diff-highlight "${make_paths[@]}"
  }
-@@ -92,7 +88,7 @@ package() {
-   make \
+@@ -103,7 +99,7 @@ package() {
+     "${make_paths[@]}" \
      "${make_options[@]}" \
      DESTDIR="$pkgdir" \
 -    install install-doc
@@ -33,12 +33,12 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  
    # bash completion
    mkdir -p "$pkgdir"/usr/share/bash-completion/completions/
-@@ -100,18 +96,8 @@ package() {
+@@ -111,18 +107,8 @@ package() {
    # fancy git prompt
    mkdir -p "$pkgdir"/usr/share/git/
    install -m 0644 ./contrib/completion/git-prompt.sh "$pkgdir"/usr/share/git/git-prompt.sh
 -  # emacs
--  make -C contrib/emacs prefix=/usr DESTDIR="$pkgdir" install
+-  make -C contrib/emacs "${make_paths[@]}" DESTDIR="$pkgdir" install
 -  # gnome credentials helper
 -  install -m 0755 contrib/credential/gnome-keyring/git-credential-gnome-keyring \
 -      "$pkgdir"/usr/lib/git-core/git-credential-gnome-keyring
@@ -48,8 +48,8 @@ diff -rupN a/PKGBUILD b/PKGBUILD
 -      "$pkgdir"/usr/lib/git-core/git-credential-libsecret
 -  make -C contrib/credential/libsecret clean
    # subtree installation
--  make -C contrib/subtree prefix=/usr gitexecdir=/usr/lib/git-core DESTDIR="$pkgdir" install install-doc
-+  make -C contrib/subtree prefix=/usr gitexecdir=/usr/lib/git-core DESTDIR="$pkgdir" install
+-  make -C contrib/subtree "${make_paths[@]}" DESTDIR="$pkgdir" install install-doc
++  make -C contrib/subtree "${make_paths[@]}" DESTDIR="$pkgdir" install
    # mediawiki installation
-   make -C contrib/mw-to-git prefix=/usr gitexecdir=/usr/lib/git-core DESTDIR="$pkgdir" install
-   mv "$pkgdir"/Git/Mediawiki.pm "$pkgdir"/usr/share/perl5/vendor_perl/Git/ && rmdir "$pkgdir"/Git # TODO: fix install path!
+   make -C contrib/mw-to-git "${make_paths[@]}" DESTDIR="$pkgdir" install
+   # the rest of the contrib stuff

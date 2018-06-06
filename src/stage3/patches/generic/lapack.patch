@@ -1,5 +1,6 @@
---- a/PKGBUILD	2018-03-17 16:28:41.782588188 +0100
-+++ b/PKGBUILD	2018-03-17 16:56:33.167656401 +0100
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-05 21:05:44.792089550 +0200
++++ b/PKGBUILD	2018-06-05 21:14:13.185427953 +0200
 @@ -5,12 +5,12 @@
  # Contributor: Jason Taylor <jftaylor21@gmail.com>
  
@@ -7,12 +8,12 @@
 -pkgname=('lapack' 'blas' 'cblas' 'lapacke' 'lapack-doc')
 +pkgname=('lapack' 'blas' 'cblas' 'lapacke')
  pkgver=3.8.0
- pkgrel=1
+ pkgrel=2
  url="http://www.netlib.org/lapack"
  pkgdesc="Linear Algebra PACKage"
 -makedepends=('gcc-fortran' 'cmake' 'python' 'doxygen')
 +makedepends=('gcc-fortran' 'cmake' 'python')
- arch=('i686' 'x86_64')
+ arch=('x86_64')
  license=("custom")
  source=(http://www.netlib.org/${pkgbase}/${pkgbase}-${pkgver}.tar.gz LICENSE.blas)
 @@ -32,10 +32,6 @@ build() {

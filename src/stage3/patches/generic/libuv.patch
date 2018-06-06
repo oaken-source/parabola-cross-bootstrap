@@ -1,12 +1,13 @@
---- a/PKGBUILD	2018-03-15 19:18:02.566897558 +0100
-+++ b/PKGBUILD	2018-03-15 19:24:59.499643475 +0100
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-05 21:17:19.425429812 +0200
++++ b/PKGBUILD	2018-06-05 21:18:00.678763557 +0200
 @@ -9,7 +9,6 @@ arch=('x86_64')
  url="https://github.com/libuv/libuv"
  license=('custom')
- depends=('glibc')
+ depends=('glibc' 'libnsl')
 -makedepends=('python-sphinx')
  source=("https://github.com/libuv/libuv/archive/v$pkgver/$pkgname-$pkgver.tar.gz")
- sha512sums=('4fa879e34c51ae428ebf72ce80873b8d12994ae1560f9d3577a693653bfd5bd4b4fda7ff457b98b5e60fc82546658300401d6545d677f31d2cd66be3d82e02da')
+ sha512sums=('60ebc0059ec9fdd022aa9d60b2a0340f29e037bf79fa08707f6f2ecca9ec263c7a6466bdc1f94e0875a6a627ee749efa86117dedb22119676a7bafed8b5d77a0')
  
 @@ -18,7 +17,6 @@ build() {
  	./autogen.sh

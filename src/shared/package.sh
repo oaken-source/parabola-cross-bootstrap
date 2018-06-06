@@ -158,7 +158,6 @@ package_patch() {
     echo "no"
   fi
 
-
   local ln_patch="$patch"
   [ "x$patch" == "xno" ] && ln_patch="$SRCDIR/patches/generic/$pkgbase$p.patch"
   ln -s "$ln_patch" .PATCH
