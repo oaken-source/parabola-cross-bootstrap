@@ -1,0 +1,25 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-06 12:56:52.759325634 +0200
++++ b/PKGBUILD	2018-06-06 12:56:52.759325634 +0200
+@@ -30,6 +30,8 @@ check() {
+   make test
+ }
+ 
++perlver() { perl -e '$v = $^V->{version}; print $v->[0].".".($v->[1]+$ARGV[0]);' $1; }
++
+ package() {
+   cd "${srcdir}/${_realname}-${pkgver}"
+   make install DESTDIR="${pkgdir}"
+@@ -38,11 +40,7 @@ package() {
+   find "${pkgdir}" -name perllocal.pod -delete
+   find "${pkgdir}" -name .packlist -delete
+ 
+-# template start; name=perl-binary-module-dependency; version=1;
+ if [[ $(find "$pkgdir/usr/lib/perl5/" -name "*.so") ]]; then
+-	_perlver_min=$(perl -e '$v = $^V->{version}; print $v->[0].".".($v->[1]);')
+-	_perlver_max=$(perl -e '$v = $^V->{version}; print $v->[0].".".($v->[1]+1);')
+-	depends+=("perl>=$_perlver_min" "perl<$_perlver_max")
++	depends+=("perl>=$(perlver)" "perl<$(perlver 1)")
+ fi
+-# template end;
+ }
