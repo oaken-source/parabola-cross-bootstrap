@@ -1,6 +1,6 @@
 diff -rupN a/0001-pthread-reentrant.patch b/0001-pthread-reentrant.patch
 --- a/0001-pthread-reentrant.patch	1970-01-01 01:00:00.000000000 +0100
-+++ b/0001-pthread-reentrant.patch	2018-05-25 10:19:14.186356955 +0200
++++ b/0001-pthread-reentrant.patch	2018-06-07 11:53:03.550149516 +0200
 @@ -0,0 +1,11 @@
 +--- trunk/gcc/config/riscv/linux.h	2018/01/03 10:03:58	256169
 ++++ trunk/gcc/config/riscv/linux.h	2018/02/13 11:21:01	257621
@@ -14,8 +14,8 @@ diff -rupN a/0001-pthread-reentrant.patch b/0001-pthread-reentrant.patch
 + -melf" XLEN_SPEC "lriscv \
 + %{shared} \
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-05-25 10:15:30.533015789 +0200
-+++ b/PKGBUILD	2018-05-25 10:18:49.539689424 +0200
+--- a/PKGBUILD	2018-06-07 04:45:58.776560502 +0200
++++ b/PKGBUILD	2018-06-07 11:52:53.533482750 +0200
 @@ -5,8 +5,9 @@
  # toolchain build order: linux-api-headers->glibc->binutils->gcc->binutils->glibc
  # NOTE: libtool requires rebuilt with each new gcc version
@@ -34,7 +34,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  url='http://gcc.gnu.org'
 -makedepends=(binutils libmpc gcc-ada doxygen lib32-glibc lib32-gcc-libs python)
 -checkdepends=(dejagnu inetutils)
-+makedepends=(binutils libmpc)
++makedepends=(binutils libmpc python)
 +[ "x@MULTILIB@" == "xdisable" ] || makedepends+=(lib32-glibc lib32-gcc-libs)
 +checkdepends=(dejagnu)
  options=(!emptydirs)
