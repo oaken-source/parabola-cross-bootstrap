@@ -1,15 +1,11 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-11 06:12:11.168229069 +0200
-+++ b/PKGBUILD	2018-04-11 06:12:11.169229069 +0200
-@@ -9,18 +9,15 @@
- # parabola changes and rationale:
- #  - rebranded to parabola
- 
--pkgname=('texlive-bin')
-+pkgname=('texlive-bin' 'libsynctex')
+--- a/PKGBUILD	2018-06-07 01:03:40.376427415 +0200
++++ b/PKGBUILD	2018-06-07 07:34:49.533328252 +0200
+@@ -12,20 +12,12 @@
+ pkgname=('texlive-bin')
  pkgver=2017.44590
- pkgrel=13
--pkgrel+=.parabola1
+ pkgrel=14
+-pkgrel+=.parabola2
  license=('GPL')
  arch=('x86_64')
 -arch+=('i686' 'armv7h')
@@ -17,12 +13,17 @@ diff -rupN a/PKGBUILD b/PKGBUILD
           'libsigsegv' 'zziplib' 'libpng' 'libjpeg' 'freetype2'
           'icu' 'harfbuzz' 'harfbuzz-icu' 'gmp' 'mpfr' 'potrace' 'libpaper'
 -         'perl' 'clisp' 'ffcall')
--makedepends+=('poppler=0.63.0' 'icu>=61' 'icu<62')
+-case "$CARCH" in
+-  i686)
+-    makedepends+=('poppler=0.63.0' 'icu>=61' 'icu<62') ;;
+-  armv7h|x86_64)
+-    makedepends+=('poppler=0.64.0' 'icu>=61' 'icu<62') ;;
+-esac
 +         'perl')
  url='http://tug.org/texlive/'
  source=("https://sources.archlinux.org/other/texlive/texlive-bin-source-${pkgver}.tar.xz"
          "luatex-gcc7.patch"
-@@ -52,12 +49,6 @@ prepare() {
+@@ -62,12 +54,6 @@ prepare() {
  build() {
     cd "$srcdir"
  
@@ -35,7 +36,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
     #############################################################
     ### configure
     cd source
-@@ -105,8 +96,7 @@ build() {
+@@ -115,8 +101,7 @@ build() {
       --disable-dump-share \
       --disable-aleph \
       --enable-luatex \
@@ -45,7 +46,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
     #############################################################
     ### make
     echo "-------------------------------------------------------"
-@@ -115,6 +105,15 @@ build() {
+@@ -125,6 +110,15 @@ build() {
     make
  }
  
@@ -61,17 +62,17 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  package_texlive-bin() {
     pkgdesc="TeX Live binaries"
     pkgdesc+=" (Parabola rebranded)"
-@@ -122,8 +121,7 @@ package_texlive-bin() {
+@@ -132,8 +126,7 @@ package_texlive-bin() {
              'libsigsegv' 'zziplib' 'libpng' 'libjpeg' 'freetype2'
              'icu' 'harfbuzz' 'harfbuzz-icu' 'gmp' 'mpfr' 'potrace' 'libpaper'
              'libsynctex')
--   depends+=('icu>=61' 'icu<62' 'poppler=0.63.0')
+-   depends+=('icu>=61' 'icu<62' 'poppler=0.64.0')
 -   provides=('lcdf-typetools' 'kpathsea' 'xindy')
 +   provides=('lcdf-typetools' 'kpathsea')
     optdepends=('ed: for texconfig'
                 'biber: for bibliography processing')
     options=('!strip')
-@@ -133,8 +131,6 @@ package_texlive-bin() {
+@@ -143,8 +136,6 @@ package_texlive-bin() {
     #############################################################
     ### install
     cd source
@@ -80,7 +81,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  
     echo "-------------------------------------------------------"
     echo "--> Proceeding with make install ..."
-@@ -307,7 +303,6 @@ texdoc
+@@ -317,7 +308,6 @@ texdoc
  texdoctk
  texexec
  texfot
@@ -88,7 +89,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  texlinks
  texliveonfly
  texloganalyser
-@@ -323,11 +318,7 @@ updmap-user
+@@ -333,11 +323,7 @@ updmap-user
  vpl2ovp
  vpl2vpl
  xhlatex

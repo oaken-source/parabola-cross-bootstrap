@@ -1,10 +1,10 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-10 16:06:17.697039349 +0200
-+++ b/PKGBUILD	2018-04-10 16:07:11.543034246 +0200
+--- a/PKGBUILD	2018-06-06 23:22:48.539700362 +0200
++++ b/PKGBUILD	2018-06-07 07:29:31.799991748 +0200
 @@ -11,9 +11,8 @@ url='http://www.graphviz.org/'
  license=('CPL')
  arch=('x86_64')
- depends=('libltdl' 'gd' 'librsvg' 'libxaw' 'ghostscript' 'pango' 'gts' 'gsfonts')
+ depends=('libltdl' 'gd' 'librsvg' 'libxaw' 'ghostscript' 'pango' 'gts' 'gsfonts' 'libnsl')
 -makedepends=('swig' 'mono' 'guile' 'lua' 'ocaml' 'perl' 'python2' 'r' 'tk' 'qt4' 'gtk2')
 -optdepends=('mono: sharp bindings'
 -            'guile: guile bindings'

@@ -1,6 +1,6 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-17 19:26:37.026578845 +0200
-+++ b/PKGBUILD	2018-04-17 22:07:42.832662745 +0200
+--- a/PKGBUILD	2018-06-06 05:21:02.252386067 +0200
++++ b/PKGBUILD	2018-06-06 06:15:14.332418516 +0200
 @@ -85,6 +85,10 @@ sha512sums=('SKIP'
  _backports=(
    # nspawn: wait for network namespace creation before interface setup (#8633)
@@ -12,7 +12,18 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  )
  
  _reverts=(
-@@ -261,7 +265,7 @@ package_systemd() {
+@@ -134,7 +138,9 @@ prepare() {
+   git remote add -f upstream ../systemd
+   git checkout "$_commit"
+ 
+-  _validate_tag || return
++  # temporary hack due to upstream build issues
++  # https://tests.reproducible-builds.org/archlinux/core/systemd/build1.log
++  #_validate_tag || return
+ 
+   local c
+   for c in "${_backports[@]}"; do
+@@ -261,7 +267,7 @@ package_systemd() {
    rm -rv "$pkgdir"/etc/systemd/system/*
  
    # we'll create this on installation

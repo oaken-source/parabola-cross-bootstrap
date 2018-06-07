@@ -1,18 +1,18 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-10 10:23:30.086988693 +0200
-+++ b/PKGBUILD	2018-04-10 10:23:30.087988693 +0200
-@@ -9,7 +9,7 @@ pkgrel=1.parabola1
+--- a/PKGBUILD	2018-06-07 00:14:42.959731440 +0200
++++ b/PKGBUILD	2018-06-07 07:32:17.853326738 +0200
+@@ -10,7 +10,7 @@ pkgrel=1.parabola2
  arch=('i686' 'x86_64' 'armv7h')
  makedepends=('python2-mako' 'libxml2' 'libx11' 'glproto' 'libdrm' 'dri2proto' 'dri3proto' 'presentproto'
               'libxshmfence' 'libxxf86vm' 'libxdamage' 'libvdpau' 'libva' 'wayland' 'wayland-protocols'
--             'elfutils' 'llvm' 'libomxil-bellagio' 'clang' 'libglvnd' 'lm_sensors')
-+             'elfutils' 'llvm' 'libomxil-bellagio' 'libglvnd' 'lm_sensors')
+-             'elfutils' 'llvm' 'libomxil-bellagio' 'clang' 'libglvnd' 'lm_sensors'
++             'elfutils' 'llvm' 'libomxil-bellagio' 'libglvnd' 'lm_sensors'
+              'meson')
  makedepends_x86_64=('libclc' 'libunwind')
  makedepends_i686=("${makedepends_x86_64[@]}")
- url="https://www.mesa3d.org/"
-@@ -57,6 +57,14 @@ build() {
-       VDPAU_AND_XA=
-       OPENCL=
+@@ -76,6 +76,14 @@ build() {
+       GALLIUM_XA=false
+       LIBUNWIND=false
        ;;
 +    powerpc64le)
 +      GALLIUM=r300,r600,radeonsi,nouveau,swrast,virgl
@@ -24,26 +24,16 @@ diff -rupN a/PKGBUILD b/PKGBUILD
 +      ;;
    esac
  
-   ./configure --prefix=/usr \
-@@ -85,8 +93,7 @@ build() {
-     $VDPAU_AND_XA \
-     --enable-omx-bellagio \
-     --enable-nine \
--    $OPENCL \
--    --with-clang-libdir=/usr/lib
-+    $OPENCL
- 
-   make
- 
-@@ -125,11 +132,6 @@ package_mesa() {
-   cp -rv ${srcdir}/fakeinstall/usr/lib/libOSMesa.so* ${pkgdir}/usr/lib/
-   cp -rv ${srcdir}/fakeinstall/usr/lib/libwayland*.so* ${pkgdir}/usr/lib/
+   arch-meson mesa-$pkgver build \
+@@ -158,11 +166,6 @@ package_mesa() {
+     _install fakeinstall/usr/lib/libwayland*.so*
+   fi
  
 -  if [ "$CARCH" != "armv7h" ]; then
--    cp -rv ${srcdir}/fakeinstall/usr/lib/libxatracker.so* ${pkgdir}/usr/lib/
--    cp -rv ${srcdir}/fakeinstall/usr/lib/libswrAVX*.so* ${pkgdir}/usr/lib/
+-    _install fakeinstall/usr/lib/libxatracker.so*
+-    _install fakeinstall/usr/lib/libswrAVX*.so*
 -  fi
 -
-   cp -rv ${srcdir}/fakeinstall/usr/include ${pkgdir}/usr
-   cp -rv ${srcdir}/fakeinstall/usr/lib/pkgconfig ${pkgdir}/usr/lib/
+   # in libglvnd
+   rm -v fakeinstall/usr/lib/libGLESv{1_CM,2}.so*
  

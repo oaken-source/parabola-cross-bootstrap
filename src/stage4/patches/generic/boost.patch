@@ -1,11 +1,12 @@
---- a/PKGBUILD	2018-03-17 18:52:01.668936255 +0100
-+++ b/PKGBUILD	2018-03-17 19:06:24.436261723 +0100
-@@ -28,7 +28,7 @@ build() {
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-06 17:17:39.352815084 +0200
++++ b/PKGBUILD	2018-06-06 17:17:47.479481833 +0200
+@@ -38,6 +38,8 @@ build() {
  
-    ./bootstrap.sh --with-toolset=gcc --with-icu --with-python=/usr/bin/python2
- 
--   _bindir="bin.linuxx86"
 +   _bindir="bin.linux"
     [[ "${CARCH}" = "x86_64" ]] && _bindir="bin.linuxx86_64"
++   [[ "${CARCH}" = "riscv64" ]] && _bindir="bin.linux"
++   [[ "${CARCH}" = "powerpc64le" ]] && _bindir="bin.linuxppc"
     install -Dm755 tools/build/src/engine/$_bindir/b2 "${_stagedir}"/bin/b2
  
+    # Support for OpenMPI

@@ -163,7 +163,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
 +      @CARCH@)
 +        mycarch="@CARCH@"
 +        mychost="@CHOST@"
-+        myflags="@PLATFORM_FLAGS@ -O2 -pipe -fstack-protector-strong -fno-plt"
++        myflags="@PLATFORM_CFLAGS@ -O2 -pipe -fstack-protector-strong -fno-plt"
 +        ;;
      esac
      myldflags="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
