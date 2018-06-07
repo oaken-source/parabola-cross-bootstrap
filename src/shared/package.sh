@@ -146,6 +146,9 @@ package_patch() {
   pkgbase=$(srcinfo_pkgbase) || return
   pkgname=$(srcinfo_pkgname) || return
 
+  # temporary workaround for broken perl packages with makepkg-5.1
+  [ -n "$pkgbase" ] || pkgbase="$pkgname"
+
   echo -n "checking for package patch ... "
   local patch="$SRCDIR/patches/$CARCH/$pkgbase$p.$pkgname".patch
   [ -f "$patch" ] || patch="$SRCDIR/patches/$CARCH/$pkgbase$p".patch

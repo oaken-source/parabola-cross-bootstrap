@@ -49,7 +49,7 @@ check_cross_toolchain() {
 
 stage1_makepkg() {
   # produce pkgfiles
-  for f in "$SRCDIR"/toolchain-pkgbuilds/$1/*.in; do
+  for f in "$SRCDIR/toolchain-pkgbuilds/$1"/*.in; do
     sed "s#@CHOST@#$CHOST#g; \
          s#@CARCH@#$CARCH#g; \
          s#@PLATFORM_CFLAGS@#${PLATFORM_CFLAGS[*]}#g; \

@@ -67,7 +67,7 @@ EOF
   done
 
   # patch libremakepkg to update config.sub/config.guess
-  cat "$(which libremakepkg)" > "$BUILDDIR/libremakepkg.sh"
+  cat "$(command -v libremakepkg)" > "$BUILDDIR/libremakepkg.sh"
   chmod +x "$BUILDDIR/libremakepkg.sh"
 
   if [ "x${REGEN_CONFIG_FRAGMENTS:-no}" == "xyes" ]; then

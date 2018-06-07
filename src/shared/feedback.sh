@@ -29,7 +29,7 @@ export ERROR_KEYFAIL=5
 notify() {
   if type -p notify-send >/dev/null; then
     machinectl -q shell --uid="$SUDO_USER" .host \
-      "$(which notify-send)" "$@" >/dev/null
+      "$(command -v notify-send)" "$@" >/dev/null
   fi
 }
 
