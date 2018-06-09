@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-08 14:45:04.531114588 +0200
++++ b/PKGBUILD	2018-06-08 14:55:15.544454018 +0200
+@@ -34,6 +34,8 @@ prepare() {
+ 
+ build() {
+   cd $srcdir/$pkgname-$pkgver
++  CFLAGS="$CFLAGS -I/usr/include/tirpc/"
++  LDFLAGS="$LDGLAGS -ltirpc"
+   ./configure --prefix=/usr --sbindir=/usr/bin --without-libwrap
+   make
+ }

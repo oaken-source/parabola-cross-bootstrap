@@ -1,23 +1,23 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-08 10:01:54.988488966 +0200
-+++ b/PKGBUILD	2018-04-08 10:01:54.988488966 +0200
+--- a/PKGBUILD	2018-06-09 12:32:34.855230691 +0200
++++ b/PKGBUILD	2018-06-09 12:33:12.855231068 +0200
 @@ -13,13 +13,12 @@ arch=('x86_64')
  url="http://subversion.apache.org/"
  license=('APACHE')
- depends=('sqlite' 'file' 'serf' 'systemd')
--makedepends=('apache' 'python2' 'perl' 'swig' 'java-environment'
--             'libgnome-keyring' 'kdelibs' 'ruby')
+ depends=('file' 'libutf8proc' 'serf' 'sqlite' 'systemd')
+-makedepends=('apache' 'python2' 'perl' 'swig' 'java-environment<10'
+-             'libgnome-keyring' 'kwallet' 'kdelibs4support' 'ruby')
 +makedepends=('apache' 'python2' 'perl' 'swig'
 +             'libgnome-keyring')
  optdepends=('libgnome-keyring: for GNOME Keyring for auth credentials'
-             'kdebase-runtime: for KWallet for auth credentials'
+             'kwallet: for KWallet for auth credentials'
              'bash-completion: for svn bash completion'
              'python2: for some hook scripts'
 -            'java-environment: for Java support'
              'ruby: for some hook scripts')
+ checkdepends=('ruby-test-unit')
  provides=('svn')
- backup=('etc/xinetd.d/svn' 'etc/conf.d/svnserve')
-@@ -59,21 +58,18 @@ build() {
+@@ -61,21 +60,18 @@ build() {
     ./configure --prefix=/usr --with-apr=/usr --with-apr-util=/usr \
                 --with-zlib=/usr --with-serf=/usr --with-apxs \
                 --with-sqlite=/usr \
@@ -41,7 +41,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  }
  
  package() {
-@@ -83,7 +79,7 @@ package() {
+@@ -85,7 +81,7 @@ package() {
     make DESTDIR="${pkgdir}" INSTALLDIRS=vendor \
       swig_pydir=/usr/lib/python2.7/site-packages/libsvn \
       swig_pydir_extra=/usr/lib/python2.7/site-packages/svn \

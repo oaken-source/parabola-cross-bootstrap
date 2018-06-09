@@ -1,0 +1,41 @@
+diff -rupN a/0001-nss-ppc64le-support.patch b/0001-nss-ppc64le-support.patch
+--- a/0001-nss-ppc64le-support.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/0001-nss-ppc64le-support.patch	2018-06-09 12:42:35.998570021 +0200
+@@ -0,0 +1,10 @@
++--- a/nss/build.sh	2018-03-05 16:58:32.000000000 +0100
+++++ b/nss/build.sh	2018-04-05 07:27:59.516930570 +0200
++@@ -58,7 +58,7 @@ ninja_params=()
++ 
++ # try to guess sensible defaults
++ arch=$(python "$cwd"/coreconf/detect_host_arch.py)
++-if [ "$arch" = "x64" -o "$arch" = "aarch64" ]; then
+++if [ "$arch" = "x64" -o "$arch" = "aarch64" -o "$arch" = "ppc64le" ]; then
++     build_64=1
++ elif [ "$arch" = "arm" ]; then
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-09 12:41:17.355235903 +0200
++++ b/PKGBUILD	2018-06-09 12:42:34.908570010 +0200
+@@ -14,10 +14,12 @@ depends=("nspr>=${_nsprver}" sqlite zlib
+ makedepends=(perl python2 gyp)
+ options=(!strip !makeflags staticlibs)
+ source=("https://ftp.mozilla.org/pub/security/nss/releases/NSS_${pkgver//./_}_RTM/src/nss-${pkgver}.tar.gz"
+-        certdata2pem.py bundle.sh)
++        certdata2pem.py bundle.sh
++        0001-nss-ppc64le-support.patch)
+ sha256sums=('097b30e436479ad737b3703b25b6198b6513e202731085c6f097d8853dd20405'
+             '512b12a2f13129be62c008b4df0153f527dd7d71c2c5183de99dfa2a1c49dd8a'
+-            '3bfadf722da6773bdabdd25bdf78158648043d1b7e57615574f189a88ca865dd')
++            '3bfadf722da6773bdabdd25bdf78158648043d1b7e57615574f189a88ca865dd'
++            'ec2f6a90dfe168a5070e919d9951da4e20b2898e6f7d975697231dc47ef461a8')
+ 
+ prepare() {
+   mkdir certs path
+@@ -26,6 +28,8 @@ prepare() {
+ 
+   cd nss-$pkgver
+ 
++  patch -Np1 -i ../0001-nss-ppc64le-support.patch
++
+   ln -sr nss/lib/ckfw/builtins/certdata.txt ../certs/
+   ln -sr nss/lib/ckfw/builtins/nssckbi.h ../certs/
+ }

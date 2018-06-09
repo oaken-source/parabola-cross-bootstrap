@@ -1,22 +1,22 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-10 14:06:09.643722509 +0200
-+++ b/PKGBUILD	2018-04-10 14:06:54.477718260 +0200
+--- a/PKGBUILD	2018-06-08 14:38:16.277777181 +0200
++++ b/PKGBUILD	2018-06-08 14:39:55.754444840 +0200
 @@ -2,7 +2,7 @@
  # Maintainer: Jan de Groot <jgc@archlinux.org>
  
  pkgname=librsvg
--pkgver=2.42.3
+-pkgver=2.42.5
 +pkgver=2.40.20
  pkgrel=1
  epoch=2
  pkgdesc="SVG rendering library"
-@@ -10,34 +10,24 @@ url="https://wiki.gnome.org/Projects/Lib
+@@ -10,35 +10,25 @@ url="https://wiki.gnome.org/Projects/Lib
  arch=(x86_64)
  license=(LGPL)
  depends=(gdk-pixbuf2 pango libcroco)
 -makedepends=(intltool gobject-introspection vala python2 gtk-doc git rust)
 +makedepends=(intltool gobject-introspection python2 gtk-doc git)
- _commit=ca640d1185745665c61689b71c627e1d020a80b7  # tags/2.42.3^0
+ _commit=497c925593e41c12cec4a55e4365655a29c3fe59  # tags/2.42.5^0
 -source=("git+https://gitlab.gnome.org/GNOME/librsvg.git#commit=$_commit")
 -sha256sums=('SKIP')
 -
@@ -52,3 +52,4 @@ diff -rupN a/PKGBUILD b/PKGBUILD
 +  cd $pkgname-$pkgver
    make DESTDIR="$pkgdir" install
  }
+ 

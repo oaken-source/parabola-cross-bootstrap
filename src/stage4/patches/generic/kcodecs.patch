@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-09 14:38:16.411972605 +0200
++++ b/PKGBUILD	2018-06-09 14:44:55.275309918 +0200
+@@ -11,7 +11,7 @@ arch=(x86_64)
+ url='https://community.kde.org/Frameworks'
+ license=(LGPL)
+ depends=(qt5-base)
+-makedepends=(extra-cmake-modules qt5-tools clang python-pyqt5 python2-pyqt5 gperf doxygen)
++makedepends=(extra-cmake-modules qt5-tools python-pyqt5 python2-pyqt5 gperf doxygen)
+ optdepends=('python-pykf5: to use the Python 3 bindings' 'python2-pykf5: to use the Python 2 bindings')
+ groups=(kf5)
+ source=("https://download.kde.org/stable/frameworks/${pkgver%.*}/$pkgname-$pkgver.tar.xz"{,.sig})

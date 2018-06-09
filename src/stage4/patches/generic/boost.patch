@@ -1,9 +1,9 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-06-06 17:17:39.352815084 +0200
-+++ b/PKGBUILD	2018-06-06 17:17:47.479481833 +0200
+--- a/PKGBUILD	2018-06-08 00:17:14.930595049 +0200
++++ b/PKGBUILD	2018-06-08 08:01:13.110872809 +0200
 @@ -38,6 +38,8 @@ build() {
  
-+   _bindir="bin.linux"
+    _bindir="bin.linuxx86"
     [[ "${CARCH}" = "x86_64" ]] && _bindir="bin.linuxx86_64"
 +   [[ "${CARCH}" = "riscv64" ]] && _bindir="bin.linux"
 +   [[ "${CARCH}" = "powerpc64le" ]] && _bindir="bin.linuxppc"

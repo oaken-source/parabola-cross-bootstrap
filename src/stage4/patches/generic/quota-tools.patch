@@ -1,0 +1,10 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-09 08:44:47.235094316 +0200
++++ b/PKGBUILD	2018-06-09 08:56:00.805101036 +0200
+@@ -28,5 +28,5 @@ package() {
+   head -33 quota.c > "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+ 
+ # remove conflicts with glibc
+-  rm "${pkgdir}"/usr/include/rpcsvc/rquota.{h,x}
++  rm -f "${pkgdir}"/usr/include/rpcsvc/rquota.{h,x}
+ }

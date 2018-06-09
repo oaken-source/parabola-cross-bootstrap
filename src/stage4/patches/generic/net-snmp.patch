@@ -1,0 +1,25 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-07 18:29:32.163720210 +0200
++++ b/PKGBUILD	2018-06-07 20:59:37.773810067 +0200
+@@ -50,6 +50,8 @@ build() {
+   make NETSNMP_DONT_CHECK_VERSION=1
+ }
+ 
++perlver() { perl -e '$v = $^V->{version}; print $v->[0].".".($v->[1]+$ARGV[0]);' $1; }
++
+ package() {
+   cd ${pkgname}-${pkgver}
+   sed -i -e "s:install --basedir=\$\$dir:install --basedir=\$\$dir --root=${pkgdir}:" Makefile
+@@ -58,11 +60,7 @@ package() {
+   install -D -m644 "${srcdir}/snmptrapd.service" "${pkgdir}/usr/lib/systemd/system/snmptrapd.service"
+   install -D -m644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+ 
+-# template start; name=perl-binary-module-dependency; version=1;
+ if [[ $(find "$pkgdir/usr/lib/perl5/" -name "*.so") ]]; then
+-	_perlver_min=$(perl -e '$v = $^V->{version}; print $v->[0].".".($v->[1]);')
+-	_perlver_max=$(perl -e '$v = $^V->{version}; print $v->[0].".".($v->[1]+1);')
+-	depends+=("perl>=$_perlver_min" "perl<$_perlver_max")
++	depends+=("perl>=$(perlver)" "perl<$(perlver 1)")
+ fi
+-# template end;
+ }

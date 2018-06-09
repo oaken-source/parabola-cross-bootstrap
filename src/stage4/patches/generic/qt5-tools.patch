@@ -1,0 +1,14 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-09 11:08:53.421847253 +0200
++++ b/PKGBUILD	2018-06-09 11:27:05.441858149 +0200
+@@ -11,8 +11,8 @@ url='http://qt-project.org/'
+ license=('GPL3' 'LGPL3' 'FDL' 'custom')
+ pkgdesc='A cross-platform application and UI framework (Development Tools, QtHelp)'
+ depends=('qt5-base' 'hicolor-icon-theme')
+-makedepends=('qt5-declarative' 'qt5-webkit' 'vulkan-headers' 'clang')
+-optdepends=('clang: for qdoc' 'qt5-webkit: for Qt Assistant')
++makedepends=('qt5-declarative' 'qt5-webkit' 'vulkan-headers')
++optdepends=('qt5-webkit: for Qt Assistant')
+ groups=('qt' 'qt5')
+ conflicts=('qtchooser')
+ _pkgfqn="${pkgname/5-/}-everywhere-src-${_qtver}"

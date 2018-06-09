@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-09 05:50:56.764990242 +0200
++++ b/PKGBUILD	2018-06-09 09:01:01.681770705 +0200
+@@ -9,7 +9,7 @@ pkgdesc="Client library for Firebird."
+ arch=('x86_64')
+ url="http://www.firebirdsql.org/"
+ license=('custom')
+-depends=('gcc-libs' 'icu')
++depends=('gcc-libs' 'icu' 'libatomic_ops')
+ options=('!makeflags')
+ source=(http://downloads.sourceforge.net/firebird/Firebird-$pkgver-0.tar.bz2
+         firebird-c++11.patch

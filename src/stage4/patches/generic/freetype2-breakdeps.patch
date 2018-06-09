@@ -1,6 +1,6 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-05 10:50:53.694776733 +0200
-+++ b/PKGBUILD	2018-04-05 10:50:53.695776733 +0200
+--- a/PKGBUILD	2018-06-07 01:06:31.523095788 +0200
++++ b/PKGBUILD	2018-06-08 16:22:26.947839549 +0200
 @@ -11,7 +11,7 @@ license=('GPL')
  url="https://www.freetype.org/"
  # adding harfbuzz for improved OpenType features auto-hinting
@@ -10,3 +10,12 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  makedepends=('libx11')
  source=(https://download-mirror.savannah.gnu.org/releases/freetype/freetype-${pkgver}.tar.bz2{,.sig}
          https://download-mirror.savannah.gnu.org/releases/freetype/freetype-doc-${pkgver}.tar.bz2{,.sig}
+@@ -54,7 +54,7 @@ prepare() {
+ 
+ build() {
+   cd freetype2
+-  ./configure --prefix=/usr --disable-static
++  ./configure --prefix=/usr --disable-static --enable-freetype-config
+   make
+ 
+   # Build demos

@@ -1,10 +1,10 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-07 17:13:27.064223747 +0200
-+++ b/PKGBUILD	2018-04-07 17:13:27.064223747 +0200
+--- a/PKGBUILD	2018-06-09 08:44:19.088427369 +0200
++++ b/PKGBUILD	2018-06-09 08:46:28.728428661 +0200
 @@ -14,7 +14,7 @@ arch=('x86_64')
  license=('custom')
  url="http://www.python.org/"
- depends=('expat' 'bzip2' 'gdbm' 'openssl' 'libffi' 'zlib')
+ depends=('expat' 'bzip2' 'gdbm' 'openssl' 'libffi' 'zlib' 'libnsl')
 -makedepends=('tk' 'sqlite' 'valgrind' 'bluez-libs' 'mpdecimal' 'llvm' 'gdb' 'xorg-server-xvfb')
 +makedepends=('tk' 'sqlite' 'bluez-libs' 'mpdecimal' 'llvm' 'xorg-server-xvfb')
  optdepends=('python-setuptools'

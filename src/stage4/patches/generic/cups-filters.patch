@@ -1,10 +1,10 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-11 15:51:13.794936255 +0200
-+++ b/PKGBUILD	2018-04-11 17:14:15.653464088 +0200
+--- a/PKGBUILD	2018-06-08 11:17:40.824323759 +0200
++++ b/PKGBUILD	2018-06-08 14:21:14.767766988 +0200
 @@ -14,7 +14,7 @@ url="https://wiki.linuxfoundation.org/op
  license=('custom')
  depends=('lcms2' 'poppler' 'qpdf' 'imagemagick' 'liblouis' 'ijs' 'libcups>=2.2.6-2' 'systemd')
- depends+=('poppler=0.63.0')
+ depends+=('poppler=0.64.0')
 -makedepends=('ghostscript' 'ttf-dejavu' 'python' 'mupdf-tools') # ttf-dejavu for make check
 +makedepends=('avahi' 'ghostscript' 'ttf-dejavu' 'python' 'mupdf-tools') # ttf-dejavu for make check
  optdepends=('ghostscript: for non-PostScript printers to print with CUPS to convert PostScript to raster images'

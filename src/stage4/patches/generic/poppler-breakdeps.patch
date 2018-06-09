@@ -1,13 +1,13 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-08 21:19:01.690638474 +0200
-+++ b/PKGBUILD	2018-04-08 21:19:01.691638474 +0200
+--- a/PKGBUILD	2018-06-08 00:17:03.190594926 +0200
++++ b/PKGBUILD	2018-06-08 08:02:22.654206837 +0200
 @@ -3,13 +3,13 @@
  # Maintainer: Jan de Groot <jgc@archlinux.org>
  
  pkgbase=poppler
 -pkgname=('poppler' 'poppler-glib' 'poppler-qt5')
 +pkgname=('poppler' 'poppler-glib')
- pkgver=0.63.0
+ pkgver=0.64.0
  pkgrel=1
  arch=(x86_64)
  license=('GPL')

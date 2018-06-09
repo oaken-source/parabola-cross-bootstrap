@@ -1,15 +1,16 @@
---- a/PKGBUILD	2018-04-04 11:14:02.585833861 +0200
-+++ b/PKGBUILD	2018-04-04 16:55:29.948892123 +0200
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-09 03:43:23.308247210 +0200
++++ b/PKGBUILD	2018-06-09 09:05:32.711773409 +0200
 @@ -15,7 +15,7 @@ license=('GPL')
  makedepends=('python-sip' 'python2-sip' 'python-opengl' 'python2-opengl'
               'python2-dbus' 'python-dbus' 'qt5-connectivity'
               'qt5-multimedia' 'qt5-tools' 'qt5-serialport' 'qt5-svg'
 -             'qt5-webengine' 'qt5-webkit' 'qt5-websockets' 'qt5-x11extras' 'qt5-networkauth')
 +             'qt5-webkit' 'qt5-websockets' 'qt5-x11extras' 'qt5-networkauth')
- source=("http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-$pkgver/PyQt5_gpl-$pkgver.tar.gz" pyqt-support-new-qt.patch)
+ source=("http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-$pkgver/PyQt5_gpl-$pkgver.tar.gz" pyqt-support-new-qt.patch
+         pyqt5-cura-crash.patch pyqt-qt5.11.patch)
  sha512sums=('04cd0292f7a088f9c0d088d7c73ec96cfc40253f771dfdf194eb92be7635e6fcaf04863fa24215e9c34a096658549bb2feeb8d8fdca1e39ed87f0256ef0f790b'
-             '9e4184291c0ece0bf375da3e0cf6e3f22df33eea1ee2b981fe9e2a0ba7d625583dd513c029c49562189986c0145262ac2aa8e5aa85701a981b3ed4061f4acf36')
-@@ -83,7 +83,6 @@ package_python-pyqt5(){
+@@ -88,7 +88,6 @@ package_python-pyqt5(){
                'qt5-serialport: QtSerialPort'
                'qt5-websockets: QtWebSockets'
                'qt5-connectivity: QtNfc, QtBluetooth'
@@ -17,7 +18,7 @@
                'qt5-x11extras: QtX11Extras'
                'qt5-networkauth: QtNetworkAuth')
  
-@@ -109,7 +108,6 @@ package_python2-pyqt5(){
+@@ -114,7 +113,6 @@ package_python2-pyqt5(){
                'qt5-serialport: QtSerialPort'
                'qt5-websockets: QtWebSockets'
                'qt5-connectivity: QtNfc, QtBluetooth'

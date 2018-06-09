@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-09 05:43:01.364985498 +0200
++++ b/PKGBUILD	2018-06-09 09:04:05.861772543 +0200
+@@ -16,7 +16,7 @@ build() {
+   cd "$srcdir/$pkgname-$pkgver"
+   # AIO library is a thin wrapper around kernel syscalls, it does not use stdlib
+   # and other helpers like stack protection libraries
+-  CFLAGS="-march=${CARCH/_/-} -mtune=generic -O2 -pipe"
++  CFLAGS=`echo $CFLAGS | sed -e 's/-fstack-protector[^ ]*//'` && CXXFLAGS="$CFLAGS"
+   make
+ }
+ 

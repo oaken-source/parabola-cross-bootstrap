@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-07 01:06:24.206429047 +0200
++++ b/PKGBUILD	2018-06-08 16:22:09.101172704 +0200
+@@ -54,7 +54,7 @@ prepare() {
+ 
+ build() {
+   cd freetype2
+-  ./configure --prefix=/usr --disable-static
++  ./configure --prefix=/usr --disable-static --enable-freetype-config
+   make
+ 
+   # Build demos

@@ -1,16 +1,16 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-04 18:34:55.528326721 +0200
-+++ b/PKGBUILD	2018-04-09 14:07:33.607903315 +0200
+--- a/PKGBUILD	2018-06-09 11:09:28.288514268 +0200
++++ b/PKGBUILD	2018-06-09 11:26:01.755190846 +0200
 @@ -21,7 +21,7 @@ depends=('alsa-lib' 'bzip2' 'fontconfig'
-          'libomxil-bellagio'
+          'xz' 'zlib'
           'libass.so' 'libbluray.so' 'libfreetype.so' 'libva-drm.so' 'libva.so'
           'libva-x11.so' 'libvidstab.so' 'libvorbisenc.so' 'libvorbis.so'
 -         'libvpx.so' 'libx264.so' 'libx265.so' 'libxvidcore.so')
 +         'libvpx.so' 'libxvidcore.so')
- makedepends=('ladspa' 'libvdpau' 'yasm')
+ makedepends=('ffnvcodec-headers' 'ladspa' 'yasm')
  optdepends=('ladspa: LADSPA filters')
  provides=('libavcodec.so' 'libavdevice.so' 'libavfilter.so' 'libavformat.so'
-@@ -79,8 +79,6 @@ build() {
+@@ -69,8 +69,6 @@ build() {
      --enable-libvorbis \
      --enable-libvpx \
      --enable-libwebp \
