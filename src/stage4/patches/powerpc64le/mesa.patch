@@ -1,6 +1,6 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-06-07 00:14:42.959731440 +0200
-+++ b/PKGBUILD	2018-06-07 07:32:17.853326738 +0200
+--- a/PKGBUILD	2018-06-11 18:57:32.847185338 +0200
++++ b/PKGBUILD	2018-06-11 19:03:38.503855653 +0200
 @@ -10,7 +10,7 @@ pkgrel=1.parabola2
  arch=('i686' 'x86_64' 'armv7h')
  makedepends=('python2-mako' 'libxml2' 'libx11' 'glproto' 'libdrm' 'dri2proto' 'dri3proto' 'presentproto'
@@ -10,22 +10,39 @@ diff -rupN a/PKGBUILD b/PKGBUILD
               'meson')
  makedepends_x86_64=('libclc' 'libunwind')
  makedepends_i686=("${makedepends_x86_64[@]}")
-@@ -76,6 +76,14 @@ build() {
+@@ -23,7 +23,6 @@ source=(https://mesa.freedesktop.org/arc
+         0003-meson-Version-libMesaOpenCL-like-autotools-does.patch
+         0004-loader_dri3-Variant-2-Wait-for-pending-swaps-to-comp.patch
+         drirc)
+-source_armv7h=("atomic.patch::https://cgit.freedesktop.org/mesa/mesa/patch/?id=498faea103aa7966b435f21d8ff5e36172389b1e")
+ sha512sums=('f9a14be46c209661ceb318add1611481445d13b47e95c7a5d2a5e5ecfdd5d2c3fa9c2b16b30035bbb8d61ccc7cb65bfa6698ac8b040273e5ab045a951a67752c'
+             'SKIP'
+             'f9f0d0ccf166fe6cb684478b6f1e1ab1f2850431c06aa041738563eb1808a004e52cdec823c103c9e180f03ffc083e95974d291353f0220fe52ae6d4897fecc7'
+@@ -32,7 +31,6 @@ sha512sums=('f9a14be46c209661ceb318add16
+             'a2062f8a5259aabed1aa20df6a8510f0f3e914cb6bba72751249b3295285596bb7615063a7a7b7870f9f4489d0e6b774f0bced2bdde49a1aa9df6a44976462d1'
+             '572901a1e9cacfacfc8c4cc3cd077a626d4aeda8c8a58f6085bae827cba8a2d4d99af1dafbb5a9296b6ebf3120e2b05a084fe1c96093074befe62597319384a1'
+             '7d949d1f45e68b8ec71ca0192569eeb6fc98b540e9696fea437894db02d98a78724ae4021f244137dd2ed2c8c167e96016f20306b4cf83c2defc8acd10170a1e')
+-sha512sums_armv7h=('75cd21bccc84a6b6b0de39c6d209c8bee0e5143b486433184ca078e8bc6797d30746be3ce5f7a89eea9bc3c7e2d68880412511fd6b9946252c7c7638523c6caa')
+ validpgpkeys=('8703B6700E7EE06D7A39B8D6EDAE37B02CEB490D'  # Emil Velikov <emil.l.velikov@gmail.com>
+               '946D09B5E4C9845E63075FF1D961C596A7203456'  # Andres Gomez <tanty@igalia.com>
+               'E3E8F480C52ADD73B278EE78E1ECBE07D7D70895'  # Juan Antonio Suárez Romero (Igalia, S.L.) <jasuarez@igalia.com>"
+@@ -76,6 +74,15 @@ build() {
        GALLIUM_XA=false
        LIBUNWIND=false
        ;;
 +    powerpc64le)
++      DRI=r200,radeon,nouveau
 +      GALLIUM=r300,r600,radeonsi,nouveau,swrast,virgl
-+      DRI=r200,radeon,nouveau,swrast
 +      VULKAN=
-+      LIBUNWIND=
-+      VDPAU_AND_XA='--enable-vdpau'
-+      OPENCL=
++      SWR_ARCHES=
++      OPENCL=disabled
++      GALLIUM_XA=false
++      LIBUNWIND=false
 +      ;;
    esac
  
    arch-meson mesa-$pkgver build \
-@@ -158,11 +166,6 @@ package_mesa() {
+@@ -158,11 +165,6 @@ package_mesa() {
      _install fakeinstall/usr/lib/libwayland*.so*
    fi
  

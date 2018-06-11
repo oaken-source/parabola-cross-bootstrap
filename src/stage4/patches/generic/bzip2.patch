@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-10 00:28:43.935659430 +0200
++++ b/PKGBUILD	2018-06-10 08:11:25.309269764 +0200
+@@ -16,7 +16,7 @@ source=(http://www.bzip.org/$pkgver/bzip
+         fix-heap-use-after-free-bzip2recover.patch::https://gitweb.gentoo.org/repo/gentoo.git/plain/app-arch/bzip2/files/bzip2-1.0.6-CVE-2016-3189.patch)
+ sha1sums=('3f89f861209ce81a6bab1fd1998c0ef311712002'
+           '85ce76fdb67f52f152bba368c1de81132dcdbdb5'
+-          '95f6187491bcd980f869c6857a72edb3e43e1064')
++          '3318e71b4a6d9d350a61f47de495301a937fad8a')
+ build() {
+   cd "$srcdir/$pkgname-$pkgver"
+ 

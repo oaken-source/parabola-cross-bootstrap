@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-11 14:53:16.530372433 +0200
++++ b/PKGBUILD	2018-06-11 14:59:55.570376413 +0200
+@@ -8,7 +8,7 @@
+ pkgname=libtool
+ pkgver=2.4.6+40+g6ca5e224
+ pkgrel=6
+-_gccver=8.1.0
++_gccver=7.3.1
+ pkgdesc='A generic library support script'
+ arch=(x86_64)
+ url='http://www.gnu.org/software/libtool'

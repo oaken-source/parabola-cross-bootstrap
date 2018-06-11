@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-10 17:26:05.576268497 +0200
++++ b/PKGBUILD	2018-06-11 23:00:09.270663913 +0200
+@@ -95,7 +95,7 @@ check() {
+ 
+ package_ruby() {
+   pkgdesc='An object-oriented language for quick and easy programming'
+-  depends=(gdbm openssl libffi libyaml gmp zlib rubygems)
++  depends=(gdbm openssl libffi libyaml gmp zlib)
+   optdepends=(
+       'ruby-docs: Ruby documentation'
+       'tk: for Ruby/TK'

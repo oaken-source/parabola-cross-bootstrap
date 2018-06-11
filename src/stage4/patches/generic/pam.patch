@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-10 13:54:40.969475265 +0200
++++ b/PKGBUILD	2018-06-10 15:15:10.819523456 +0200
+@@ -9,7 +9,7 @@ pkgdesc="PAM (Pluggable Authentication M
+ arch=('x86_64')
+ license=('GPL2')
+ url="http://linux-pam.org"
+-depends=('glibc' 'cracklib' 'libtirpc' 'pambase')
++depends=('glibc' 'cracklib' 'libtirpc' 'pambase' 'libnsl')
+ makedepends=('flex' 'w3m' 'docbook-xml>=4.4' 'docbook-xsl')
+ backup=(etc/security/{access.conf,group.conf,limits.conf,namespace.conf,namespace.init,pam_env.conf,time.conf} etc/default/passwd etc/environment)
+ source=(http://linux-pam.org/library/Linux-PAM-$pkgver.tar.bz2)

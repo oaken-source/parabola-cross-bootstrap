@@ -5,7 +5,7 @@ deptree="$(cat "$1")"
 while grep -q '\[ *\]' <<< "$deptree"; do
   pkg=$(grep '\[ *\]' <<< "$deptree" | head -n1 | awk '{print $1}')
   echo "consuming pkg: $pkg"
-  deptree="$(sed "/^$pkg :/d; s/ /  /g; s/ $pkg / /g; s/  */ /g" <<< "$deptree")"
+  deptree="$(sed "/^$pkg :/d; s/ /  /g; s/ $pkg / /g; s/ ${pkg%-breakdeps} / /g; s/  */ /g" <<< "$deptree")"
 done
 printf "%s" "$deptree" > DEPTREE.reduced
 echo "unresolved pkgs: $(wc -l < DEPTREE.reduced)"

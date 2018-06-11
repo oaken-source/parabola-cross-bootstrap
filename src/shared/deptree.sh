@@ -65,7 +65,7 @@ deptree_next() {
 }
 
 deptree_remove() {
-  sed -i "/^$1 :/d; s/ /  /g; s/ $1 / /g; s/  */ /g" "$DEPTREE"
+  sed -i "/^$1 :/d; s/ /  /g; s/ $1 / /g; s/ ${1%-breakdeps} / /g; s/  */ /g" "$DEPTREE"
 }
 
 deptree_is_satisfyable() {

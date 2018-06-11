@@ -1,0 +1,39 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-11 03:06:05.699949062 +0200
++++ b/PKGBUILD	2018-06-11 18:13:58.207159250 +0200
+@@ -4,7 +4,7 @@
+ # Contributor: Joel Teichroeb <joel@teichroeb.net>
+ 
+ pkgbase=wayland
+-pkgname=(wayland wayland-docs)
++pkgname=(wayland)
+ pkgver=1.15.0
+ pkgrel=1
+ pkgdesc='A computer display server protocol'
+@@ -12,7 +12,7 @@ arch=('x86_64')
+ url='https://wayland.freedesktop.org/'
+ license=('MIT')
+ depends=('glibc' 'libffi' 'expat' 'libxml2')
+-makedepends=('libxslt' 'doxygen' 'xmlto' 'graphviz' 'docbook-xsl')
++makedepends=('libxslt' 'doxygen' 'xmlto' 'docbook-xsl')
+ validpgpkeys=('C7223EBE4EF66513B892598911A30156E0E67611'  # Bryce Harrington
+               'C0066D7DB8E9AC6844D728715E54498E697F11D7') # Derek Foreman
+ source=("https://wayland.freedesktop.org/releases/$pkgbase-$pkgver.tar.xz"{,.sig})
+@@ -28,6 +28,7 @@ build() {
+ 
+   ./configure \
+     --prefix=/usr \
++    --disable-documentation \
+     --disable-static
+   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+   make
+@@ -44,9 +45,6 @@ package_wayland() {
+ 
+   make DESTDIR="$pkgdir" install
+ 
+-  mkdir -p "$srcdir/docs/share"
+-  mv "$pkgdir"/usr/share/{doc,man} "$srcdir/docs/share"
+-
+   install -Dm 644 COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+ }
+ 

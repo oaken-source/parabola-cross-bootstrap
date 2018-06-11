@@ -6,7 +6,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  license=(LGPL MPL)
  depends=(libpng libxrender libxext fontconfig pixman glib2 lzo)
 -makedepends=(librsvg gtk2 poppler-glib libspectre gtk-doc valgrind git)
-+makedepends=(librsvg poppler-glib libspectre gtk-doc git)
++makedepends=(librsvg libspectre gtk-doc git)
  _commit=7149686456ec3c481fa1d3dbe76a0dab1e42b519  # tags/1.15.12^0
  source=("git+https://anongit.freedesktop.org/git/cairo#commit=$_commit"
          utf-8.diff)

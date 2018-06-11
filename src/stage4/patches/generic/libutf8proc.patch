@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-09 13:00:00.985247114 +0200
++++ b/PKGBUILD	2018-06-09 14:55:30.215316253 +0200
+@@ -15,7 +15,7 @@ sha256sums=('1223c2dd9c5cd077564feb30a6a
+             '345ea6782c361f5d38808c13e1e6ce6c2bef69a22a97d115b8ce950d74de1ed1')
+ 
+ prepare() {
+-  setconf libutf8proc.pc Version "${pkgver%%_*}"
++  #setconf libutf8proc.pc Version "${pkgver%%_*}"
+ 
+   cd "$pkgname-${pkgver/_/-}"
+   find . -iwholename '*cmake*' \

@@ -34,6 +34,7 @@ stage4_makepkg() {
 
   # substitute common variables
   sed "s#@MULTILIB@#${MULTILIB:-disable}#g; \
+       s#@PLATFORM_CFLAGS@#${PLATFORM_CFLAGS[*]}#g; \
        s#@GCC_CONFIG_FLAGS@#${GCC_CONFIG_FLAGS[*]}#g" \
     PKGBUILD.in > PKGBUILD
 
@@ -54,7 +55,6 @@ stage4_makepkg() {
     # add a temporary -breakdeps build, if a patch exists
     if [ "x$1" == "x$pkgname" ] && package_has_patch -p breakdeps "$1"; then
       deptree_add_entry "$1-breakdeps" "$1"
-      sed -i "s/ /  /g; s/ $pkgname / $pkgname-breakdeps /g; s/  */ /g" "$DEPTREE"
     fi
     # postpone actual build
     return 0

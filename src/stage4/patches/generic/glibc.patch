@@ -1,51 +1,34 @@
---- a/PKGBUILD	2018-03-06 06:01:42.289066523 +0100
-+++ b/PKGBUILD	2018-03-06 06:01:42.289066523 +0100
-@@ -6,21 +6,21 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-10 02:55:37.495747371 +0200
++++ b/PKGBUILD	2018-06-10 08:10:22.642602471 +0200
+@@ -6,13 +6,15 @@
  # NOTE: valgrind requires rebuilt with each major glibc version
  
  pkgbase=glibc
 -pkgname=(glibc lib32-glibc)
--pkgver=2.26
--pkgrel=11
 +pkgname=(glibc)
 +[ "x@MULTILIB@" != "xenable" ] || pkgname+=(lib32-glibc)
-+pkgver=2.27
-+pkgrel=1
+ pkgver=2.27
+ pkgrel=3
  arch=(x86_64)
  url='http://www.gnu.org/software/libc'
  license=(GPL LGPL)
 -makedepends=(git gd lib32-gcc-libs)
++makedepends=(git gd)
++[ "x@MULTILIB@" != "xenable" ] || makedepends+=(lib32-gcc-libs)
  options=(!strip staticlibs)
- _commit=de51f431ed6226ec68ca76e578f2cbd55b6262cb
--source=(git+https://sourceware.org/git/glibc.git#commit=${_commit}
-+source=(https://ftp.gnu.org/gnu/glibc/glibc-$pkgver.tar.gz
-         locale.gen.txt
-         locale-gen
-         lib32-glibc.conf
-         bz20338.patch)
--md5sums=('SKIP'
-+md5sums=('527bc6270e37ab97314a3af0b7b83db8'
-          '07ac979b6ab5eeb778d55f041529d623'
-          '476e9113489f93b348b21e144b6a8fcf'
-          '6e052f1cb693d5d3203f50f9d4e8c33b'
-@@ -29,6 +29,7 @@ md5sums=('SKIP'
- prepare() {
-   mkdir -p glibc-build lib32-glibc-build
- 
-+  ln -s glibc-$pkgver glibc
-   cd glibc
- 
-   local i; for i in ${source[@]}; do
-@@ -49,7 +50,7 @@ build() {
+ _commit=23158b08a0908f381459f273a984c6fd328363cb
+ #source=(git+https://sourceware.org/git/glibc.git#commit=$_commit
+@@ -53,7 +55,7 @@ build() {
        --enable-add-ons
        --enable-bind-now
        --enable-lock-elision
 -      --enable-multi-arch
 +      --@MULTILIB@-multi-arch
-       --enable-obsolete-nsl
-       --enable-obsolete-rpc
        --enable-stack-protector=strong
-@@ -84,6 +85,8 @@ build() {
+       --enable-stackguard-randomization
+       --enable-static-pie
+@@ -87,6 +89,8 @@ build() {
    echo "CXX += -D_FORTIFY_SOURCE=2" >> configparms
    make
  
@@ -54,12 +37,3 @@
    cd "$srcdir/lib32-glibc-build"
    export CC="gcc -m32 -mstackrealign"
    export CXX="g++ -m32 -mstackrealign"
-@@ -177,7 +170,7 @@ package_glibc() {
-     strip $STRIP_STATIC usr/lib/lib{anl,BrokenLocale,c{,_nonshared},crypt}.a \
-                         usr/lib/lib{dl,g,ieee,mcheck,nsl,pthread{,_nonshared}}.a \
-                         usr/lib/lib{resolv,rpcsvc,rt,util}.a \
--                        usr/lib/lib{m-${pkgver},mvec{,_nonshared}}.a
-+                        usr/lib/lib{m-${pkgver},mvec{,_nonshared}}.a || true
- 
-     strip $STRIP_SHARED usr/lib/lib{anl,BrokenLocale,cidn,crypt}-${pkgver}.so \
-                         usr/lib/libnss_{compat,db,dns,files,hesiod,nis,nisplus}-*.so \

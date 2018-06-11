@@ -1,0 +1,67 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-11 19:54:54.087219674 +0200
++++ b/PKGBUILD	2018-06-11 20:55:14.277255797 +0200
+@@ -13,12 +13,16 @@ license=('GPL')
+ depends=('gcc-libs')
+ makedepends=('cmake' 'nasm')
+ provides=('libx265.so')
+-source=("https://bitbucket.org/multicoreware/x265/downloads/x265_${pkgver}.tar.gz")
+-sha256sums=('6e59f9afc0c2b87a46f98e33b5159d56ffb3558a49d8e3d79cb7fdc6b7aaa863')
++source=("https://bitbucket.org/multicoreware/x265/downloads/x265_${pkgver}.tar.gz"
++        "x265.patch")
++sha256sums=('6e59f9afc0c2b87a46f98e33b5159d56ffb3558a49d8e3d79cb7fdc6b7aaa863'
++            '4e41a1684eb9e0e0239985e0f65b8c72c797d8a5c1bfe2e0298706886adff46f')
+ 
+ prepare() {
+   cd x265_${pkgver}
+ 
++  patch -Np1 -i "$srcdir"/x265.patch
++
+   for d in 8 10 12; do
+     if [[ -d build-$d ]]; then
+       rm -rf build-$d
+@@ -30,9 +34,12 @@ prepare() {
+ build() {
+   cd x265_${pkgver}/build-12
+ 
++  # note: https://bitbucket.org/multicoreware/x265/issues/320/fail-to-build-on-power8-le
++
+   cmake ../source \
+     -DCMAKE_INSTALL_PREFIX='/usr' \
+     -DHIGH_BIT_DEPTH='TRUE' \
++    -DENABLE_ALTIVEC=OFF \
+     -DMAIN12='TRUE' \
+     -DEXPORT_C_API='FALSE' \
+     -DENABLE_CLI='FALSE' \
+@@ -44,6 +51,7 @@ build() {
+   cmake ../source \
+     -DCMAKE_INSTALL_PREFIX='/usr' \
+     -DHIGH_BIT_DEPTH='TRUE' \
++    -DENABLE_ALTIVEC=OFF \
+     -DEXPORT_C_API='FALSE' \
+     -DENABLE_CLI='FALSE' \
+     -DENABLE_SHARED='FALSE'
+@@ -56,6 +64,7 @@ build() {
+ 
+   cmake ../source \
+     -DCMAKE_INSTALL_PREFIX='/usr' \
++    -DENABLE_ALTIVEC=OFF \
+     -DENABLE_SHARED='TRUE' \
+     -DENABLE_HDR10_PLUS='TRUE' \
+     -DEXTRA_LIB='x265_main10.a;x265_main12.a' \
+diff -rupN a/x265.patch b/x265.patch
+--- a/x265.patch	1970-01-01 01:00:00.000000000 +0100
++++ b/x265.patch	2018-06-11 20:55:27.953922599 +0200
+@@ -0,0 +1,12 @@
++diff -rupN x265_2.8/source/common/param.cpp x265_2.8.new/source/common/param.cpp
++--- x265_2.8/source/common/param.cpp	2018-05-21 10:33:10.000000000 +0200
+++++ x265_2.8.new/source/common/param.cpp	2018-06-11 16:25:27.383760951 +0200
++@@ -633,7 +633,7 @@ int x265_param_parse(x265_param* p, cons
++         if (bValueWasNull)
++             p->cpuid = atobool(value);
++         else
++-            p->cpuid = parseCpuName(value, bError);
+++            p->cpuid = parseCpuName(value, bError, false);
++ #endif
++     }
++     OPT("fps")
