@@ -1,0 +1,15 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-15 04:55:07.973462698 +0200
++++ b/PKGBUILD	2018-06-15 07:46:16.800231826 +0200
+@@ -15,10 +15,9 @@ makedepends=(ghostscript openexr libwmf
+ checkdepends=(gsfonts ttf-dejavu)
+ _relname=ImageMagick-${pkgver%%.*}
+ _tarname=ImageMagick-${pkgver%.*}-${pkgver##*.}
+-source=(https://www.imagemagick.org/download/$_tarname.tar.xz{,.asc}
++source=(https://www.imagemagick.org/download/$_tarname.tar.xz
+         arch-fonts.diff)
+ sha256sums=('b6a8b6afea4cd0ea87e752a83bc66b13200e219e0a476156a83a259be3760560'
+-            'SKIP'
+             'a85b744c61b1b563743ecb7c7adad999d7ed9a8af816650e3ab9321b2b102e73')
+ validpgpkeys=(D8272EF51DA223E4D05B466989AB63D48277377A)  # Lexie Parsimoniae
+ 

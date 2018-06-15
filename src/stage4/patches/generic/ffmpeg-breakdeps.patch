@@ -10,7 +10,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  makedepends=('ffnvcodec-headers' 'ladspa' 'yasm')
  optdepends=('ladspa: LADSPA filters')
  provides=('libavcodec.so' 'libavdevice.so' 'libavfilter.so' 'libavformat.so'
-@@ -69,8 +69,6 @@ build() {
+@@ -69,12 +69,9 @@ build() {
      --enable-libvorbis \
      --enable-libvpx \
      --enable-libwebp \
@@ -19,3 +19,7 @@ diff -rupN a/PKGBUILD b/PKGBUILD
      --enable-libxcb \
      --enable-libxml2 \
      --enable-libxvid \
+-    --enable-nvenc \
+     --enable-omx \
+     --enable-shared \
+     --enable-version3

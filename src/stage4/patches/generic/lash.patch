@@ -1,6 +1,6 @@
 diff -rupN a/04_disable_stacktrace.patch b/04_disable_stacktrace.patch
 --- a/04_disable_stacktrace.patch	1970-01-01 01:00:00.000000000 +0100
-+++ b/04_disable_stacktrace.patch	2018-04-11 14:28:53.993404436 +0200
++++ b/04_disable_stacktrace.patch	2018-06-15 07:38:56.470227432 +0200
 @@ -0,0 +1,29 @@
 +Description: Don't print the stacktrace on segfaults.
 + Fixes FTBFS on armel,powerpc,ia64,alpha.
@@ -32,9 +32,14 @@ diff -rupN a/04_disable_stacktrace.patch b/04_disable_stacktrace.patch
 + }
 + 
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-11 14:05:43.327536240 +0200
-+++ b/PKGBUILD	2018-04-11 14:28:53.988404437 +0200
-@@ -15,13 +15,16 @@ depends=('jack' 'python2')
+--- a/PKGBUILD	2018-06-14 22:56:46.496581493 +0200
++++ b/PKGBUILD	2018-06-15 07:38:48.970227358 +0200
+@@ -11,17 +11,20 @@ pkgdesc="A session management system for
+ arch=('x86_64')
+ url="http://lash.nongnu.org/"
+ license=('GPL2')
+-depends=('jack' 'python2')
++depends=('jack' 'python2' 'libtirpc')
  makedepends=('gtk2')
  optdepends=('gtk2: For lash_panel, lash_save_button and lash_synth')
  source=("https://download.savannah.gnu.org/releases/lash/${pkgname}-${pkgver}.tar.bz2"
@@ -53,3 +58,13 @@ diff -rupN a/PKGBUILD b/PKGBUILD
    # Python2 fixes
    export PYTHON="python2"
    sed -i "s#env python#&2#" clients/lash_control
+@@ -29,7 +32,8 @@ prepare() {
+ 
+ build() {
+   cd "${pkgname}-${_relver}"
+-  export LDFLAGS="-ldl -lm"
++  export LDFLAGS="-ldl -lm -ltirpc"
++  export CPPFLAGS="$CPPFLAGS -I/usr/include/tirpc"
+   ./configure --prefix=/usr
+   make
+ }

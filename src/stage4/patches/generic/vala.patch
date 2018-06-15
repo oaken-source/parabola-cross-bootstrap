@@ -1,0 +1,12 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-12 17:39:35.488000757 +0200
++++ b/PKGBUILD	2018-06-12 18:14:47.968021836 +0200
+@@ -17,7 +17,7 @@ provides=(valadoc)
+ conflicts=(valadoc)
+ replaces=(valadoc)
+ _commit=2efef16d7e6265bc251050d22cfb4d8830706621  # tags/0.40.6^0
+-source=("git+https://git.gnome.org/browse/vala#commit=$_commit")
++source=("git+https://gitlab.gnome.org/GNOME/vala.git#commit=$_commit")
+ sha256sums=('SKIP')
+ 
+ pkgver() {

@@ -1,7 +1,7 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-10 18:33:56.884199699 +0200
-+++ b/PKGBUILD	2018-04-10 18:48:25.109117411 +0200
-@@ -3,13 +3,13 @@
+--- a/PKGBUILD	2018-06-13 08:23:15.461863118 +0200
++++ b/PKGBUILD	2018-06-13 08:25:08.601864248 +0200
+@@ -3,16 +3,16 @@
  # Contributor: Tom Newsom <Jeepster@gmx.co.uk>
  
  pkgbase=libsigc++
@@ -16,7 +16,11 @@ diff -rupN a/PKGBUILD b/PKGBUILD
 +makedepends=('gcc-libs' 'git' 'doxygen' 'libxslt' 'graphviz')
  options=('!emptydirs')
  _commit=83f1e2fe7855f85af570b9653903d2c426d67e72
- source=("git://git.gnome.org/libsigcplusplus#commit=$_commit")
+-source=("git://git.gnome.org/libsigcplusplus#commit=$_commit")
++source=("git+https://github.com/GNOME/libsigcplusplus.git#commit=$_commit")
+ sha256sums=('SKIP')
+ 
+ pkgver() {
 @@ -20,35 +20,11 @@ pkgver() {
    git describe --tags | sed 's/-/+/g'
  }

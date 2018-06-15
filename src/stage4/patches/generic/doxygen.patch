@@ -1,6 +1,6 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-04-14 16:29:01.773155012 +0200
-+++ b/PKGBUILD	2018-04-14 16:50:58.123030252 +0200
+--- a/PKGBUILD	2018-06-15 02:49:04.173387228 +0200
++++ b/PKGBUILD	2018-06-15 07:43:24.360230106 +0200
 @@ -28,15 +28,16 @@ prepare() {
  build() {
    cd ${pkgbase}-Release_${pkgver//./_}/build
@@ -11,8 +11,9 @@ diff -rupN a/PKGBUILD b/PKGBUILD
      -DDOC_INSTALL_DIR:PATH=share/doc/doxygen \
      -DPYTHON_EXECUTABLE:FILE=/usr/bin/python2 \
 -    -Dbuild_doc:BOOL=ON \
+-    -Dbuild_wizard:BOOL=ON
 +    -Dbuild_doc:BOOL=OFF \
-     -Dbuild_wizard:BOOL=ON
++    -Dbuild_wizard:BOOL=OFF
  
    make
 -  make docs

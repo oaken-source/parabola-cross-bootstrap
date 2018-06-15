@@ -1,6 +1,15 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-06-07 14:38:00.630248269 +0200
-+++ b/PKGBUILD	2018-06-07 14:50:16.570255611 +0200
+--- a/PKGBUILD	2018-06-12 19:26:26.354731391 +0200
++++ b/PKGBUILD	2018-06-12 21:15:53.914796921 +0200
+@@ -3,7 +3,7 @@
+ # Contributor: Ionut Biru <ibiru@archlinux.org>
+ 
+ pkgbase=colord
+-pkgname=(colord colord-sane)
++pkgname=(colord)
+ pkgver=1.4.3
+ pkgrel=1
+ pkgdesc="System daemon for managing color devices"
 @@ -11,7 +11,7 @@ url="https://www.freedesktop.org/softwar
  arch=(x86_64)
  license=(GPL2)
@@ -21,3 +30,24 @@ diff -rupN a/PKGBUILD b/PKGBUILD
      -D print_profiles=true \
      -D daemon_user=colord
    ninja -C build
+@@ -44,19 +44,13 @@ check() {
+ }
+ 
+ package_colord() {
+-  optdepends=('argyllcms: color profiling'
+-              'colord-sane: SANE support')
++  optdepends=('argyllcms: color profiling')
+   replaces=(shared-color-profiles)
+ 
+   DESTDIR="$pkgdir" ninja -C build install
+ 
+   echo 'u colord - "Color management daemon" /var/lib/colord' |
+     install -Dm644 /dev/stdin "$pkgdir/usr/lib/sysusers.d/colord.conf"
+-
+-### Split colord-sane
+-  mkdir -p colord-sane/usr/lib/colord-plugins
+-  mv {"$pkgdir",colord-sane}/usr/lib/colord-sane
+-  mv {"$pkgdir",colord-sane}/usr/lib/colord-plugins/libcolord_sensor_sane.so
+ }
+ 
+ package_colord-sane() {

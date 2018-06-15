@@ -1,6 +1,6 @@
 diff -rupN a/libffado-sconstruct-in-chroot.patch b/libffado-sconstruct-in-chroot.patch
 --- a/libffado-sconstruct-in-chroot.patch	1970-01-01 01:00:00.000000000 +0100
-+++ b/libffado-sconstruct-in-chroot.patch	2018-06-13 23:30:20.449072831 +0200
++++ b/libffado-sconstruct-in-chroot.patch	2018-06-13 23:46:26.835749140 +0200
 @@ -0,0 +1,32 @@
 +diff -rupN libffado-2.4.1/SConstruct libffado-2.4.1.new/SConstruct
 +--- libffado-2.4.1/SConstruct	2018-03-04 07:13:17.000000000 +0100
@@ -35,17 +35,9 @@ diff -rupN a/libffado-sconstruct-in-chroot.patch b/libffado-sconstruct-in-chroot
 +     env['USE_SSE'] = 1
 + if '-msse2' in opt_flags:
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-06-13 23:25:14.575736446 +0200
-+++ b/PKGBUILD	2018-06-13 23:30:17.279072800 +0200
-@@ -11,19 +11,21 @@ pkgdesc="Driver for FireWire audio devic
- arch=('x86_64')
- url="http://www.ffado.org/"
- license=('GPL')
--depends=('dbus-c++' 'jack' 'libavc1394' 'libconfig' 'libiec61883' 'libxml++' 'python-dbus')
--makedepends=('python-pyqt5' 'python-dbus' 'scons')
--optdepends=('python-pyqt5: ffado-mixer')
-+depends=('dbus-c++' 'libavc1394' 'libconfig' 'libiec61883' 'libxml++' 'python-dbus')
-+makedepends=('python-dbus' 'scons')
+--- a/PKGBUILD	2018-06-11 04:14:44.399990158 +0200
++++ b/PKGBUILD	2018-06-13 23:46:22.152415760 +0200
+@@ -17,13 +17,16 @@ optdepends=('python-pyqt5: ffado-mixer')
  provides=('ffado')
  source=("http://www.ffado.org/files/${pkgname}-${pkgver}.tgz"
          "${pkgname}-fix-python3-pyqt5.diff"

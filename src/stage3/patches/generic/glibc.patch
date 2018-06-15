@@ -1,7 +1,7 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-06-02 23:14:43.099580493 +0200
-+++ b/PKGBUILD	2018-06-03 08:56:01.259928500 +0200
-@@ -6,13 +6,13 @@
+--- a/PKGBUILD	2018-06-10 02:55:37.495747371 +0200
++++ b/PKGBUILD	2018-06-10 08:10:22.642602471 +0200
+@@ -6,13 +6,15 @@
  # NOTE: valgrind requires rebuilt with each major glibc version
  
  pkgbase=glibc
@@ -14,10 +14,12 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  url='http://www.gnu.org/software/libc'
  license=(GPL LGPL)
 -makedepends=(git gd lib32-gcc-libs)
++makedepends=(git gd)
++[ "x@MULTILIB@" != "xenable" ] || makedepends+=(lib32-gcc-libs)
  options=(!strip staticlibs)
  _commit=23158b08a0908f381459f273a984c6fd328363cb
  #source=(git+https://sourceware.org/git/glibc.git#commit=$_commit
-@@ -53,10 +53,10 @@ build() {
+@@ -53,10 +55,10 @@ build() {
        --enable-add-ons
        --enable-bind-now
        --enable-lock-elision

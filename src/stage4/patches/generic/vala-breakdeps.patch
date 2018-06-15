@@ -1,6 +1,6 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-06-07 14:37:41.456914744 +0200
-+++ b/PKGBUILD	2018-06-07 14:49:30.713588487 +0200
+--- a/PKGBUILD	2018-06-12 14:37:09.191224869 +0200
++++ b/PKGBUILD	2018-06-12 16:00:09.877941233 +0200
 @@ -11,37 +11,35 @@ url="https://wiki.gnome.org/Projects/Val
  arch=(x86_64)
  license=(LGPL)
@@ -14,8 +14,8 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  _commit=2efef16d7e6265bc251050d22cfb4d8830706621  # tags/0.40.6^0
 -source=("git+https://git.gnome.org/browse/vala#commit=$_commit")
 -sha256sums=('SKIP')
-+source=("git://git.gnome.org/vala-bootstrap"
-+        "git+https://git.gnome.org/browse/vala#commit=$_commit")
++source=("git+https://gitlab.gnome.org/Archive/vala-bootstrap.git"
++        "git+https://gitlab.gnome.org/GNOME/vala.git#commit=$_commit")
 +sha256sums=('SKIP'
 +            'SKIP')
  
