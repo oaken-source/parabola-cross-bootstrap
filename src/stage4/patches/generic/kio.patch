@@ -1,0 +1,21 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-15 17:13:58.807238360 +0200
++++ b/PKGBUILD	2018-06-15 17:56:23.817263754 +0200
+@@ -7,7 +7,7 @@
+ # Maintainer: Andreas Grapentin <andreas@grapentin.org>
+ 
+ pkgname=kio
+-pkgver=5.45.0
++pkgver=5.46.0
+ pkgrel=1
+ pkgrel+=.parabola1
+ pkgdesc='Resource and network access abstraction'
+@@ -23,7 +23,7 @@ optdepends=('kio-extras: extra protocols
+ groups=(kf5)
+ source=("https://download.kde.org/stable/frameworks/${pkgver%.*}/$pkgname-$pkgver.tar.xz"{,.sig})
+ source+=("duckduckgo_html.desktop" "duckduckgo_lite.desktop")
+-sha256sums=('3e7512e819fe1831b15981641dba26a7dcbbdbccd79cbf076ceedae8e4116b15'
++sha256sums=('eb6a793f46777980633b0c41de596a14a76845d3d763fdac16e90678a88cd3a5'
+             'SKIP'
+             '31910ab7393e67609f15e04a57f6406f63e6dae58b01bce0787741bc5958f292'
+             '40466a9dad7075f2525e9e024720da7d7b49a22892b6fca8b81cc0e6408d2f7d')

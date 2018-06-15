@@ -1,7 +1,15 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-06-11 09:07:15.226831944 +0200
-+++ b/PKGBUILD	2018-06-11 09:07:36.293498821 +0200
-@@ -11,7 +11,7 @@ arch=(x86_64)
+--- a/PKGBUILD	2018-06-15 15:43:17.910517404 +0200
++++ b/PKGBUILD	2018-06-15 15:44:19.990518024 +0200
+@@ -4,18 +4,18 @@
+ # Contributor: Andrea Scarpino <andrea@archlinux.org>
+ 
+ pkgname=kwidgetsaddons
+-pkgver=5.47.0
++pkgver=5.46.0
+ pkgrel=1
+ pkgdesc='Addons to QtWidgets'
+ arch=(x86_64)
  url='https://community.kde.org/Frameworks'
  license=(LGPL)
  depends=(qt5-base)
@@ -10,3 +18,8 @@ diff -rupN a/PKGBUILD b/PKGBUILD
  optdepends=('python-pykf5: to use the Python 3 bindings' 'python2-pykf5: to use the Python 2 bindings')
  groups=(kf5)
  source=("https://download.kde.org/stable/frameworks/${pkgver%.*}/$pkgname-$pkgver.tar.xz"{,.sig})
+-sha256sums=('5aa6f4002e6f1302f272b3839513debefafd51b7f3a9249f6ef2c5f30cec5a34'
++sha256sums=('c921682227b6e6bce59bbec6bdda1d0bf0c0dae36366b75279d7faef23241641'
+             'SKIP')
+ validpgpkeys=(53E6B47B45CEA3E0D5B7457758D0EE648A48B3BB) # David Faure <faure@kde.org>
+ 
