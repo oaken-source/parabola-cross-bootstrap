@@ -20,8 +20,6 @@ jre8-openjdk-headless:build broken
 jdk9-openjdk:build broken
 jre9-openjdk:build broken
 jre9-openjdk-headless:build broken
-lib32-gcc-libs:no multilib
-lib32-glibc:no multilib
 libreoffice-fresh:depends on java-environment
 libreoffice-still:depends on java-environment
 libunwind:no port exists

@@ -34,13 +34,14 @@ export PLATFORM_CFLAGS=()
 # flags added to the gcc PKGBUILD configure call
 export GCC_CONFIG_FLAGS=(
   "--with-cpu=power8"
-  "--with-long-double-128")
+  "--with-long-double-128"
+  "--enable-targets=powerpcle-linux")
 
 # multilib configuration, uncomment if applicable
-#export MULTILIB=enable
-#export CARCH32=""
-#export CHOST32=""
-#export PLATFORM32_CFLAGS=()
+export MULTILIB=enable
+export CARCH32="powerpcle"
+export CHOST32="$CARCH32-unknown-linux-gnu"
+export PLATFORM32_CFLAGS=("-m32")
 
 # configure build directories
 export TOPBUILDDIR="$startdir/build/$CARCH"

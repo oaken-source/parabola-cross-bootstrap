@@ -27,7 +27,6 @@ build() {
   ./configure --target=$_target \
               --prefix=/usr \
               --with-sysroot=/usr/$_target \
-              --@MULTILIB@-multilib \
               --disable-werror \
               --disable-nls \
               --with-expat=yes \

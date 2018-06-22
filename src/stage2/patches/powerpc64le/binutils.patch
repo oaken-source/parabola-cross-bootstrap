@@ -1,6 +1,6 @@
 diff -rupN a/PKGBUILD b/PKGBUILD
 --- a/PKGBUILD	2018-06-20 07:56:40.877881835 +0200
-+++ b/PKGBUILD	2018-06-20 11:07:26.331329370 +0200
++++ b/PKGBUILD	2018-06-20 11:06:02.564661867 +0200
 @@ -51,6 +51,7 @@ build() {
    cd binutils-build
  
@@ -9,7 +9,14 @@ diff -rupN a/PKGBUILD b/PKGBUILD
      --prefix=/usr \
      --with-lib-path=/usr/lib:/usr/local/lib \
      --with-bugurl=https://bugs.archlinux.org/ \
-@@ -66,7 +67,7 @@ build() {
+@@ -61,12 +62,13 @@ build() {
+     --enable-plugins \
+     --enable-relro \
+     --enable-shared \
+-    --enable-targets=x86_64-pep \
++    --enable-targets=spu \
++    --enable-targets=powerpc-linux \
+     --enable-threads \
      --disable-gdb \
      --disable-werror \
      --with-pic \

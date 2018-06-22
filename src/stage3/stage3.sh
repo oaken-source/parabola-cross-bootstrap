@@ -35,6 +35,8 @@ stage3_makepkg() {
   # substitute common variables
   sed "s#@MULTILIB@#${MULTILIB:-disable}#g; \
        s#@PLATFORM_CFLAGS@#${PLATFORM_CFLAGS[*]}#g; \
+       s#@CHOST32@#${CHOST32}#g; \
+       s#@PLATFORM32_CFLAGS@#${PLATFORM32_CFLAGS[*]}#g; \
        s#@GCC_CONFIG_FLAGS@#${GCC_CONFIG_FLAGS[*]}#g" \
     PKGBUILD.in > PKGBUILD
 

@@ -80,8 +80,8 @@ build() {
   CFLAGS=${CFLAGS/-fno-plt/}
   CXXFLAGS=${CXXFLAGS/-fno-plt/}
 
-	CFLAGS="$CFLAGS -mcmodel=medlow -g -O2 @PLATFORM32_CFLAGS@" \
-	ASFLAGS="$ASFLAGS -mcmodel=medlow @PLATFORM32_CFLAGS@" \
+	CFLAGS="$CFLAGS -g -O2 @PLATFORM32_CFLAGS@" \
+	ASFLAGS="$ASFLAGS @PLATFORM32_CFLAGS@" \
   "$srcdir/glibc-$pkgver/configure" \
       --host=@CHOST32@ \
       --libdir=/usr/lib32 \
@@ -102,13 +102,13 @@ build() {
 }
 
 package() {
-  cd glibc-build
+  cd "$srcdir/glibc-build"
 
   make install_root=$pkgdir/usr/$_target install
 
   [ "x@MULTILIB@" == "xenable" ] || return 0
 
-  cd lib32-glibc-build
+  cd "$srcdir/lib32-glibc-build"
 
   make install_root=$pkgdir/usr/$_target install
 }

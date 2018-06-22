@@ -1,0 +1,13 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-18 09:36:34.209550790 +0200
++++ b/PKGBUILD	2018-06-20 08:01:20.661217960 +0200
+@@ -61,7 +61,8 @@ build() {
+     --enable-plugins \
+     --enable-relro \
+     --enable-shared \
+-    --enable-targets=x86_64-pep \
++    --enable-targets=spu \
++    --enable-targets=powerpc-linux \
+     --enable-threads \
+     --disable-gdb \
+     --disable-werror \

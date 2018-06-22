@@ -59,7 +59,6 @@ build() {
 
   $srcdir/gcc/configure \
       --target=$_target \
-      @GCC_CONFIG_FLAGS@ \
       --prefix=/usr \
       --libdir=/usr/lib \
       --libexecdir=/usr/lib \
@@ -77,7 +76,8 @@ build() {
 		  --disable-nls \
       --@MULTILIB@-multilib \
 		  --disable-bootstrap \
-      --enable-checking=release
+      --enable-checking=release \
+      @GCC_CONFIG_FLAGS@
 
   make
 }

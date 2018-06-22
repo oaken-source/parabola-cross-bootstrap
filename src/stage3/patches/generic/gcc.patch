@@ -14,8 +14,8 @@ diff -rupN a/0001-pthread-reentrant.patch b/0001-pthread-reentrant.patch
 + -melf" XLEN_SPEC "lriscv \
 + %{shared} \
 diff -rupN a/PKGBUILD b/PKGBUILD
---- a/PKGBUILD	2018-05-26 12:05:20.233145125 +0200
-+++ b/PKGBUILD	2018-05-26 12:56:33.449842456 +0200
+--- a/PKGBUILD	2018-06-20 10:31:33.911307893 +0200
++++ b/PKGBUILD	2018-06-20 20:05:11.994984639 +0200
 @@ -5,8 +5,9 @@
  # toolchain build order: linux-api-headers->glibc->binutils->gcc->binutils->glibc
  # NOTE: libtool requires rebuilt with each new gcc version
@@ -220,3 +220,25 @@ diff -rupN a/PKGBUILD b/PKGBUILD
      install-{toolexeclibDATA,nodist_fincludeHEADERS}
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_fincludeHEADERS
    make -C gcc DESTDIR="$pkgdir" fortran.install-{common,man,info}
+@@ -365,20 +346,12 @@ package_lib32-gcc-libs() {
+ 
+   for lib in libatomic \
+              libgfortran \
+-             libgo \
+              libgomp \
+-             libitm \
+              libquadmath \
+-             libsanitizer/{a,l,ub}san \
+-             libstdc++-v3/src \
+-             libvtv; do
++             libstdc++-v3/src; do
+     make -C $CHOST/32/$lib DESTDIR="$pkgdir" install-toolexeclibLTLIBRARIES
+   done
+ 
+-  make -C $CHOST/32/libobjc DESTDIR="$pkgdir" install-libs
+-  make -C $CHOST/32/libmpx DESTDIR="$pkgdir" install
+-  rm -f "$pkgdir/usr/lib32/libmpx.spec"
+-
+   # remove files provided by gcc-libs
+   rm -rf "$pkgdir"/usr/lib
+ 

@@ -1,20 +1,17 @@
 
-parabola-riscv64-bootstrap
-==========================
+parabola-riscv64-bootstrap ==========================
 
- “Don't cry because it's over, smile because it happened.”
-	― Dr. Seuss
+ “Don't cry because it's over, smile because it happened.” ― Dr. Seuss
 
-1. Introduction
----------------
+1. Introduction ---------------
 
 This project is an attempt to bootstrap a self-contained parabola
 GNU/Linux-libre system for the following architectures:
 
- - riscv64 (HiFive)
- - riscv32 (PULP)
- - sparc (OpenSparc)
- - powerpc64le (TalosII)
+ - riscv64 (HiFive) (complete)
+ - riscv32 (PULP) (blocked)
+ - sparc (OpenSparc) (planned)
+ - powerpc64le (TalosII) (multilib complete)
 
 The scripts are created with the goal to be as architecture agnostic as
 possible, to make future porting efforts easier.
@@ -22,8 +19,7 @@ possible, to make future porting efforts easier.
 The build process is split into four stages, the rationale of which is outlined
 in section 2 below.
 
-To initiate a complete build of all stages, run:
-  $> sudo ./create [CARCH]
+To initiate a complete build of all stages, run: $> sudo ./create [CARCH]
 
 The builds can be configured to keep going if the build of a single package
 fails, by creating the file `build/.KEEP_GOING`. Otherwise, the build will stop
@@ -35,23 +31,23 @@ will be overwritten by the next package.
 The complete console output of a package build process can be found in the
 corresponding .MAKEPKGLOG file in the build directory of that package.
 
-1.1. System Requirements
-------------------------
+Target platform configuration is persisted in the config/config.$CARCH.sh
+files.
+
+1.1. System Requirements ------------------------
 
 The scripts require, among probably other things, to be running on a fairly
-POSIX-conforming GNU/Linux system, and in particulary need the following tools
+POSIX-conforming GNU/Linux system, and in particular need the following tools
 to be present and functional:
 
- * decently up-to-date GNU build toolchain (gcc, glibc, binutils)
- * most of the things in base-devel
- * pacman, makepkg
+ * decently up-to-date GNU build toolchain (gcc, glibc, binutils) most of the
+ * things in base-devel pacman, makepkg
 
 I have tried to make the script smart enough to check for required bits and
 pieces where needed, and to report when anything is missing ahead of time, but
 some requirements may be missing.
 
-1.2. A note to the reader
--------------------------
+1.2. A note to the reader -------------------------
 
 The scripts assume to be running on a parabola GNU/Linux-libre system, and may
 fail in subtle and unexpected ways otherwise. They also may fail in subtle and
@@ -65,43 +61,44 @@ Also, if you found this project useful, and want to chat about anything, you
 can email me at <andreas@grapentin.org>, or find me as <oaken-source> in
 #parabola and others on irc.freenode.org.
 
-1.3. Current state of the project
----------------------------------
+1.3. Current state of the project ---------------------------------
 
 All four stages of the riscv64 bootstrap are complete, and efforts to add
 additional architectures has begun. A pointer where to find future development
-efforts for the parabola RISC-V port will be added here in due time.
+efforts for the parabola ports will be added here in due time.
 
-2. Build Stages
----------------
+2. Build Stages ---------------
 
 The following subsections outline the reasoning behind the separate bootstrap
 stages. More details about *how* things are done may be gathered from reading
 the inline comments of the respective scripts.
 
 From Stage 2 onwards, the scripts use DEPTREEs to determine what packages need
-to be built. these files are located in the build/stageX/ directories and can
-give an insight into what packages are going to be built next and what
+to be built. these files are located in the build/$CARCH/stage$X/ directories
+and can give an insight into what packages are going to be built next and what
 dependencies are still missing.
 
 Since risc-v is a fairly new ISA, some packages were packaged with config.sub
 and config.guess files that are too old to recognize the target triplet. This
 requires config.sub and config.guess files to be refreshed with newer versions
 from upstream. This is done automatically for stage 2 and onwards, if
-REGEN_CONFIG_FRAGMENTS is set to yes (the default) in create.sh or the
-environment.
+REGEN_CONFIG_FRAGMENTS is set to yes (the default) in the architecture config
+file.
 
 Packages with the `any' architecture are reused from upstream arch for this
 bootstrap, since they should work for any architecture and do not need to be
-re-(or cross-)compiled.
+re-(or cross-)compiled. This assumption is not always true, but it is a
+reasonable approximation.
 
 Additionally, all checkdepends are ignored, and the check() phase of the builds
-is skipped for sanity reasons.
+is skipped for sanity reasons, since the tests are likely to fail for benign
+reasons in a cross-arch makepkg chroot.
 
 Note that the stages use upstream arch and parabola PKGBUILDs and attempt to
 apply custom patches to resolve unbuildable or missing dependencies, and fix
-risc-v specific build issues. Look for these patches in src/stageX/patches and
-be prepared to fix and adapt them for future porting efforts.
+architecture specific build issues. Look for these patches in
+src/stage$X/patches/* and be prepared to fix and adapt them for future porting
+efforts.
 
 2.1. Stage 1
 ------------
@@ -148,7 +145,8 @@ sysroot of the compiler available to builds in the chroot and vice-versa, the
 
 To build the packages, the DEPTREE is traversed and packages are cross-compiled
 using upstream PKGBUILDs and custom patches, and the compiled packages are
-installed into the chroot immediately.
+installed into the chroot immediately. For this stage, the patches are
+mandatory for each built package.
 
 Note that this process is a bit fragile and dependent on arbitrary
 particularities of the host system, and thus might fail for subtle reasons,
@@ -162,8 +160,9 @@ Stage 3 uses the cross-compiled makepkg chroot created in Stage 2 to natively
 recompile the base-devel group of packages. This stage requires to build more
 packages, since a reduced set of make-time dependencies need to be present in
 the makepkg chroot, as well as runtime dependencies. Additionally, running the
-cross-compiled native compiler instead of the cross compiler takes longer. As a
-result, stage 3 is expected to takes much longer than stage 2.
+cross-compiled native compiler instead of the cross compiler takes longer,
+since user-mode emulation needs to be applied. As a result, stage 3 is expected
+to takes much longer than stage 2.
 
 However, since now the process is isolated from the host systems installed
 packages, since everything is built cleanly in a chroot, the process is much
@@ -172,16 +171,17 @@ more stable and less prone to hard to diagnose problems with the host system.
 The scripts create a clean librechroot from the cross-compiled packages
 produced in stage 2. A modified libremakepkg script is created to perform
 config fragment regeneration and to skip the check() phase, and then packages
-are built in order.
+are built in order of the DEPTREE.
 
-Since no cross-compilation is needed from stage 3 onwards, fewer packages need
-patching, and the patches are typically smaller and apply less pressure. As a
+Since no cross-compilation is needed from stage 3 onwards, the patches are no
+longer required for each package. Fewer packages need patching, and the patches
+are typically smaller and apply less pressure to the build recipes. As a
 consequence, the patches probably need less maintenance in the future, and less
 work to adapt to a different architecture.
 
 Note that the cross-compiled packages from stage 3 can be a bit derpy at times,
 hence the stage 3 build scripts prioritize building bash and make natively, to
-avoid some very weird known issues down the line.
+avoid some known issues down the line.
 
 2.4. Stage 4
 ------------
@@ -193,17 +193,20 @@ and the packages of the base group are added to the DEPTREE.
 Stage 4 relies entirely on the packages natively compiled in stage 3, and no
 cross-compiled packages are present in the build chroot at any time. This
 results in reliable builds and reproducible build failures. However, since the
-number of packages to be built in stage 4 is close to 750, expect the builds to
-take a long time (days / weeks, not including work required to fix broken
-patches and builds).
+number of packages to be built in stage 4 is again much larger, expect the
+builds to take a long time (days / weeks, not including work required to fix
+broken patches and builds).
 
 The result of stage 4 is a repository of packages that should allow to
-bootstrap and boot a risc-v virtual machine, with the packages required to
-build the entirety of the arch / parabola package repository. At this point, I
-consider the bootstrap process done.
+bootstrap and boot a virtual machine of the bootstrapped architecture, with the
+packages required to build the entirety of the arch / parabola package
+repository. At this point, the port becomes self-hosting and I consider the
+bootstrap process done. Note that a bootloader is missing from the bootstrap
+process, but this can easily be built manually after stage4 using the
+bootstrapped makepkg chroot.
 
-3. Final Words
-==============
+3. Acknowledgements
+===================
 
 I would like to thank the awesome abaumann from the archlinux32 project for
 pointers on how to bootstrap a PKGBUILD based system for a new architecture,
@@ -226,3 +229,16 @@ much work it really is to get a port like this off the ground. I could not have
 made it this far without your work.
 
 	― Andreas Grapentin, 2018-04-18
+
+------------------------------------------------------------------------------
+
+After finishing the risc-v bootstrap, I didn't expect to revisit this
+repository so soon. Now, after bootstrapping parabola for powerpc64le, I was
+very pleased with how well the scripts held up to the new architecture and how
+easily everything came together, despite a couple of bumps in the road.
+
+I realize again that this would not have been possible without the people
+listed above - abaumann from archlinux32 and the fedora crew (including, of
+course, the amazing people working on ppc64le fedora). Thank you.
+
+	― Andreas Grapentin, 2018-06-22

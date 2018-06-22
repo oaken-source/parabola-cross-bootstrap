@@ -1,0 +1,58 @@
+diff -rupN a/PKGBUILD b/PKGBUILD
+--- a/PKGBUILD	2018-06-18 09:38:57.866218889 +0200
++++ b/PKGBUILD	2018-06-21 11:19:08.038865128 +0200
+@@ -7,7 +7,7 @@
+ # Maintainer: Omar Vega Ramos <ovruni@gnu.org.pe>
+ 
+ ## '1' to enable Xen support, '0' to disable
+-_XEN='1'
++_XEN='0'
+ 
+ ## '1' to enable IA32-EFI build in Arch x86_64, '0' to disable
+ _IA32_EFI_IN_ARCH_X64='1'
+@@ -351,7 +351,7 @@ _build_grub-ieee1275() {
+ 	msg 'Run ./configure for IEEE1275 (OpenFirmware) build'
+ 	./configure \
+ 		--with-platform='ieee1275' \
+-		--target='i386' \
++		--target="$CARCH" \
+ 		--disable-efiemu \
+ 		--enable-mm-debug \
+ 		--enable-nls \
+@@ -560,6 +560,11 @@ _build_grub-uboot() {
+ build() {
+ 	cd "${srcdir}/grub-${pkgver}/"
+ 
++	if [[ "${CARCH}" = 'powerpc64le' ]]; then
++		msg "Build grub ieee1275 stuff"
++		_build_grub-ieee1275
++	fi
++
+ 	if [[ "${CARCH}" = 'x86_64' ]] || [[ "${CARCH}" = 'i686' ]] || [[ "${CARCH}" = 'armv7h' ]]; then
+ 		msg "Build grub ${_EFI_ARCH} EFI stuff"
+ 		_build_grub-efi
+@@ -661,9 +666,9 @@ _package_grub-ieee1275() {
+ 	make DESTDIR="${pkgdir}/" bashcompletiondir="/usr/share/bash-completion/completions" install
+ 
+ 	msg 'Remove gdb debugging related files for IEEE1275 (OpenFirmware) build'
+-	rm -f "${pkgdir}/usr/lib/grub/i386-ieee1275"/*.module || true
+-	rm -f "${pkgdir}/usr/lib/grub/i386-ieee1275"/*.image || true
+-	rm -f "${pkgdir}/usr/lib/grub/i386-ieee1275"/{kernel.exec,gdb_grub,gmodule.pl} || true
++	rm -f "${pkgdir}/usr/lib/grub/${CARCH}-ieee1275"/*.module || true
++	rm -f "${pkgdir}/usr/lib/grub/${CARCH}-ieee1275"/*.image || true
++	rm -f "${pkgdir}/usr/lib/grub/${CARCH}-ieee1275"/{kernel.exec,gdb_grub,gmodule.pl} || true
+ }
+ 
+ _package_grub-libreboot() {
+@@ -728,6 +733,11 @@ package_grub() {
+ 
+ 	cd "${srcdir}/grub-${pkgver}/"
+ 
++	if [[ "${CARCH}" = 'powerpc64le' ]]; then
++		msg "Package grub ieee1275 stuff"
++		_package_grub-ieee1275
++	fi
++
+ 	if [[ "${CARCH}" = 'x86_64' ]] || [[ "${CARCH}" = 'i686' ]] || [[ "${CARCH}" = 'armv7h' ]]; then	
+ 		msg "Package grub ${_EFI_ARCH} EFI stuff"
+ 		_package_grub-efi
