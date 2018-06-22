@@ -1,9 +1,12 @@
 
-parabola-riscv64-bootstrap ==========================
+parabola-riscv64-bootstrap
+==========================
 
- “Don't cry because it's over, smile because it happened.” ― Dr. Seuss
+ “Don't cry because it's over, smile because it happened.”
+	― Dr. Seuss
 
-1. Introduction ---------------
+1. Introduction
+---------------
 
 This project is an attempt to bootstrap a self-contained parabola
 GNU/Linux-libre system for the following architectures:
@@ -34,7 +37,8 @@ corresponding .MAKEPKGLOG file in the build directory of that package.
 Target platform configuration is persisted in the config/config.$CARCH.sh
 files.
 
-1.1. System Requirements ------------------------
+1.1. System Requirements
+------------------------
 
 The scripts require, among probably other things, to be running on a fairly
 POSIX-conforming GNU/Linux system, and in particular need the following tools
@@ -47,7 +51,8 @@ I have tried to make the script smart enough to check for required bits and
 pieces where needed, and to report when anything is missing ahead of time, but
 some requirements may be missing.
 
-1.2. A note to the reader -------------------------
+1.2. A note to the reader
+-------------------------
 
 The scripts assume to be running on a parabola GNU/Linux-libre system, and may
 fail in subtle and unexpected ways otherwise. They also may fail in subtle and
@@ -61,13 +66,15 @@ Also, if you found this project useful, and want to chat about anything, you
 can email me at <andreas@grapentin.org>, or find me as <oaken-source> in
 #parabola and others on irc.freenode.org.
 
-1.3. Current state of the project ---------------------------------
+1.3. Current state of the project
+---------------------------------
 
 All four stages of the riscv64 bootstrap are complete, and efforts to add
 additional architectures has begun. A pointer where to find future development
 efforts for the parabola ports will be added here in due time.
 
-2. Build Stages ---------------
+2. Build Stages
+---------------
 
 The following subsections outline the reasoning behind the separate bootstrap
 stages. More details about *how* things are done may be gathered from reading
